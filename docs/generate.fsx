@@ -28,15 +28,15 @@ let texFile = outputDir ++ "index.tex"
 let createPDF fileName =
     use p = new System.Diagnostics.Process()
     p.StartInfo.FileName <- "pdflatex.exe"
-    p.StartInfo.Arguments <- sprintf "-output-directory=%s %s" (Path.GetDirectoryName(fileName)) fileName
+    p.StartInfo.Arguments <- sprintf " -output-directory=%s %s" (Path.GetDirectoryName(fileName)) fileName
     p.StartInfo.UseShellExecute <- false
     p.StartInfo.RedirectStandardOutput <- false
     p.Start() |> ignore
     p.WaitForExit()
-    for ext in ["aux"; "out"; "log"] do
-        let auxFile = Path.ChangeExtension(fileName, ext)
-        printfn "Delete auxiliary file: %s" auxFile
-        if File.Exists(auxFile) then File.Delete(auxFile)
+//    for file in FileInfo(fileName).Directory.EnumerateFiles() do
+//        let ext = Path.GetExtension(file.Name)
+//        if ext <> ".pdf" && ext <> ".tex" then
+//            File.Delete file.FullName
     if p.ExitCode <> 0 then exit p.ExitCode
     Path.ChangeExtension(fileName, "pdf")
 
@@ -53,7 +53,10 @@ CreateDir outputDir
                         __SOURCE_DIRECTORY__ ++ x + ".md", 
                         __SOURCE_DIRECTORY__ ++ ".." ++ "templates" ++ "template.tex", 
                         outputDir ++ x + ".tex", 
-                        format = OutputKind.Latex)
+                        format = OutputKind.Latex))
+
+["chapter1-intro"]
+|> List.iter (fun x -> 
                 numberSections (outputDir ++ x + ".tex"))
 
 File.Copy(index, texFile, true) |> ignore
