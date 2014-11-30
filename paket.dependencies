@@ -1,0 +1,4 @@
+source https://nuget.org/api/v2
+
+nuget FSharp.Formatting 2.4.35
+nuget FAKE

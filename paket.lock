@@ -1,0 +1,12 @@
+NUGET
+  remote: https://nuget.org/api/v2
+  specs:
+    FAKE (3.10.0)
+    FSharp.Compiler.Service (0.0.67)
+    FSharp.Formatting (2.4.35)
+      FSharp.Compiler.Service (0.0.67)
+      Microsoft.AspNet.Razor (2.0.30506.0)
+      RazorEngine (3.3.0)
+    Microsoft.AspNet.Razor (2.0.30506.0)
+    RazorEngine (3.3.0)
+      Microsoft.AspNet.Razor (>= 2.0.30506.0)
