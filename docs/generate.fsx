@@ -34,11 +34,11 @@ let createPDF fileName =
     p.StartInfo.RedirectStandardOutput <- false
     p.Start() |> ignore
     p.WaitForExit()
-    if p.ExitCode <> 0 then failwith "pdflatex failed"
     for ext in ["tex"; "aux"; "out"; "log"] do
         let auxFile = Path.ChangeExtension(fileName, ext)
         printfn "Delete auxiliary file: %s" auxFile
         if File.Exists(auxFile) then File.Delete(auxFile)
+    if p.ExitCode <> 0 then exit p.ExitCode
     Path.ChangeExtension(fileName, "pdf")
 
 CreateDir outputDir

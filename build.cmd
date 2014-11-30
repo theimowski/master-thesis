@@ -5,4 +5,8 @@ if not exist packages\FAKE\tools\Fake.exe (
     paket restore
 )
 
-packages\FAKE\tools\FAKE.exe build.fsx %*
+pushd "docs"
+
+"C:\Program Files (x86)\Microsoft SDKs\F#\3.0\Framework\v4.0\Fsi.exe" --use:generate.fsx --exec --quiet
+
+popd
