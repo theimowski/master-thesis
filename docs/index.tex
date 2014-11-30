@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[10pt]{article}
 
 % Defining colors by names
 \usepackage{xcolor}
@@ -13,7 +13,8 @@
 \usepackage{longtable}
 % For including pdf
 \usepackage{pdfpages}
-
+% Margins for twosided layout
+\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=3.5cm,asymmetric,twoside=true]{geometry}
 \usepackage{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 
@@ -75,5 +76,6 @@
 \include{abstract}
 \tableofcontents
 \include{chapter1-intro}
+\include{summary}
 
 \end{document}

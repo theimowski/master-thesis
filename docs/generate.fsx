@@ -47,7 +47,7 @@ let numberSections filePath =
 
 CreateDir outputDir
 
-["streszczenie";"abstract";"chapter1-intro"]
+["streszczenie";"abstract";"chapter1-intro";"summary"]
 |> List.iter (fun x -> 
                 Literate.ProcessMarkdown(
                         __SOURCE_DIRECTORY__ ++ x + ".md", 
@@ -55,7 +55,7 @@ CreateDir outputDir
                         outputDir ++ x + ".tex", 
                         format = OutputKind.Latex))
 
-["chapter1-intro"]
+["chapter1-intro";"summary"]
 |> List.iter (fun x -> 
                 numberSections (outputDir ++ x + ".tex"))
 
