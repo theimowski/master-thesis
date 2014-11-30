@@ -22,8 +22,7 @@ open FSharp.Literate
 let (++) a b = Path.Combine(a,b)
 
 let outputDir = __SOURCE_DIRECTORY__ ++ ".." ++ "output"
-let input = __SOURCE_DIRECTORY__ ++ "index.md"
-let template =  __SOURCE_DIRECTORY__ ++ ".." ++ "templates" ++ "template-color.tex"
+let index = __SOURCE_DIRECTORY__ ++ "index.tex"
 let texFile = outputDir ++ "index.tex"
 
 let createPDF fileName =
@@ -34,16 +33,30 @@ let createPDF fileName =
     p.StartInfo.RedirectStandardOutput <- false
     p.Start() |> ignore
     p.WaitForExit()
-    for ext in ["tex"; "aux"; "out"; "log"] do
+    for ext in ["aux"; "out"; "log"] do
         let auxFile = Path.ChangeExtension(fileName, ext)
         printfn "Delete auxiliary file: %s" auxFile
         if File.Exists(auxFile) then File.Delete(auxFile)
     if p.ExitCode <> 0 then exit p.ExitCode
     Path.ChangeExtension(fileName, "pdf")
 
+let numberSections filePath =
+    let contents = File.ReadAllText(filePath)
+    let replaced = contents.Replace(@"section*{", @"section{")
+    File.WriteAllText(filePath, replaced)
+
 CreateDir outputDir
 
-Literate.ProcessMarkdown(input, template, texFile, format = OutputKind.Latex)
+["streszczenie";"abstract";"chapter1-intro"]
+|> List.iter (fun x -> 
+                Literate.ProcessMarkdown(
+                        __SOURCE_DIRECTORY__ ++ x + ".md", 
+                        __SOURCE_DIRECTORY__ ++ ".." ++ "templates" ++ "template.tex", 
+                        outputDir ++ x + ".tex", 
+                        format = OutputKind.Latex)
+                numberSections (outputDir ++ x + ".tex"))
+
+File.Copy(index, texFile, true) |> ignore
 let pdf = createPDF texFile
 
 let newTempFile = Path.GetTempFileName()

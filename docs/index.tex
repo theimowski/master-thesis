@@ -14,6 +14,9 @@
 % For including pdf
 \usepackage{pdfpages}
 
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
 % Identifiers in color code #000000
 \newcommand{\id}[1]{\textcolor{black}{#1}}
 
@@ -63,18 +66,17 @@
   columns=fullflexible
 }
 
-\title{{page-title}}
-\date{}
-
 \begin{document}
 
 \includepdf[pages={1}]{StronaTytulowa_131517.pdf}
 \includepdf[pages={1}]{Oswiadczenie_131517.pdf}
 
-\maketitle
+\include{streszczenie}
+\include{abstract}
+\tableofcontents
+\include{chapter1-intro}
 
-{contents}
-
-{tooltips}
+\section{AAA}
+\subsection{NNN}
 
 \end{document}
