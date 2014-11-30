@@ -38,8 +38,15 @@ let createPDF fileName =
         let auxFile = Path.ChangeExtension(fileName, ext)
         printfn "Delete auxiliary file: %s" auxFile
         File.Delete(auxFile)
+    Path.ChangeExtension(fileName, "pdf")
 
 CreateDir outputDir
 
 Literate.ProcessMarkdown(input, template, texFile, format = OutputKind.Latex)
-createPDF texFile
+let pdf = createPDF texFile
+
+let newTempFile = Path.GetTempFileName()
+let pdfTempFile = Path.ChangeExtension(newTempFile, "pdf")
+File.Move(newTempFile, pdfTempFile)
+File.Copy(pdf, pdfTempFile, true)
+System.Diagnostics.Process.Start(pdfTempFile)
