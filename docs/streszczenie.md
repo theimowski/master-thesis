@@ -1,7 +1,7 @@
-Streszczenie
+STRESZCZENIE
 ============
-tu bedzie sie znajdowac normalnie streszczenie
+tu będzie się znajdować normalnie streszczenie
 
-Slowa kluczowe
+Słowa kluczowe
 --------------
 Programowanie funkcyjne, F\#

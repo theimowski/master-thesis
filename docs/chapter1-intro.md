@@ -1,4 +1,4 @@
-Introduction and Aim of the thesis
+INTRODUCTION AND AIM OF THE THESIS
 ==================================
 
 Bla bla bla **bla**

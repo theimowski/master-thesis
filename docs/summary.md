@@ -1,3 +1,3 @@
-Summary
-============
+SUMMARY
+=======
 Here goes the summary
