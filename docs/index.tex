@@ -18,9 +18,16 @@
 \usepackage{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 
+\usepackage[sort]{natbib}
+
 \usepackage[utf8]{inputenc}
 % Multiple languages - english default, polish - only streszczenie
 \usepackage[polish,english]{babel}
+
+\addto\captionsenglish{
+  \renewcommand{\contentsname}
+    {CONTENTS} % Contents uppercased
+}
 
 % Identifiers in color code #000000
 \newcommand{\id}[1]{\textcolor{black}{#1}}
@@ -82,6 +89,21 @@
 \include{abstract}
 \tableofcontents
 \include{chapter1-intro}
+\section{TEST SECTION}
+Hababab\cite{Reference2, Reference1, Reference3}
 \include{summary}
+
+\clearpage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\clearpage
+\addcontentsline{toc}{section}{List of Figures}
+\listoffigures
+
+\clearpage
+\addcontentsline{toc}{section}{List of Tables}
+\listoftables
 
 \end{document}

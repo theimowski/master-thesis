@@ -60,6 +60,7 @@ CreateDir outputDir
                 numberSections (outputDir ++ x + ".tex"))
 
 File.Copy(index, texFile, true) |> ignore
+File.Copy(__SOURCE_DIRECTORY__ ++ "bibliography.bib", outputDir ++ "bibliography.bib", true)
 let pdf = createPDF texFile
 
 let newTempFile = Path.GetTempFileName()
