@@ -20,6 +20,8 @@ open Fake
 open FSharp.Literate
 
 let (++) a b = Path.Combine(a,b)
+let withExt ext path = Path.ChangeExtension(path, ext)
+let fileName = Path.GetFileName
 
 let outputDir = __SOURCE_DIRECTORY__ ++ ".." ++ "output"
 let index = __SOURCE_DIRECTORY__ ++ "index.tex"
@@ -33,10 +35,6 @@ let createPDF fileName =
     p.StartInfo.RedirectStandardOutput <- false
     p.Start() |> ignore
     p.WaitForExit()
-//    for file in FileInfo(fileName).Directory.EnumerateFiles() do
-//        let ext = Path.GetExtension(file.Name)
-//        if ext <> ".pdf" && ext <> ".tex" then
-//            File.Delete file.FullName
     if p.ExitCode <> 0 then exit p.ExitCode
     Path.ChangeExtension(fileName, "pdf")
 
@@ -47,17 +45,18 @@ let numberSections filePath =
 
 CreateDir outputDir
 
-["streszczenie";"abstract";"chapter1-intro";"summary"]
-|> List.iter (fun x -> 
+Directory.EnumerateFiles(__SOURCE_DIRECTORY__)
+|> Seq.filter (fun f -> Path.GetExtension(f) = ".md")
+|> Seq.iter (fun f -> 
                 Literate.ProcessMarkdown(
-                        __SOURCE_DIRECTORY__ ++ x + ".md", 
+                        f, 
                         __SOURCE_DIRECTORY__ ++ ".." ++ "templates" ++ "template.tex", 
-                        outputDir ++ x + ".tex", 
+                        outputDir ++ (f |> fileName |> changeExt ".tex"), 
                         format = OutputKind.Latex))
 
-["chapter1-intro";"summary"]
-|> List.iter (fun x -> 
-                numberSections (outputDir ++ x + ".tex"))
+Directory.EnumerateFiles(outputDir)
+|> Seq.filter (fun f -> let f = Path.GetFileName(f) in f.StartsWith("section") && f.EndsWith(".tex"))
+|> Seq.iter  numberSections
 
 File.Copy(index, texFile, true) |> ignore
 File.Copy(__SOURCE_DIRECTORY__ ++ "bibliography.bib", outputDir ++ "bibliography.bib", true)
