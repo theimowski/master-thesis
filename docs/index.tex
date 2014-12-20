@@ -24,10 +24,21 @@
 % Multiple languages - english default, polish - only streszczenie
 \usepackage[polish,english]{babel}
 
+% Count tables and figures within section
+\usepackage{chngcntr}
+\counterwithin{table}{section}
+\counterwithin{figure}{section}
+
+\usepackage{array}
+
 \addto\captionsenglish{
   \renewcommand{\contentsname}
     {CONTENTS} % Contents uppercased
 }
+
+% space after table caption
+\usepackage{caption} 
+\captionsetup[table]{skip=6pt}
 
 % Identifiers in color code #000000
 \newcommand{\id}[1]{\textcolor{black}{#1}}
@@ -90,8 +101,6 @@
 \tableofcontents
 \include{section-intro}
 \include{section-test}
-% \section{TEST SECTION}
-% Hababab\cite{Reference2, Reference1, Reference3}
 \include{section-summary}
 
 \clearpage

@@ -18,6 +18,7 @@ open System.IO
 
 open Fake
 open FSharp.Literate
+open System.Text.RegularExpressions
 
 let (++) a b = Path.Combine(a,b)
 let withExt ext path = Path.ChangeExtension(path, ext)
@@ -41,6 +42,9 @@ let createPDF fileName =
 let numberSections filePath =
     let contents = File.ReadAllText(filePath)
     let replaced = contents.Replace(@"section*{", @"section{")
+    let replaced = Regex.Replace(replaced, "\\\{\\\{\\\{([\w+, ]+)\\\}\\\}\\\}", "\cite{$1}")
+    let replaced = Regex.Replace(replaced, "---([\w+ ]+)---", "\\begin{table}[h]\\caption{$1}\\centering\\setlength\\extrarowheight{2pt}")
+    let replaced = replaced.Replace("\end{tabular}", "\end{tabular}\end{table}")
     File.WriteAllText(filePath, replaced)
 
 CreateDir outputDir
