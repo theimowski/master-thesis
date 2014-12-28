@@ -1,3 +1,5 @@
 /output
 /packages
 *.suo
+src/packages
+obj
