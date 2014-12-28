@@ -17,6 +17,7 @@ let HTML(container) =
 
 choose [
     GET >>= choose [
+        url "/" >>= (HTML "Home Page")
         url "/store" >>= (HTML "Hello from store")
         url "/store/browse" 
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
