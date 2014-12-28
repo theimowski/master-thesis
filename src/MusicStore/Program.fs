@@ -13,7 +13,7 @@ choose [
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
                                             (fun genre -> OK (sprintf "Genre: %s" genre)) 
                                             never)
-        url "/store/details" >>= (OK "Hello from details")
+        url_scan "/store/details/%d" (fun id -> OK (sprintf "Details for id: %d" id))
     ]
 
     NOT_FOUND "404"
