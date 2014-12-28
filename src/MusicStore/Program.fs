@@ -24,6 +24,7 @@ choose [
                                             (fun genre -> HTML (sprintf "Genre: %s" genre)) 
                                             never)
         url_scan "/store/details/%d" (fun id -> HTML(sprintf "Details for id: %d" id))
+        Files.browse'
     ]
 
     NOT_FOUND "404"
