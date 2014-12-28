@@ -6,14 +6,23 @@ open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
 open Suave.Types
 
+let contents = System.IO.File.ReadAllText("index.html")
+let template = DotLiquid.Template.Parse(contents)
+
+let HTML(container) = 
+    fun (x : HttpContext) -> async {
+        let dictionary = ["Container", container] |> dict
+        return! OK (template.Render(DotLiquid.Hash.FromDictionary(dictionary))) x
+    }
+
 choose [
     GET >>= choose [
-        url "/store" >>= (OK "Hello from store")
+        url "/store" >>= (HTML "Hello from store")
         url "/store/browse" 
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
-                                            (fun genre -> OK (sprintf "Genre: %s" genre)) 
+                                            (fun genre -> HTML (sprintf "Genre: %s" genre)) 
                                             never)
-        url_scan "/store/details/%d" (fun id -> OK (sprintf "Details for id: %d" id))
+        url_scan "/store/details/%d" (fun id -> HTML(sprintf "Details for id: %d" id))
     ]
 
     NOT_FOUND "404"
