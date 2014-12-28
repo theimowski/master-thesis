@@ -3,3 +3,4 @@
 *.suo
 src/packages
 obj
+bin

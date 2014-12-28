@@ -1,7 +1,5 @@
-﻿// Learn more about F# at http://fsharp.net
-// See the 'F# Tutorial' project for more help.
+﻿open Suave                 // always open suave
+open Suave.Http.Successful // for OK-result
+open Suave.Web             // for config
 
-[<EntryPoint>]
-let main argv = 
-    printfn "%A" argv
-    0 // return an integer exit code
+web_server default_config (OK "Hello World from Suave!")
