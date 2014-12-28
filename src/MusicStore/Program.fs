@@ -6,19 +6,29 @@ open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
 open Suave.Types
 
+open MusicStore.Models
+
+DotLiquid.Template.RegisterSafeType(typeof<Genre>, [|"Name"|])
+
 let contents = System.IO.File.ReadAllText("index.html")
-let template = DotLiquid.Template.Parse(contents)
+let index = DotLiquid.Template.Parse(contents)
+let store = DotLiquid.Template.Parse(System.IO.File.ReadAllText("store.html"))
 
 let HTML(container) = 
     fun (x : HttpContext) -> async {
         let dictionary = ["Container", container] |> dict
-        return! OK (template.Render(DotLiquid.Hash.FromDictionary(dictionary))) x
+        return! OK (index.Render(DotLiquid.Hash.FromDictionary(dictionary))) x
+    }
+
+let partial(model,template : DotLiquid.Template) =
+    fun (x : HttpContext) -> async {
+        return! HTML (template.Render(DotLiquid.Hash.FromAnonymousObject(model))) x
     }
 
 choose [
     GET >>= choose [
         url "/" >>= (HTML "Home Page")
-        url "/store" >>= (HTML "Hello from store")
+        url "/store" >>= (partial ({Genres = [|{Name = "Rock"};{Name = "Disco"}|]}, store))
         url "/store/browse" 
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
                                             (fun genre -> HTML (sprintf "Genre: %s" genre)) 
