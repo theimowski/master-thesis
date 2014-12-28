@@ -13,6 +13,8 @@ DotLiquid.Template.RegisterSafeType(typeof<Genre>, [|"Name"|])
 let contents = System.IO.File.ReadAllText("index.html")
 let index = DotLiquid.Template.Parse(contents)
 let store = DotLiquid.Template.Parse(System.IO.File.ReadAllText("store.html"))
+let album = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album.html"))
+let genre = DotLiquid.Template.Parse(System.IO.File.ReadAllText("genre.html"))
 
 let HTML(container) = 
     fun (x : HttpContext) -> async {
@@ -31,9 +33,9 @@ choose [
         url "/store" >>= (partial ({Genres = [|{Name = "Rock"};{Name = "Disco"}|]}, store))
         url "/store/browse" 
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
-                                            (fun genre -> HTML (sprintf "Genre: %s" genre)) 
+                                            (fun name -> partial ({Name = name}, genre)) 
                                             never)
-        url_scan "/store/details/%d" (fun id -> HTML(sprintf "Details for id: %d" id))
+        url_scan "/store/details/%d" (fun id -> partial({Title = "Album " + id.ToString()}, album))
         Files.browse'
     ]
 
