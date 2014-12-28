@@ -36,6 +36,8 @@ choose [
                                             (fun name -> partial ({Name = name}, genre)) 
                                             never)
         url_scan "/store/details/%d" (fun id -> partial({Title = "Album " + id.ToString()}, album))
+        
+        url_regex "(.*?)\.(?!js$|css$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
     ]
 
