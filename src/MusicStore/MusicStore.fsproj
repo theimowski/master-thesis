@@ -88,6 +88,10 @@
       <HintPath>..\packages\DotLiquid.1.8.0\lib\NET45\DotLiquid.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharp.Data.SqlProvider">
+      <HintPath>..\packages\SQLProvider.0.0.9-alpha\lib\net40\FSharp.Data.SqlProvider.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FsPickler">
       <HintPath>..\packages\FsPickler.1.0.3\lib\net45\FsPickler.dll</HintPath>
       <Private>True</Private>
@@ -102,6 +106,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

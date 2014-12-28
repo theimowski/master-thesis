@@ -27,10 +27,34 @@ let partial(model,template : DotLiquid.Template) =
         return! HTML (template.Render(DotLiquid.Hash.FromAnonymousObject(model))) x
     }
 
+open System
+open System.Data
+open System.Linq
+open FSharp.Data.Sql
+
+type sql = SqlDataProvider< 
+              "Server=(LocalDb)\\v11.0;Database=MusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
+              DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER,
+              IndividualsAmount = 1000,
+              UseOptionTypes = true >
+
+let getStore = 
+    fun (x: HttpContext) -> async {     
+        let ctx = sql.GetDataContext()
+        
+        let genres = query {
+            for g in ctx.``[dbo].[Genre]`` do
+            where g.Name.IsSome
+            select {Name = g.Name.Value}
+        } 
+
+        return! partial({Genres = genres |> Seq.toArray}, store) x
+    }
+
 choose [
     GET >>= choose [
         url "/" >>= (HTML "Home Page")
-        url "/store" >>= (partial ({Genres = [|{Name = "Rock"};{Name = "Disco"}|]}, store))
+        url "/store" >>= getStore
         url "/store/browse" 
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
                                             (fun name -> partial ({Name = name}, genre)) 
