@@ -23,6 +23,7 @@ let genre = DotLiquid.Template.Parse(System.IO.File.ReadAllText("genre.html"))
 let manageIndex = DotLiquid.Template.Parse(System.IO.File.ReadAllText("manage_index.html"))
 let albumCreate = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_create.html"))
 let albumEdit = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_edit.html"))
+let albumDelete = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_delete.html"))
 
 let HTML(container) = 
     fun (x : HttpContext) -> async {
@@ -143,6 +144,18 @@ let getEditAlbum(id) =
         return! partial({EditAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray; Album = album}, albumEdit) x
     }
 
+let getDeleteAlbum(id) = 
+    fun (x: HttpContext) -> async { 
+        let title = query {
+            for a in ctx.``[dbo].[Album]`` do
+            where (a.AlbumId = id)
+            select a.Title
+            exactlyOne
+        }
+
+        return! partial({AlbumBrief.Id = id; Title = title}, albumDelete) x
+    }
+
 let f = Suave.Types.HttpRequest.form'
 let mint x = 
     match x |> Int32.TryParse with
@@ -206,6 +219,21 @@ let postEditAlbum(id) =
         | _ -> return! BAD_REQUEST "malformed POST" x
     }
 
+let postDeleteAlbum(id) =
+    fun (x: HttpContext) -> async { 
+        let album = query {
+            for a in ctx.``[dbo].[Album]`` do
+            where (a.AlbumId = id)
+            select a
+            exactlyOne
+        }
+
+        album.Delete()
+        ctx.SubmitUpdates()
+
+        return! Redirection.redirect "/store/manage" x    
+    }
+
 let q = Suave.Types.HttpRequest.query'
 
 choose [
@@ -218,7 +246,7 @@ choose [
         url "/store/manage" >>= manage
         url "/store/manage/create" >>= getCreateAlbum
         url_scan "/store/manage/edit/%d" getEditAlbum
-//        url_scan "/store/manage/delete/%d" deleteAlbum
+        url_scan "/store/manage/delete/%d" getDeleteAlbum
 
         url_regex "(.*?)\.(?!js$|css$|png$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
@@ -227,6 +255,7 @@ choose [
     POST >>= ParsingAndControl.parse_post_data >>= choose [
         url "/store/manage/create" >>= postCreateAlbum
         url_scan "/store/manage/edit/%d" postEditAlbum
+        url_scan "/store/manage/delete/%d" postDeleteAlbum
     ]
 
     NOT_FOUND "404"

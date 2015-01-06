@@ -24,10 +24,10 @@
             {{Album.Genre}}
         </td>
         <td>
-            {{Album.Artist}}
+            {{Album.Artist | truncate: 25}}
         </td>
         <td>
-            {{Album.Title}}
+            {{Album.Title | truncate: 25}}
         </td>
         <td>
             {{Album.Price}}
