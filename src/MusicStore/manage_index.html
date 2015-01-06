@@ -1,5 +1,7 @@
 ﻿<h2>Index</h2>
-<p>Create NEW</p>
+<p>
+    <a href="/store/manage/create">Create New</a>
+</p>
 <table>
     <tr>
         <th>
@@ -31,7 +33,8 @@
             {{Album.Price}}
         </td>
         <td>
-           Edit Delete
+            <a href="/store/manage/edit/{{Album.Id}}">Edit</a> | 
+            <a href="/store/manage/delete/{{Album.Id}}">Delete</a>
         </td>
     </tr>
     {% endfor %}

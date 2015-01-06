@@ -21,6 +21,8 @@ let store = DotLiquid.Template.Parse(System.IO.File.ReadAllText("store.html"))
 let album = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album.html"))
 let genre = DotLiquid.Template.Parse(System.IO.File.ReadAllText("genre.html"))
 let manageIndex = DotLiquid.Template.Parse(System.IO.File.ReadAllText("manage_index.html"))
+let albumCreate = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_create.html"))
+let albumEdit = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_edit.html"))
 
 let HTML(container) = 
     fun (x : HttpContext) -> async {
@@ -51,7 +53,7 @@ let getStore =
             select g.Name
         } 
 
-        return! partial({Genres = genres |> Seq.toArray |> Array.map Uri.EscapeDataString}, store) x
+        return! partial({Store.Genres = genres |> Seq.toArray |> Array.map Uri.EscapeDataString}, store) x
     }
 
 let getGenre(name) = 
@@ -93,11 +95,115 @@ let manage =
                 Title = album.Title
                 Artist = artist.Name
                 Genre = genre.Name
-                Price = album.Price
+                Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
+                Art = album.AlbumArtUrl
             }
         }
 
         return! partial({Albums = albums |> Seq.toArray}, manageIndex) x
+    }
+
+let getCreateAlbum = 
+    fun (x: HttpContext) -> async { 
+        let genres = query {
+            for g in ctx.``[dbo].[Genre]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
+        }
+
+        let artists = query {
+            for a in ctx.``[dbo].[Artist]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
+        }
+
+        return! partial({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}, albumCreate) x
+    }
+
+let getEditAlbum(id) =
+    fun (x: HttpContext) -> async { 
+        let genres = query {
+            for g in ctx.``[dbo].[Genre]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
+        }
+
+        let artists = query {
+            for a in ctx.``[dbo].[Artist]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
+        }
+
+        let album = query {
+            for a in ctx.``[dbo].[Album]`` do
+            where (a.AlbumId = id)
+            select {
+                Album.Id = a.AlbumId
+                Title = a.Title
+                Price = a.Price.ToString(Globalization.CultureInfo.InvariantCulture)
+                Art = a.AlbumArtUrl
+                Artist = artists |> Seq.find (fun artist -> artist.Id = a.ArtistId) |> (fun a -> a.Name)
+                Genre = genres |> Seq.find (fun g -> g.Id = a.GenreId) |> (fun g -> g.Name)
+            }
+            exactlyOne
+        }
+
+        return! partial({EditAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray; Album = album}, albumEdit) x
+    }
+
+let f = Suave.Types.HttpRequest.form'
+let mint x = 
+    match x |> Int32.TryParse with
+    | true, v -> Some v
+    | _ -> None
+let mdec x = 
+    match Decimal.TryParse(x, Globalization.NumberStyles.AllowDecimalPoint, Globalization.CultureInfo.InvariantCulture) with
+    | true, v -> Some v
+    | _ -> None
+
+let postCreateAlbum = 
+    fun (x: HttpContext) -> async {
+        let artist = f x.request "artist" |> Option.bind mint
+        let genre = f x.request "genre" |> Option.bind mint
+        let price = f x.request "price" |> Option.bind mdec
+        let title = f x.request "title"
+        let artUrl = f x.request "artUrl"
+
+        match artist,genre,title,price,artUrl with
+        | Some artist, Some genre, Some title, Some price, Some artUrl ->
+            let album = ctx.``[dbo].[Album]``.Create()
+            album.ArtistId <- artist
+            album.GenreId <- genre
+            album.Title <- title
+            album.Price <- price
+            album.Created <- DateTime.UtcNow
+            album.AlbumArtUrl <- artUrl
+
+            ctx.SubmitUpdates()
+
+            return! Redirection.redirect "/store/manage" x    
+        | _ -> return! BAD_REQUEST "malformed POST" x
+    }
+
+let postEditAlbum(id) = 
+    fun (x: HttpContext) -> async {
+        let artist = f x.request "artist" |> Option.bind mint
+        let genre = f x.request "genre" |> Option.bind mint
+        let price = f x.request "price" |> Option.bind mdec
+        let title = f x.request "title"
+        let artUrl = f x.request "artUrl"
+
+        match artist,genre,title,price,artUrl with
+        | Some artist, Some genre, Some title, Some price, Some artUrl ->
+            let album = query {
+                for a in ctx.``[dbo].[Album]`` do
+                where (a.AlbumId = id)
+                select a
+                exactlyOne
+            }
+            album.ArtistId <- artist
+            album.GenreId <- genre
+            album.Title <- title
+            album.Price <- price
+            album.Created <- DateTime.UtcNow
+            album.AlbumArtUrl <- artUrl
+
+            ctx.SubmitUpdates()
+
+            return! Redirection.redirect "/store/manage" x    
+        | _ -> return! BAD_REQUEST "malformed POST" x
     }
 
 let q = Suave.Types.HttpRequest.query'
@@ -110,9 +216,17 @@ choose [
         url_scan "/store/details/%d" getAlbum
 
         url "/store/manage" >>= manage
+        url "/store/manage/create" >>= getCreateAlbum
+        url_scan "/store/manage/edit/%d" getEditAlbum
+//        url_scan "/store/manage/delete/%d" deleteAlbum
 
         url_regex "(.*?)\.(?!js$|css$|png$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
+    ]
+
+    POST >>= ParsingAndControl.parse_post_data >>= choose [
+        url "/store/manage/create" >>= postCreateAlbum
+        url_scan "/store/manage/edit/%d" postEditAlbum
     ]
 
     NOT_FOUND "404"

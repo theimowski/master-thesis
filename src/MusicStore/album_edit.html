@@ -1,0 +1,64 @@
+﻿<h2>Create</h2>
+
+<form method="POST">
+    <fieldset>
+        <legend>Album</legend>
+
+        <div>
+            Genre
+        </div>
+        <div>
+            <select name="genre">
+                {% for Genre in Genres %}
+                <option {% if Genre.Name == Album.Genre %}selected="selected"{% endif %}
+                        value="{{Genre.Id}}">
+                    {{Genre.Name}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            Artist
+        </div>
+        <div>
+            <select name="artist">
+                {% for Artist in Artists %}
+                <option {% if Artist.Name == Album.Artist %}selected="selected"{% endif %}
+                        value="{{Artist.Id}}">
+                    {{Artist.Name}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            Title
+        </div>
+        <div>
+            <input name="title" type="text" value="{{Album.Title}}" required/>
+        </div>
+
+        <div>
+            Price
+        </div>
+        <div>
+            <input name="price" type="number" value="{{Album.Price}}" required/>
+        </div>
+
+        <div>
+            Album Art Url
+        </div>
+        <div>
+            <input name="artUrl" type="text" value="{{Album.Art}}" required />
+        </div>
+
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+</form>
+
+<div>
+    <a href="/store/manage">Back to list</a>
+</div>
