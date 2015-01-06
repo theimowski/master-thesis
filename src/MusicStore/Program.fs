@@ -70,6 +70,20 @@ let getGenre(name) =
         return! partial({Name = name; Albums = albums |> Seq.toArray}, genre) x
     }
 
+let getAlbum(id) = 
+    fun (x: HttpContext) -> async {
+        let ctx = sql.GetDataContext()
+
+        let a = query {
+            for a in ctx.``[dbo].[Album]`` do
+            where (a.AlbumId = id && a.Title.IsSome)
+            select {Id = a.AlbumId; Title = a.Title.Value}
+            exactlyOne
+        }
+
+        return! partial(a, album) x
+    }
+
 choose [
     GET >>= choose [
         url "/" >>= (HTML "Home Page")
@@ -78,7 +92,7 @@ choose [
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
                                             getGenre 
                                             never)
-        url_scan "/store/details/%d" (fun id -> partial({Id = id; Title = "Album " + id.ToString()}, album))
+        url_scan "/store/details/%d" getAlbum
         
         url_regex "(.*?)\.(?!js$|css$|png$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
