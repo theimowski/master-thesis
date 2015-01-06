@@ -47,3 +47,8 @@ type EditAlbum = {
     Genres : GenreBrief []
     Album : Album
 }
+
+type Index = {
+    Container : string
+    Genres : string[]
+}

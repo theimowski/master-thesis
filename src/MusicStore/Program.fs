@@ -25,17 +25,6 @@ let albumCreate = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_cre
 let albumEdit = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_edit.html"))
 let albumDelete = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_delete.html"))
 
-let HTML(container) = 
-    fun (x : HttpContext) -> async {
-        let dictionary = ["Container", container] |> dict
-        return! OK (index.Render(DotLiquid.Hash.FromDictionary(dictionary))) x
-    }
-
-let partial(model,template : DotLiquid.Template) =
-    fun (x : HttpContext) -> async {
-        return! HTML (template.Render(DotLiquid.Hash.FromAnonymousObject(model))) x
-    }
-
 open System
 open System.Data
 open System.Linq
@@ -47,14 +36,31 @@ type sql = SqlDataProvider<
 
 let ctx = sql.GetDataContext()
 
+let HTML(container) = 
+    fun (x : HttpContext) -> async {
+        let genres = query {
+            for g in ctx.``[dbo].[Genre]`` do
+            select (Uri.EscapeDataString g.Name)
+        } 
+
+        let model = {Index.Container = container; Genres = genres |> Seq.toArray}
+
+        return! OK (index.Render(DotLiquid.Hash.FromAnonymousObject(model))) x
+    }
+
+let partial(model,template : DotLiquid.Template) =
+    fun (x : HttpContext) -> async {
+        return! HTML (template.Render(DotLiquid.Hash.FromAnonymousObject(model))) x
+    }
+
 let getStore = 
     fun (x: HttpContext) -> async {     
         let genres = query {
             for g in ctx.``[dbo].[Genre]`` do
-            select g.Name
+            select (Uri.EscapeDataString g.Name)
         } 
 
-        return! partial({Store.Genres = genres |> Seq.toArray |> Array.map Uri.EscapeDataString}, store) x
+        return! partial({Store.Genres = genres |> Seq.toArray}, store) x
     }
 
 let getGenre(name) = 
@@ -76,9 +82,18 @@ let getGenre(name) =
 let getAlbum(id) = 
     fun (x: HttpContext) -> async {
         let a = query {
-            for a in ctx.``[dbo].[Album]`` do
-            where (a.AlbumId = id)
-            select {AlbumBrief.Id = a.AlbumId; Title = a.Title}
+            for album in ctx.``[dbo].[Album]`` do 
+            where (album.AlbumId = id)
+            join artist in ctx.``[dbo].[Artist]`` on (album.ArtistId = artist.ArtistId)
+            join genre in ctx.``[dbo].[Genre]`` on (album.GenreId = genre.GenreId)
+            select { 
+                Album.Id = album.AlbumId
+                Title = album.Title
+                Artist = artist.Name
+                Genre = genre.Name
+                Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
+                Art = album.AlbumArtUrl
+            }
             exactlyOne
         }
 
@@ -238,7 +253,7 @@ let q = Suave.Types.HttpRequest.query'
 
 choose [
     GET >>= choose [
-        url "/" >>= (HTML "Home Page")
+        url "/" >>= (HTML """<div id="promotion"/>""")
         url "/store" >>= getStore
         url "/store/browse" >>= request(fun x -> cond (q x "genre") getGenre never)
         url_scan "/store/details/%d" getAlbum

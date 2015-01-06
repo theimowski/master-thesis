@@ -4,21 +4,33 @@
     <title>F# Suave Music Store</title>
     <link href="/Site.css" rel="stylesheet" type="text/css"/>
 </head>
-    <body>
-        <div id="header">
-            <h1>
-                F# Suave Music Store
-            </h1>
-            <ul id="navlist">
-                <li class="first">
-                    <a href="/"
-                       id="current">Home</a>
-                </li>
-                <li>
-                    <a href="/store">Store</a>
-                </li>
-            </ul>
-        </div>
-        <div id="container">{{Container}}</div>
-    </body>
+<body>
+    <div id="header">
+        <h1>
+            <a href="/">F# Suave Music Store</a>
+        </h1>
+        <ul id="navlist">
+            <li class="first">
+                <a href="/"
+                   id="current">Home</a>
+            </li>
+            <li>
+                <a href="/store">Store</a>
+            </li>
+            <li>
+                <a href="/store/manage">Admin</a>
+            </li>
+        </ul>
+    </div>
+
+    <ul id="categories">
+        {% for Genre in Genres %}
+        <li>
+            <a href="/store/browse?genre={{Genre}}">{{Genre}}</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div id="container">{{Container}}</div>
+</body>
 </html>
