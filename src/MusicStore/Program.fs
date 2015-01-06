@@ -35,18 +35,15 @@ open FSharp.Data.Sql
 
 type sql = SqlDataProvider< 
               "Server=(LocalDb)\\v11.0;Database=MusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
-              DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER,
-              IndividualsAmount = 1000,
-              UseOptionTypes = true >
+              DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER>
+
+let ctx = sql.GetDataContext()
 
 let getStore = 
     fun (x: HttpContext) -> async {     
-        let ctx = sql.GetDataContext()
-        
         let genres = query {
             for g in ctx.``[dbo].[Genre]`` do
-            where g.Name.IsSome
-            select g.Name.Value
+            select g.Name
         } 
 
         return! partial({Genres = genres |> Seq.toArray |> Array.map Uri.EscapeDataString}, store) x
@@ -54,17 +51,15 @@ let getStore =
 
 let getGenre(name) = 
     fun (x: HttpContext) -> async {
-        let ctx = sql.GetDataContext()
-
         let albums = query {
             for a in ctx.``[dbo].[Album]`` do
             where (a.GenreId = query {
                 for g in ctx.``[dbo].[Genre]`` do 
-                where (g.Name.IsSome && g.Name.Value = name)
+                where (g.Name = name)
                 select g.GenreId
                 exactlyOne
-            } && a.Title.IsSome)
-            select {Id = a.AlbumId; Title = a.Title.Value }
+            })
+            select {Id = a.AlbumId; Title = a.Title }
         }
 
         return! partial({Name = name; Albums = albums |> Seq.toArray}, genre) x
@@ -72,12 +67,10 @@ let getGenre(name) =
 
 let getAlbum(id) = 
     fun (x: HttpContext) -> async {
-        let ctx = sql.GetDataContext()
-
         let a = query {
             for a in ctx.``[dbo].[Album]`` do
-            where (a.AlbumId = id && a.Title.IsSome)
-            select {Id = a.AlbumId; Title = a.Title.Value}
+            where (a.AlbumId = id)
+            select {Id = a.AlbumId; Title = a.Title}
             exactlyOne
         }
 
@@ -92,7 +85,7 @@ choose [
         url "/store" >>= getStore
         url "/store/browse" >>= request(fun x -> cond (q x "genre") getGenre never)
         url_scan "/store/details/%d" getAlbum
-        
+
         url_regex "(.*?)\.(?!js$|css$|png$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
     ]
