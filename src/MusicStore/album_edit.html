@@ -36,21 +36,21 @@
             Title
         </div>
         <div>
-            <input name="title" type="text" value="{{Album.Title}}" required/>
+            <input name="title" type="text" value="{{Album.Title}}" required maxlength="100" />
         </div>
 
         <div>
             Price
         </div>
         <div>
-            <input name="price" type="number" value="{{Album.Price}}" required/>
+            <input name="price" type="number" value="{{Album.Price}}" required step="0.01" min="0.01" max="100.00">
         </div>
 
         <div>
             Album Art Url
         </div>
         <div>
-            <input name="artUrl" type="text" value="{{Album.Art}}" required />
+            <input name="artUrl" type="text" value="{{Album.Art}}" required maxlength="100" />
         </div>
 
         <p>
