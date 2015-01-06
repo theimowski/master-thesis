@@ -14,7 +14,7 @@ open System.Linq
 open FSharp.Data.Sql
 
 type sql = SqlDataProvider< 
-              "Server=(LocalDb)\\v11.0;Database=MusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
+              "Server=(LocalDb)\\v11.0;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
               DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER>
 
 let ctx = sql.GetDataContext()
@@ -39,7 +39,7 @@ let albumDelete = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_del
 let HTML(container) = 
     fun (x : HttpContext) -> async {
         let genres = query {
-            for g in ctx.``[dbo].[Genre]`` do
+            for g in ctx.``[dbo].[Genres]`` do
             select (Uri.EscapeDataString g.Name)
         } 
 
@@ -56,7 +56,7 @@ let partial(model,template : DotLiquid.Template) =
 let getStore = 
     fun (x: HttpContext) -> async {     
         let genres = query {
-            for g in ctx.``[dbo].[Genre]`` do
+            for g in ctx.``[dbo].[Genres]`` do
             select (Uri.EscapeDataString g.Name)
         } 
 
@@ -66,9 +66,9 @@ let getStore =
 let getGenre(name) = 
     fun (x: HttpContext) -> async {
         let albums = query {
-            for a in ctx.``[dbo].[Album]`` do
+            for a in ctx.``[dbo].[Albums]`` do
             where (a.GenreId = query {
-                for g in ctx.``[dbo].[Genre]`` do 
+                for g in ctx.``[dbo].[Genres]`` do 
                 where (g.Name = name)
                 select g.GenreId
                 exactlyOne
@@ -82,10 +82,10 @@ let getGenre(name) =
 let getAlbum(id) = 
     fun (x: HttpContext) -> async {
         let a = query {
-            for album in ctx.``[dbo].[Album]`` do 
+            for album in ctx.``[dbo].[Albums]`` do 
             where (album.AlbumId = id)
-            join artist in ctx.``[dbo].[Artist]`` on (album.ArtistId = artist.ArtistId)
-            join genre in ctx.``[dbo].[Genre]`` on (album.GenreId = genre.GenreId)
+            join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
+            join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
             select { 
                 Album.Id = album.AlbumId
                 Title = album.Title
@@ -103,9 +103,9 @@ let getAlbum(id) =
 let manage = 
     fun (x: HttpContext) -> async {
         let albums = query {
-            for album in ctx.``[dbo].[Album]`` do 
-            join artist in ctx.``[dbo].[Artist]`` on (album.ArtistId = artist.ArtistId)
-            join genre in ctx.``[dbo].[Genre]`` on (album.GenreId = genre.GenreId)
+            for album in ctx.``[dbo].[Albums]`` do 
+            join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
+            join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
             select { 
                 Album.Id = album.AlbumId
                 Title = album.Title
@@ -122,11 +122,11 @@ let manage =
 let getCreateAlbum = 
     fun (x: HttpContext) -> async { 
         let genres = query {
-            for g in ctx.``[dbo].[Genre]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
+            for g in ctx.``[dbo].[Genres]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
         }
 
         let artists = query {
-            for a in ctx.``[dbo].[Artist]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
+            for a in ctx.``[dbo].[Artists]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
         }
 
         return! partial({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}, albumCreate) x
@@ -135,15 +135,15 @@ let getCreateAlbum =
 let getEditAlbum(id) =
     fun (x: HttpContext) -> async { 
         let genres = query {
-            for g in ctx.``[dbo].[Genre]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
+            for g in ctx.``[dbo].[Genres]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
         }
 
         let artists = query {
-            for a in ctx.``[dbo].[Artist]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
+            for a in ctx.``[dbo].[Artists]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
         }
 
         let album = query {
-            for a in ctx.``[dbo].[Album]`` do
+            for a in ctx.``[dbo].[Albums]`` do
             where (a.AlbumId = id)
             select {
                 Album.Id = a.AlbumId
@@ -162,7 +162,7 @@ let getEditAlbum(id) =
 let getDeleteAlbum(id) = 
     fun (x: HttpContext) -> async { 
         let title = query {
-            for a in ctx.``[dbo].[Album]`` do
+            for a in ctx.``[dbo].[Albums]`` do
             where (a.AlbumId = id)
             select a.Title
             exactlyOne
@@ -191,12 +191,11 @@ let postCreateAlbum =
 
         match artist,genre,title,price,artUrl with
         | Some artist, Some genre, Some title, Some price, Some artUrl ->
-            let album = ctx.``[dbo].[Album]``.Create()
+            let album = ctx.``[dbo].[Albums]``.Create()
             album.ArtistId <- artist
             album.GenreId <- genre
             album.Title <- title
             album.Price <- price
-            album.Created <- DateTime.UtcNow
             album.AlbumArtUrl <- artUrl
 
             ctx.SubmitUpdates()
@@ -216,7 +215,7 @@ let postEditAlbum(id) =
         match artist,genre,title,price,artUrl with
         | Some artist, Some genre, Some title, Some price, Some artUrl ->
             let album = query {
-                for a in ctx.``[dbo].[Album]`` do
+                for a in ctx.``[dbo].[Albums]`` do
                 where (a.AlbumId = id)
                 select a
                 exactlyOne
@@ -225,7 +224,6 @@ let postEditAlbum(id) =
             album.GenreId <- genre
             album.Title <- title
             album.Price <- price
-            album.Created <- DateTime.UtcNow
             album.AlbumArtUrl <- artUrl
 
             ctx.SubmitUpdates()
@@ -237,7 +235,7 @@ let postEditAlbum(id) =
 let postDeleteAlbum(id) =
     fun (x: HttpContext) -> async { 
         let album = query {
-            for a in ctx.``[dbo].[Album]`` do
+            for a in ctx.``[dbo].[Albums]`` do
             where (a.AlbumId = id)
             select a
             exactlyOne
