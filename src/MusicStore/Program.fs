@@ -263,7 +263,7 @@ choose [
         url_scan "/store/manage/edit/%d" getEditAlbum
         url_scan "/store/manage/delete/%d" getDeleteAlbum
 
-        url_regex "(.*?)\.(?!js$|css$|png$).*" >>= RequestErrors.FORBIDDEN "Access denied."
+        url_regex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
     ]
 
