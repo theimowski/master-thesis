@@ -1,0 +1,38 @@
+﻿<h2>Index</h2>
+<p>Create NEW</p>
+<table>
+    <tr>
+        <th>
+            Genre
+        </th>
+        <th>
+            Artist
+        </th>
+        <th>
+            Title
+        </th>
+        <th>
+            Price
+        </th>
+        <th></th>
+    </tr>
+    {% for Album in Albums %}
+    <tr>
+        <td>
+            {{Album.Genre}}
+        </td>
+        <td>
+            {{Album.Artist}}
+        </td>
+        <td>
+            {{Album.Title}}
+        </td>
+        <td>
+            {{Album.Price}}
+        </td>
+        <td>
+           Edit Delete
+        </td>
+    </tr>
+    {% endfor %}
+</table>

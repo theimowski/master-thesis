@@ -1,15 +1,27 @@
 ﻿module MusicStore.Models
 
-type Album = {
+type AlbumBrief = {
     Id : int
     Title : string
 }
 
 type Genre = {
     Name : string
-    Albums : Album []
+    Albums : AlbumBrief []
 }
 
 type Store = {
     Genres : string []
+}
+
+type Album = {
+    Id : int 
+    Title : string
+    Artist : string
+    Genre : string
+    Price : decimal
+}
+
+type Manage = {
+    Albums : Album []
 }
