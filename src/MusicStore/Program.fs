@@ -1,6 +1,6 @@
-﻿open Suave                 // always open suave
-open Suave.Http.Successful // for OK-result
-open Suave.Web             // for config
+﻿open Suave
+open Suave.Http.Successful
+open Suave.Web
 open Suave.Http
 open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
@@ -84,14 +84,13 @@ let getAlbum(id) =
         return! partial(a, album) x
     }
 
+let q = Suave.Types.HttpRequest.query'
+
 choose [
     GET >>= choose [
         url "/" >>= (HTML "Home Page")
         url "/store" >>= getStore
-        url "/store/browse" 
-            >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
-                                            getGenre 
-                                            never)
+        url "/store/browse" >>= request(fun x -> cond (q x "genre") getGenre never)
         url_scan "/store/details/%d" getAlbum
         
         url_regex "(.*?)\.(?!js$|css$|png$).*" >>= RequestErrors.FORBIDDEN "Access denied."
