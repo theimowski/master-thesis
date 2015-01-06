@@ -8,6 +8,17 @@ open Suave.Types
 
 open MusicStore.Models
 
+open System
+open System.Data
+open System.Linq
+open FSharp.Data.Sql
+
+type sql = SqlDataProvider< 
+              "Server=(LocalDb)\\v11.0;Database=MusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
+              DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER>
+
+let ctx = sql.GetDataContext()
+
 let registerSafeType t = 
     let fields = Reflection.FSharpType.GetRecordFields(t) |> Array.map (fun f -> f.Name)
     DotLiquid.Template.RegisterSafeType(t, fields)
@@ -24,17 +35,6 @@ let manageIndex = DotLiquid.Template.Parse(System.IO.File.ReadAllText("manage_in
 let albumCreate = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_create.html"))
 let albumEdit = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_edit.html"))
 let albumDelete = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_delete.html"))
-
-open System
-open System.Data
-open System.Linq
-open FSharp.Data.Sql
-
-type sql = SqlDataProvider< 
-              "Server=(LocalDb)\\v11.0;Database=MusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
-              DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER>
-
-let ctx = sql.GetDataContext()
 
 let HTML(container) = 
     fun (x : HttpContext) -> async {
@@ -242,7 +242,7 @@ let postDeleteAlbum(id) =
             select a
             exactlyOne
         }
-
+        
         album.Delete()
         ctx.SubmitUpdates()
 
