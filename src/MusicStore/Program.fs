@@ -8,7 +8,8 @@ open Suave.Types
 
 open MusicStore.Models
 
-DotLiquid.Template.RegisterSafeType(typeof<Genre>, [|"Name"|])
+DotLiquid.Template.RegisterSafeType(typeof<Album>, [|"Id"; "Title"|])
+DotLiquid.Template.RegisterSafeType(typeof<Genre>, [|"Name"; "Albums"|])
 
 let contents = System.IO.File.ReadAllText("index.html")
 let index = DotLiquid.Template.Parse(contents)
@@ -45,10 +46,28 @@ let getStore =
         let genres = query {
             for g in ctx.``[dbo].[Genre]`` do
             where g.Name.IsSome
-            select {Name = g.Name.Value}
+            select g.Name.Value
         } 
 
-        return! partial({Genres = genres |> Seq.toArray}, store) x
+        return! partial({Genres = genres |> Seq.toArray |> Array.map Uri.EscapeDataString}, store) x
+    }
+
+let getGenre(name) = 
+    fun (x: HttpContext) -> async {
+        let ctx = sql.GetDataContext()
+
+        let albums = query {
+            for a in ctx.``[dbo].[Album]`` do
+            where (a.GenreId = query {
+                for g in ctx.``[dbo].[Genre]`` do 
+                where (g.Name.IsSome && g.Name.Value = name)
+                select g.GenreId
+                exactlyOne
+            } && a.Title.IsSome)
+            select {Id = a.AlbumId; Title = a.Title.Value }
+        }
+
+        return! partial({Name = name; Albums = albums |> Seq.toArray}, genre) x
     }
 
 choose [
@@ -57,11 +76,11 @@ choose [
         url "/store" >>= getStore
         url "/store/browse" 
             >>= request(fun request -> cond (HttpRequest.query(request) ^^ "genre") 
-                                            (fun name -> partial ({Name = name}, genre)) 
+                                            getGenre 
                                             never)
-        url_scan "/store/details/%d" (fun id -> partial({Title = "Album " + id.ToString()}, album))
+        url_scan "/store/details/%d" (fun id -> partial({Id = id; Title = "Album " + id.ToString()}, album))
         
-        url_regex "(.*?)\.(?!js$|css$).*" >>= RequestErrors.FORBIDDEN "Access denied."
+        url_regex "(.*?)\.(?!js$|css$|png$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
     ]
 

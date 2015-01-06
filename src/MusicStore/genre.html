@@ -1,1 +1,8 @@
 ﻿<h2>Browsing Genre: {{Name}}</h2>
+<ul>
+    {% for Album in Albums %}
+    <li>
+        <a href="/store/details/{{Album.Id}}">{{Album.Title}}</a>
+    </li>
+    {% endfor %}
+</ul>
