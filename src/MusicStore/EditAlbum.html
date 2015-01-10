@@ -10,7 +10,10 @@
         <div>
             <select name="genre">
                 {% for Genre in Genres %}
-                <option value="{{Genre.Id}}">{{Genre.Name}}</option>
+                <option {% if Genre.Item2 == Album.Genre %}selected="selected"{% endif %}
+                        value="{{Genre.Item1}}">
+                    {{Genre.Item2}}
+                </option>
                 {% endfor %}
             </select>
         </div>
@@ -21,7 +24,10 @@
         <div>
             <select name="artist">
                 {% for Artist in Artists %}
-                <option value="{{Artist.Id}}">{{Artist.Name}}</option>
+                <option {% if Artist.Item2 == Album.Artist %}selected="selected"{% endif %}
+                        value="{{Artist.Item1}}">
+                    {{Artist.Item2}}
+                </option>
                 {% endfor %}
             </select>
         </div>
@@ -30,25 +36,25 @@
             Title
         </div>
         <div>
-            <input name="title" type="text" required maxlength="100"/>
+            <input name="title" type="text" value="{{Album.Title}}" required maxlength="100" />
         </div>
 
         <div>
             Price
         </div>
         <div>
-            <input name="price" type="number" required step="0.01"/>
+            <input name="price" type="number" value="{{Album.Price}}" required step="0.01" min="0.01" max="100.00">
         </div>
 
         <div>
             Album Art Url
         </div>
         <div>
-            <input name="artUrl" type="text" value="placeholder.gif" required maxlength="100" min="0.01" max="100.00" />
+            <input name="artUrl" type="text" value="{{Album.Art}}" required maxlength="100" />
         </div>
 
         <p>
-            <input type="submit" value="Create" />
+            <input type="submit" value="Save" />
         </p>
     </fieldset>
 </form>

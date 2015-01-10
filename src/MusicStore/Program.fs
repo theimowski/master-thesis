@@ -19,35 +19,17 @@ type sql = SqlDataProvider<
 
 let ctx = sql.GetDataContext()
 
-let registerSafeType t = 
+DotLiquid.Template.RegisterSafeType(typeof<int * string>, [|"Item1";"Item2"|])
+
+let registerTemplate t = 
     let fields = Reflection.FSharpType.GetRecordFields(t) |> Array.map (fun f -> f.Name)
     DotLiquid.Template.RegisterSafeType(t, fields)
-
-typeof<Album>.DeclaringType.GetNestedTypes()
-|> Array.iter registerSafeType
-
-let contents = System.IO.File.ReadAllText("index.html")
-let index = DotLiquid.Template.Parse(contents)
-let home = DotLiquid.Template.Parse(System.IO.File.ReadAllText("home.html"))
-let store = DotLiquid.Template.Parse(System.IO.File.ReadAllText("store.html"))
-let album = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album.html"))
-let genre = DotLiquid.Template.Parse(System.IO.File.ReadAllText("genre.html"))
-let manageIndex = DotLiquid.Template.Parse(System.IO.File.ReadAllText("manage_index.html"))
-let albumCreate = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_create.html"))
-let albumEdit = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_edit.html"))
-let albumDelete = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_delete.html"))
+    t, DotLiquid.Template.Parse(System.IO.File.ReadAllText(t.Name + ".html"))
 
 let templates = 
-    [ 
-        typeof<Home>, home 
-        typeof<Album>, album 
-        typeof<Store>, store 
-        typeof<Genre>, genre 
-        typeof<Manage>, manageIndex 
-        typeof<CreateAlbum>, albumCreate
-        typeof<EditAlbum>, albumEdit
-        typeof<AlbumBrief>, albumDelete
-    ] |> dict
+    typeof<Album>.DeclaringType.GetNestedTypes()
+    |> Array.map registerTemplate
+    |> dict
 
 let partial (model) =
     fun (x : HttpContext) -> async {
@@ -61,6 +43,8 @@ let partial (model) =
         let container = template.Render(DotLiquid.Hash.FromAnonymousObject(model))
 
         let model = {Index.Container = container; Genres = genres |> Seq.toArray}
+
+        let index = templates.[typeof<Index>]
 
         return! x |>
             (OK (index.Render(DotLiquid.Hash.FromAnonymousObject(model))) 
@@ -92,7 +76,7 @@ let getGenre(name) =
                 select g.GenreId
                 exactlyOne
             })
-            select {AlbumBrief.Id = a.AlbumId; Title = a.Title }
+            select (a.AlbumId, a.Title)
         }
 
         return! partial({Name = name; Albums = albums |> Seq.toArray}) x
@@ -141,11 +125,11 @@ let manage =
 let getCreateAlbum = 
     fun (x: HttpContext) -> async { 
         let genres = query {
-            for g in ctx.``[dbo].[Genres]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
+            for g in ctx.``[dbo].[Genres]`` do select (g.GenreId, g.Name)
         }
 
         let artists = query {
-            for a in ctx.``[dbo].[Artists]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
+            for a in ctx.``[dbo].[Artists]`` do select (a.ArtistId, a.Name)
         }
 
         return! partial({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}) x
@@ -154,11 +138,11 @@ let getCreateAlbum =
 let getEditAlbum(id) =
     fun (x: HttpContext) -> async { 
         let genres = query {
-            for g in ctx.``[dbo].[Genres]`` do select {GenreBrief.Id = g.GenreId; Name = g.Name}
+            for g in ctx.``[dbo].[Genres]`` do select (g.GenreId, g.Name)
         }
 
         let artists = query {
-            for a in ctx.``[dbo].[Artists]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
+            for a in ctx.``[dbo].[Artists]`` do select (a.ArtistId,a.Name)
         }
 
         let album = query {
@@ -169,8 +153,8 @@ let getEditAlbum(id) =
                 Title = a.Title
                 Price = a.Price.ToString(Globalization.CultureInfo.InvariantCulture)
                 Art = a.AlbumArtUrl
-                Artist = artists |> Seq.find (fun artist -> artist.Id = a.ArtistId) |> (fun a -> a.Name)
-                Genre = genres |> Seq.find (fun g -> g.Id = a.GenreId) |> (fun g -> g.Name)
+                Artist = artists |> Seq.find (fun (id,_) -> id = a.ArtistId) |> snd
+                Genre = genres |> Seq.find (fun (id,_) -> id = a.GenreId) |> snd
             }
             exactlyOne
         }
@@ -187,7 +171,7 @@ let getDeleteAlbum(id) =
             exactlyOne
         }
 
-        return! partial({AlbumBrief.Id = id; Title = title}) x
+        return! partial({DeleteAlbum.Id = id; Title = title}) x
     }
 
 let f = Suave.Types.HttpRequest.form'

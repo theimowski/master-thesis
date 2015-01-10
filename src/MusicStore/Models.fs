@@ -1,13 +1,12 @@
 ﻿module MusicStore.Models
 
-type AlbumBrief = {
-    Id : int
-    Title : string
+type Index = {
+    Container : string
+    Genres : string[]
 }
 
-type Genre = {
-    Name : string
-    Albums : AlbumBrief []
+type Home = { 
+    Placeholder : unit
 }
 
 type Store = {
@@ -23,36 +22,27 @@ type Album = {
     Art : string
 }
 
-type Manage = {
+type DeleteAlbum = {
+    Id : int
+    Title : string
+}
+
+type Genre = {
+    Name : string
+    Albums : (int * string) [] 
+}
+
+type ManageStore = {
     Albums : Album []
 }
 
-type ArtistBrief = {
-    Id : int
-    Name : string
-}
-
-type GenreBrief = {
-    Id : int
-    Name : string
-}
-
 type CreateAlbum = {
-    Artists : ArtistBrief []
-    Genres : GenreBrief []
+    Artists : (int * string) []
+    Genres : (int * string) []
 }
 
 type EditAlbum = {
-    Artists : ArtistBrief []
-    Genres : GenreBrief []
+    Artists : (int * string) []
+    Genres : (int * string) []
     Album : Album
-}
-
-type Index = {
-    Container : string
-    Genres : string[]
-}
-
-type Home = { 
-    Placeholder : unit
 }
