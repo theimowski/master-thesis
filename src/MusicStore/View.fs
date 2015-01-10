@@ -24,11 +24,6 @@ type Album = {
     Art : string
 }
 
-type DeleteAlbum = {
-    Id : int
-    Title : string
-}
-
 type Genre = {
     Name : string
     Albums : (int * string) [] 
@@ -47,6 +42,11 @@ type EditAlbum = {
     Artists : (int * string) []
     Genres : (int * string) []
     Album : Album
+}
+
+type DeleteAlbum = {
+    Id : int
+    Title : string
 }
 
 let templates =

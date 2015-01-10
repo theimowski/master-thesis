@@ -19,39 +19,40 @@ type sql = SqlDataProvider<
               "Server=(LocalDb)\\v11.0;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
               DatabaseVendor = Common.DatabaseProviderTypes.MSSQLSERVER>
 
+type DbContext = sql.dataContext
+
 let ctx = sql.GetDataContext()
 
-let HTML (model) =
-    fun (x : HttpContext) -> async {
+let get =
+    fun getF (x: HttpContext) -> async {
+        let ctx = sql.GetDataContext()
         let genres = query {
             for g in ctx.``[dbo].[Genres]`` do
             select (Uri.EscapeDataString g.Name)
         } 
+        let model = getF ctx
         
         let container = View.render(model)
         let index = {Index.Container = container; Genres = genres |> Seq.toArray}
-
         return! (OK (View.render index) >>= Writers.set_mime_type "text/html; charset=utf-8") x
     }
 
-let getHome =   
-    fun (x: HttpContext) -> async {
-        return! HTML({Placeholder = ()}) x
-    }
+let getHome (_) =   
+    {Placeholder = ()}
 
-let getStore = 
-    fun (x: HttpContext) -> async {     
-        let genres = query {
-            for g in ctx.``[dbo].[Genres]`` do
+let getStore (dbContext : DbContext) = 
+    let genres = 
+        query {
+            for g in dbContext.``[dbo].[Genres]`` do
             select (Uri.EscapeDataString g.Name)
         } 
+        |> Seq.toArray
 
-        return! HTML({Store.Genres = genres |> Seq.toArray}) x
-    }
+    {Store.Genres = genres}
 
-let getGenre(name) = 
-    fun (x: HttpContext) -> async {
-        let albums = query {
+let getGenre name (ctx : DbContext) = 
+    let albums = 
+        query {
             for a in ctx.``[dbo].[Albums]`` do
             where (a.GenreId = query {
                 for g in ctx.``[dbo].[Genres]`` do 
@@ -60,35 +61,30 @@ let getGenre(name) =
                 exactlyOne
             })
             select (a.AlbumId, a.Title)
-        }
+        } |> Seq.toArray
 
-        return! HTML({Name = name; Albums = albums |> Seq.toArray}) x
+    {Name = name; Albums = albums}
+
+let getAlbum id (ctx : DbContext) =
+    query {
+        for album in ctx.``[dbo].[Albums]`` do 
+        where (album.AlbumId = id)
+        join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
+        join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
+        select { 
+            Album.Id = album.AlbumId
+            Title = album.Title
+            Artist = artist.Name
+            Genre = genre.Name
+            Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
+            Art = album.AlbumArtUrl
+        }
+        exactlyOne
     }
 
-let getAlbum(id) = 
-    fun (x: HttpContext) -> async {
-        let a = query {
-            for album in ctx.``[dbo].[Albums]`` do 
-            where (album.AlbumId = id)
-            join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
-            join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
-            select { 
-                Album.Id = album.AlbumId
-                Title = album.Title
-                Artist = artist.Name
-                Genre = genre.Name
-                Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
-                Art = album.AlbumArtUrl
-            }
-            exactlyOne
-        }
-
-        return! HTML(a) x
-    }
-
-let manage = 
-    fun (x: HttpContext) -> async {
-        let albums = query {
+let getManageStore (ctx : DbContext) =
+    let albums = 
+        query {
             for album in ctx.``[dbo].[Albums]`` do 
             join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
             join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
@@ -100,35 +96,36 @@ let manage =
                 Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
                 Art = album.AlbumArtUrl
             }
-        }
+        } |> Seq.toArray
 
-        return! HTML({Albums = albums |> Seq.toArray}) x
-    }
+    {Albums = albums }
 
-let getCreateAlbum = 
-    fun (x: HttpContext) -> async { 
-        let genres = query {
+let getCreateAlbum (ctx : DbContext) =
+    let genres = 
+        query {
             for g in ctx.``[dbo].[Genres]`` do select (g.GenreId, g.Name)
-        }
+        } |> Seq.toArray
 
-        let artists = query {
+    let artists = 
+        query {
             for a in ctx.``[dbo].[Artists]`` do select (a.ArtistId, a.Name)
-        }
+        } |> Seq.toArray
 
-        return! HTML({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}) x
-    }
+    {CreateAlbum.Genres = genres; Artists = artists}
 
-let getEditAlbum(id) =
-    fun (x: HttpContext) -> async { 
-        let genres = query {
+let getEditAlbum id (ctx : DbContext) =
+    let genres = 
+        query {
             for g in ctx.``[dbo].[Genres]`` do select (g.GenreId, g.Name)
-        }
+        } |> Seq.toArray
 
-        let artists = query {
+    let artists = 
+        query {
             for a in ctx.``[dbo].[Artists]`` do select (a.ArtistId,a.Name)
-        }
+        } |> Seq.toArray
 
-        let album = query {
+    let album = 
+        query {
             for a in ctx.``[dbo].[Albums]`` do
             where (a.AlbumId = id)
             select {
@@ -142,20 +139,17 @@ let getEditAlbum(id) =
             exactlyOne
         }
 
-        return! HTML({EditAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray; Album = album}) x
+    {EditAlbum.Genres = genres; Artists = artists; Album = album}
+
+let getDeleteAlbum id (ctx : DbContext) =
+    let title = query {
+        for a in ctx.``[dbo].[Albums]`` do
+        where (a.AlbumId = id)
+        select a.Title
+        exactlyOne
     }
 
-let getDeleteAlbum(id) = 
-    fun (x: HttpContext) -> async { 
-        let title = query {
-            for a in ctx.``[dbo].[Albums]`` do
-            where (a.AlbumId = id)
-            select a.Title
-            exactlyOne
-        }
-
-        return! HTML({DeleteAlbum.Id = id; Title = title}) x
-    }
+    {DeleteAlbum.Id = id; Title = title}
 
 let f = Suave.Types.HttpRequest.form'
 let mint x = 
@@ -166,6 +160,13 @@ let mdec x =
     match Decimal.TryParse(x, Globalization.NumberStyles.AllowDecimalPoint, Globalization.CultureInfo.InvariantCulture) with
     | true, v -> Some v
     | _ -> None
+
+type MaybeBuilder() = 
+    member this.Return(x) = Some x
+    member this.ReturnFrom(m) = m
+    member this.Bind(m, f) = Option.bind f m
+
+let maybe = MaybeBuilder()
 
 let postCreateAlbum = 
     fun (x: HttpContext) -> async {
@@ -237,15 +238,15 @@ let q = Suave.Types.HttpRequest.query'
 
 choose [
     GET >>= choose [
-        url "/" >>= getHome
-        url "/store" >>= getStore
-        url "/store/browse" >>= request(fun x -> cond (q x "genre") getGenre never)
-        url_scan "/store/details/%d" getAlbum
+        url "/" >>= get getHome
+        url "/store" >>= get getStore
+        url "/store/browse" >>= request(fun x -> cond (q x "genre") (getGenre >> get) never)
+        url_scan "/store/details/%d" (getAlbum >> get)
 
-        url "/store/manage" >>= manage
-        url "/store/manage/create" >>= getCreateAlbum
-        url_scan "/store/manage/edit/%d" getEditAlbum
-        url_scan "/store/manage/delete/%d" getDeleteAlbum
+        url "/store/manage" >>= get getManageStore
+        url "/store/manage/create" >>= get getCreateAlbum
+        url_scan "/store/manage/edit/%d" (getEditAlbum >> get)
+        url_scan "/store/manage/delete/%d" (getDeleteAlbum >> get)
 
         url_regex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
