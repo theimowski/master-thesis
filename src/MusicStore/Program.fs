@@ -6,7 +6,7 @@ open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
 open Suave.Types
 
-open MusicStore.Models
+open MusicStore.TemplateModels
 
 open System
 open System.Data
@@ -19,17 +19,7 @@ type sql = SqlDataProvider<
 
 let ctx = sql.GetDataContext()
 
-DotLiquid.Template.RegisterSafeType(typeof<int * string>, [|"Item1";"Item2"|])
-
-let registerTemplate t = 
-    let fields = Reflection.FSharpType.GetRecordFields(t) |> Array.map (fun f -> f.Name)
-    DotLiquid.Template.RegisterSafeType(t, fields)
-    t, DotLiquid.Template.Parse(System.IO.File.ReadAllText(t.Name + ".html"))
-
-let templates = 
-    typeof<Album>.DeclaringType.GetNestedTypes()
-    |> Array.map registerTemplate
-    |> dict
+let templates = MusicStore.TemplateModels.register()
 
 let partial (model) =
     fun (x : HttpContext) -> async {
