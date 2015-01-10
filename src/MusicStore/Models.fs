@@ -52,3 +52,7 @@ type Index = {
     Container : string
     Genres : string[]
 }
+
+type Home = { 
+    Placeholder : unit
+}

@@ -37,12 +37,27 @@ let albumCreate = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_cre
 let albumEdit = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_edit.html"))
 let albumDelete = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_delete.html"))
 
-let partial(model,template : DotLiquid.Template) =
+let templates = 
+    [ 
+        typeof<Home>, home 
+        typeof<Album>, album 
+        typeof<Store>, store 
+        typeof<Genre>, genre 
+        typeof<Manage>, manageIndex 
+        typeof<CreateAlbum>, albumCreate
+        typeof<EditAlbum>, albumEdit
+        typeof<AlbumBrief>, albumDelete
+    ] |> dict
+
+let partial (model) =
     fun (x : HttpContext) -> async {
         let genres = query {
             for g in ctx.``[dbo].[Genres]`` do
             select (Uri.EscapeDataString g.Name)
         } 
+        
+        let template = templates.[model.GetType()]
+
         let container = template.Render(DotLiquid.Hash.FromAnonymousObject(model))
 
         let model = {Index.Container = container; Genres = genres |> Seq.toArray}
@@ -54,7 +69,7 @@ let partial(model,template : DotLiquid.Template) =
 
 let getHome =   
     fun (x: HttpContext) -> async {
-        return! partial((), home) x
+        return! partial({Placeholder = ()}) x
     }
 
 let getStore = 
@@ -64,7 +79,7 @@ let getStore =
             select (Uri.EscapeDataString g.Name)
         } 
 
-        return! partial({Store.Genres = genres |> Seq.toArray}, store) x
+        return! partial({Store.Genres = genres |> Seq.toArray}) x
     }
 
 let getGenre(name) = 
@@ -80,7 +95,7 @@ let getGenre(name) =
             select {AlbumBrief.Id = a.AlbumId; Title = a.Title }
         }
 
-        return! partial({Name = name; Albums = albums |> Seq.toArray}, genre) x
+        return! partial({Name = name; Albums = albums |> Seq.toArray}) x
     }
 
 let getAlbum(id) = 
@@ -101,7 +116,7 @@ let getAlbum(id) =
             exactlyOne
         }
 
-        return! partial(a, album) x
+        return! partial(a) x
     }
 
 let manage = 
@@ -120,7 +135,7 @@ let manage =
             }
         }
 
-        return! partial({Albums = albums |> Seq.toArray}, manageIndex) x
+        return! partial({Albums = albums |> Seq.toArray}) x
     }
 
 let getCreateAlbum = 
@@ -133,7 +148,7 @@ let getCreateAlbum =
             for a in ctx.``[dbo].[Artists]`` do select {ArtistBrief.Id = a.ArtistId; Name = a.Name}
         }
 
-        return! partial({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}, albumCreate) x
+        return! partial({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}) x
     }
 
 let getEditAlbum(id) =
@@ -160,7 +175,7 @@ let getEditAlbum(id) =
             exactlyOne
         }
 
-        return! partial({EditAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray; Album = album}, albumEdit) x
+        return! partial({EditAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray; Album = album}) x
     }
 
 let getDeleteAlbum(id) = 
@@ -172,7 +187,7 @@ let getDeleteAlbum(id) =
             exactlyOne
         }
 
-        return! partial({AlbumBrief.Id = id; Title = title}, albumDelete) x
+        return! partial({AlbumBrief.Id = id; Title = title}) x
     }
 
 let f = Suave.Types.HttpRequest.form'
