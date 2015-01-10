@@ -21,8 +21,6 @@ type sql = SqlDataProvider<
 
 type DbContext = sql.dataContext
 
-let ctx = sql.GetDataContext()
-
 let get =
     fun getF (x: HttpContext) -> async {
         let ctx = sql.GetDataContext()
@@ -197,50 +195,45 @@ let validateAlbum req = binding {
         }
     }
 
-let doCreateAlbum a = 
-    fun (x: HttpContext) -> async {
-        let album = ctx.``[dbo].[Albums]``.Create(a.ArtistId, a.GenreId, a.Price, a.Title)
-        album.AlbumArtUrl <- a.ArtUrl
-        ctx.SubmitUpdates()
-
-        return! Redirection.redirect "/store/manage" x    
+let post =
+    fun postF (x: HttpContext) -> async {
+        let ctx = sql.GetDataContext()
+        postF ctx
+        return! Redirection.redirect "/store/manage" x   
     }
 
-let doUpdateAlbum id a = 
-    fun (x: HttpContext) -> async {
-        let album = 
-            query {
-                for a in ctx.``[dbo].[Albums]`` do
-                where (a.AlbumId = id)
-                select a
-                exactlyOne
-            }
-        
-        album.ArtistId <- a.ArtistId
-        album.GenreId <- a.GenreId
-        album.Title <- a.Title
-        album.Price <- a.Price
-        album.AlbumArtUrl <- a.ArtUrl
+let createAlbum a (ctx : DbContext) =
+    let album = ctx.``[dbo].[Albums]``.Create(a.ArtistId, a.GenreId, a.Price, a.Title)
+    album.AlbumArtUrl <- a.ArtUrl
+    ctx.SubmitUpdates()
 
-        ctx.SubmitUpdates()
-
-        return! Redirection.redirect "/store/manage" x    
-    }
-
-let postDeleteAlbum(id) =
-    fun (x: HttpContext) -> async { 
-        let album = query {
+let updateAlbum id a (ctx : DbContext) = 
+    let album = 
+        query {
             for a in ctx.``[dbo].[Albums]`` do
             where (a.AlbumId = id)
             select a
             exactlyOne
         }
         
-        album.Delete()
-        ctx.SubmitUpdates()
+    album.ArtistId <- a.ArtistId
+    album.GenreId <- a.GenreId
+    album.Title <- a.Title
+    album.Price <- a.Price
+    album.AlbumArtUrl <- a.ArtUrl
 
-        return! Redirection.redirect "/store/manage" x    
+    ctx.SubmitUpdates()
+
+let deleteAlbum id (ctx : DbContext) =
+    let album = query {
+        for a in ctx.``[dbo].[Albums]`` do
+        where (a.AlbumId = id)
+        select a
+        exactlyOne
     }
+        
+    album.Delete()
+    ctx.SubmitUpdates()
 
 let q = Suave.Types.HttpRequest.query'
 
@@ -261,9 +254,9 @@ choose [
     ]
 
     POST >>= ParsingAndControl.parse_post_data >>= choose [
-        url "/store/manage/create" >>= (Binding.bind_req validateAlbum doCreateAlbum BAD_REQUEST)
-        url_scan "/store/manage/edit/%d" (fun id -> Binding.bind_req validateAlbum (doUpdateAlbum id) BAD_REQUEST)
-        url_scan "/store/manage/delete/%d" postDeleteAlbum
+        url "/store/manage/create" >>= (Binding.bind_req validateAlbum (createAlbum >> post) BAD_REQUEST)
+        url_scan "/store/manage/edit/%d" (fun id -> Binding.bind_req validateAlbum (updateAlbum id >> post) BAD_REQUEST)
+        url_scan "/store/manage/delete/%d" (deleteAlbum >> post)
     ]
 
     NOT_FOUND "404"
