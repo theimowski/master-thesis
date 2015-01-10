@@ -55,7 +55,8 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="View.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Db.fs" />
+    <Compile Include="App.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
     <None Include="Index.html">
