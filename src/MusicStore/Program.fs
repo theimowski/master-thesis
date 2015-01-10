@@ -45,7 +45,9 @@ let HTML(container) =
 
         let model = {Index.Container = container; Genres = genres |> Seq.toArray}
 
-        return! OK (index.Render(DotLiquid.Hash.FromAnonymousObject(model))) x
+        return! x |>
+            (OK (index.Render(DotLiquid.Hash.FromAnonymousObject(model))) 
+                >>= Writers.set_mime_type "text/html; charset=utf-8")
     }
 
 let partial(model,template : DotLiquid.Template) =
