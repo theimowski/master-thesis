@@ -28,6 +28,7 @@ typeof<Album>.DeclaringType.GetNestedTypes()
 
 let contents = System.IO.File.ReadAllText("index.html")
 let index = DotLiquid.Template.Parse(contents)
+let home = DotLiquid.Template.Parse(System.IO.File.ReadAllText("home.html"))
 let store = DotLiquid.Template.Parse(System.IO.File.ReadAllText("store.html"))
 let album = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album.html"))
 let genre = DotLiquid.Template.Parse(System.IO.File.ReadAllText("genre.html"))
@@ -36,12 +37,13 @@ let albumCreate = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_cre
 let albumEdit = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_edit.html"))
 let albumDelete = DotLiquid.Template.Parse(System.IO.File.ReadAllText("album_delete.html"))
 
-let HTML(container) = 
+let partial(model,template : DotLiquid.Template) =
     fun (x : HttpContext) -> async {
         let genres = query {
             for g in ctx.``[dbo].[Genres]`` do
             select (Uri.EscapeDataString g.Name)
         } 
+        let container = template.Render(DotLiquid.Hash.FromAnonymousObject(model))
 
         let model = {Index.Container = container; Genres = genres |> Seq.toArray}
 
@@ -50,9 +52,9 @@ let HTML(container) =
                 >>= Writers.set_mime_type "text/html; charset=utf-8")
     }
 
-let partial(model,template : DotLiquid.Template) =
-    fun (x : HttpContext) -> async {
-        return! HTML (template.Render(DotLiquid.Hash.FromAnonymousObject(model))) x
+let getHome =   
+    fun (x: HttpContext) -> async {
+        return! partial((), home) x
     }
 
 let getStore = 
@@ -253,7 +255,7 @@ let q = Suave.Types.HttpRequest.query'
 
 choose [
     GET >>= choose [
-        url "/" >>= (HTML """<div id="promotion"/>""")
+        url "/" >>= getHome
         url "/store" >>= getStore
         url "/store/browse" >>= request(fun x -> cond (q x "genre") getGenre never)
         url_scan "/store/details/%d" getAlbum
