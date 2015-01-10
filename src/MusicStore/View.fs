@@ -1,4 +1,4 @@
-﻿module MusicStore.TemplateModels
+﻿module MusicStore.View
 
 open DotLiquid
 
@@ -49,7 +49,7 @@ type EditAlbum = {
     Album : Album
 }
 
-let register() = 
+let templates =
     Template.RegisterSafeType(typeof<int * string>, [|"Item1";"Item2"|])
 
     let registerTemplate modelType = 
@@ -60,3 +60,7 @@ let register() =
     typeof<Album>.DeclaringType.GetNestedTypes()
     |> Array.map registerTemplate
     |> dict
+
+let render model =  
+    let template = templates.[model.GetType()]
+    template.Render(DotLiquid.Hash.FromAnonymousObject(model))

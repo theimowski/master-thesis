@@ -1,4 +1,6 @@
-﻿open Suave
+﻿module MusicStore.App
+
+open Suave
 open Suave.Http.Successful
 open Suave.Web
 open Suave.Http
@@ -6,7 +8,7 @@ open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
 open Suave.Types
 
-open MusicStore.TemplateModels
+open MusicStore.View
 
 open System
 open System.Data
@@ -19,31 +21,22 @@ type sql = SqlDataProvider<
 
 let ctx = sql.GetDataContext()
 
-let templates = MusicStore.TemplateModels.register()
-
-let partial (model) =
+let HTML (model) =
     fun (x : HttpContext) -> async {
         let genres = query {
             for g in ctx.``[dbo].[Genres]`` do
             select (Uri.EscapeDataString g.Name)
         } 
         
-        let template = templates.[model.GetType()]
+        let container = View.render(model)
+        let index = {Index.Container = container; Genres = genres |> Seq.toArray}
 
-        let container = template.Render(DotLiquid.Hash.FromAnonymousObject(model))
-
-        let model = {Index.Container = container; Genres = genres |> Seq.toArray}
-
-        let index = templates.[typeof<Index>]
-
-        return! x |>
-            (OK (index.Render(DotLiquid.Hash.FromAnonymousObject(model))) 
-                >>= Writers.set_mime_type "text/html; charset=utf-8")
+        return! (OK (View.render index) >>= Writers.set_mime_type "text/html; charset=utf-8") x
     }
 
 let getHome =   
     fun (x: HttpContext) -> async {
-        return! partial({Placeholder = ()}) x
+        return! HTML({Placeholder = ()}) x
     }
 
 let getStore = 
@@ -53,7 +46,7 @@ let getStore =
             select (Uri.EscapeDataString g.Name)
         } 
 
-        return! partial({Store.Genres = genres |> Seq.toArray}) x
+        return! HTML({Store.Genres = genres |> Seq.toArray}) x
     }
 
 let getGenre(name) = 
@@ -69,7 +62,7 @@ let getGenre(name) =
             select (a.AlbumId, a.Title)
         }
 
-        return! partial({Name = name; Albums = albums |> Seq.toArray}) x
+        return! HTML({Name = name; Albums = albums |> Seq.toArray}) x
     }
 
 let getAlbum(id) = 
@@ -90,7 +83,7 @@ let getAlbum(id) =
             exactlyOne
         }
 
-        return! partial(a) x
+        return! HTML(a) x
     }
 
 let manage = 
@@ -109,7 +102,7 @@ let manage =
             }
         }
 
-        return! partial({Albums = albums |> Seq.toArray}) x
+        return! HTML({Albums = albums |> Seq.toArray}) x
     }
 
 let getCreateAlbum = 
@@ -122,7 +115,7 @@ let getCreateAlbum =
             for a in ctx.``[dbo].[Artists]`` do select (a.ArtistId, a.Name)
         }
 
-        return! partial({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}) x
+        return! HTML({CreateAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray}) x
     }
 
 let getEditAlbum(id) =
@@ -149,7 +142,7 @@ let getEditAlbum(id) =
             exactlyOne
         }
 
-        return! partial({EditAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray; Album = album}) x
+        return! HTML({EditAlbum.Genres = genres |> Seq.toArray; Artists = artists |> Seq.toArray; Album = album}) x
     }
 
 let getDeleteAlbum(id) = 
@@ -161,7 +154,7 @@ let getDeleteAlbum(id) =
             exactlyOne
         }
 
-        return! partial({DeleteAlbum.Id = id; Title = title}) x
+        return! HTML({DeleteAlbum.Id = id; Title = title}) x
     }
 
 let f = Suave.Types.HttpRequest.form'
