@@ -98,7 +98,7 @@ let getManageStore (ctx : DbContext) =
             }
         } |> Seq.toArray
 
-    {Albums = albums }
+    {Albums = albums}
 
 let getCreateAlbum (ctx : DbContext) =
     let genres = 
@@ -151,72 +151,80 @@ let getDeleteAlbum id (ctx : DbContext) =
 
     {DeleteAlbum.Id = id; Title = title}
 
-let f = Suave.Types.HttpRequest.form'
-let mint x = 
-    match x |> Int32.TryParse with
-    | true, v -> Some v
-    | _ -> None
-let mdec x = 
-    match Decimal.TryParse(x, Globalization.NumberStyles.AllowDecimalPoint, Globalization.CultureInfo.InvariantCulture) with
-    | true, v -> Some v
-    | _ -> None
 
-type MaybeBuilder() = 
-    member this.Return(x) = Some x
-    member this.ReturnFrom(m) = m
-    member this.Bind(m, f) = Option.bind f m
+/////////////////////////////
+type AlbumModel = {
+    ArtistId : int
+    GenreId : int
+    Title : string
+    Price : decimal
+    ArtUrl : string
+}
 
-let maybe = MaybeBuilder()
+let private parse_using<'a> (f:string -> bool * 'a) s =
+    match f s with
+    | true, i -> Choice1Of2 i
+    | false, _ -> Choice2Of2 (sprintf "Cound not parse '%s' to %s" s typeof<'a>.Name)
 
-let postCreateAlbum = 
-    fun (x: HttpContext) -> async {
-        let artist = f x.request "artist" |> Option.bind mint
-        let genre = f x.request "genre" |> Option.bind mint
-        let price = f x.request "price" |> Option.bind mdec
-        let title = f x.request "title"
-        let artUrl = f x.request "artUrl"
+let binding = Suave.Model.binding
+module Binding = Suave.Model.Binding
+let (>>=.) a f = Suave.Utils.Choice.bind f a
+module Parse = Suave.Model.Parse
 
-        match artist,genre,title,price,artUrl with
-        | Some artist, Some genre, Some title, Some price, Some artUrl ->
-            let album = ctx.``[dbo].[Albums]``.Create()
-            album.ArtistId <- artist
-            album.GenreId <- genre
-            album.Title <- title
-            album.Price <- price
-            album.AlbumArtUrl <- artUrl
+module Parse = 
+    let decimal = 
+        parse_using 
+            (fun s -> 
+            Decimal.TryParse
+                (s, Globalization.NumberStyles.AllowDecimalPoint, 
+                 Globalization.CultureInfo.InvariantCulture))
 
-            ctx.SubmitUpdates()
+let bindForm key = Binding.form key Choice1Of2
 
-            return! Redirection.redirect "/store/manage" x    
-        | _ -> return! BAD_REQUEST "malformed POST" x
+let validateAlbum req = binding {
+        let! artistId = req |> bindForm "artist" >>=. Parse.int32
+        let! genreId = req |> bindForm "genre" >>=. Parse.int32
+        let! title = req |> bindForm "title"
+        let! price = req |> bindForm "price" >>=. Parse.decimal
+        let! artUrl = req |> bindForm "artUrl"
+
+        return {
+            ArtistId = artistId
+            GenreId = genreId
+            Title = title
+            Price = price
+            ArtUrl = artUrl
+        }
     }
 
-let postEditAlbum(id) = 
+let doCreateAlbum a = 
     fun (x: HttpContext) -> async {
-        let artist = f x.request "artist" |> Option.bind mint
-        let genre = f x.request "genre" |> Option.bind mint
-        let price = f x.request "price" |> Option.bind mdec
-        let title = f x.request "title"
-        let artUrl = f x.request "artUrl"
+        let album = ctx.``[dbo].[Albums]``.Create(a.ArtistId, a.GenreId, a.Price, a.Title)
+        album.AlbumArtUrl <- a.ArtUrl
+        ctx.SubmitUpdates()
 
-        match artist,genre,title,price,artUrl with
-        | Some artist, Some genre, Some title, Some price, Some artUrl ->
-            let album = query {
+        return! Redirection.redirect "/store/manage" x    
+    }
+
+let doUpdateAlbum id a = 
+    fun (x: HttpContext) -> async {
+        let album = 
+            query {
                 for a in ctx.``[dbo].[Albums]`` do
                 where (a.AlbumId = id)
                 select a
                 exactlyOne
             }
-            album.ArtistId <- artist
-            album.GenreId <- genre
-            album.Title <- title
-            album.Price <- price
-            album.AlbumArtUrl <- artUrl
+        
+        album.ArtistId <- a.ArtistId
+        album.GenreId <- a.GenreId
+        album.Title <- a.Title
+        album.Price <- a.Price
+        album.AlbumArtUrl <- a.ArtUrl
 
-            ctx.SubmitUpdates()
+        ctx.SubmitUpdates()
 
-            return! Redirection.redirect "/store/manage" x    
-        | _ -> return! BAD_REQUEST "malformed POST" x
+        return! Redirection.redirect "/store/manage" x    
     }
 
 let postDeleteAlbum(id) =
@@ -253,8 +261,8 @@ choose [
     ]
 
     POST >>= ParsingAndControl.parse_post_data >>= choose [
-        url "/store/manage/create" >>= postCreateAlbum
-        url_scan "/store/manage/edit/%d" postEditAlbum
+        url "/store/manage/create" >>= (Binding.bind_req validateAlbum doCreateAlbum BAD_REQUEST)
+        url_scan "/store/manage/edit/%d" (fun id -> Binding.bind_req validateAlbum (doUpdateAlbum id) BAD_REQUEST)
         url_scan "/store/manage/delete/%d" postDeleteAlbum
     ]
 
