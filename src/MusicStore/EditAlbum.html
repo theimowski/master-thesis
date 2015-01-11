@@ -10,9 +10,9 @@
         <div>
             <select name="genre">
                 {% for Genre in Genres %}
-                <option {% if Genre.Item2 == Album.Genre %}selected="selected"{% endif %}
-                        value="{{Genre.Item1}}">
-                    {{Genre.Item2}}
+                <option {% if Genre.Name == Album.Genre %}selected="selected"{% endif %}
+                        value="{{Genre.Id}}">
+                    {{Genre.Name}}
                 </option>
                 {% endfor %}
             </select>
@@ -24,9 +24,9 @@
         <div>
             <select name="artist">
                 {% for Artist in Artists %}
-                <option {% if Artist.Item2 == Album.Artist %}selected="selected"{% endif %}
-                        value="{{Artist.Item1}}">
-                    {{Artist.Item2}}
+                <option {% if Artist.Name == Album.Artist %}selected="selected"{% endif %}
+                        value="{{Artist.Id}}">
+                    {{Artist.Name}}
                 </option>
                 {% endfor %}
             </select>

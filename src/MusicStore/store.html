@@ -5,7 +5,7 @@
 <ul>
     {% for Genre in Genres %}
     <li>
-        <a href="/store/browse?genre={{Genre}}">{{Genre}}</a>
+        <a href="/store/browse?genre={{Genre.Name}}">{{Genre.Name}}</a>
     </li>
     {% endfor %}
 </ul>

@@ -10,7 +10,7 @@
         <div>
             <select name="genre">
                 {% for Genre in Genres %}
-                <option value="{{Genre.Item1}}">{{Genre.Item2}}</option>
+                <option value="{{Genre.Id}}">{{Genre.Name}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -21,7 +21,7 @@
         <div>
             <select name="artist">
                 {% for Artist in Artists %}
-                <option value="{{Artist.Item1}}">{{Artist.Item2}}</option>
+                <option value="{{Artist.Id}}">{{Artist.Name}}</option>
                 {% endfor %}
             </select>
         </div>

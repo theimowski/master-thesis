@@ -1,10 +1,14 @@
 ﻿module MusicStore.View
 
+open System
+
+open MusicStore.Domain
+
 open DotLiquid
 
 type Index = {
     Container : string
-    Genres : string[]
+    Genres : Genre []
 }
 
 type Home = { 
@@ -12,21 +16,16 @@ type Home = {
 }
 
 type Store = {
-    Genres : string []
+    Genres : Genre []
 }
 
-type Album = {
-    Id : int 
-    Title : string
-    Artist : string
-    Genre : string
-    Price : string
-    Art : string
+type AlbumDetails = {
+    Album : Album
 }
 
-type Genre = {
-    Name : string
-    Albums : (int * string) [] 
+type AlbumsForGenre = {
+    Genre : Genre
+    Albums : IdAndName [] 
 }
 
 type ManageStore = {
@@ -34,33 +33,33 @@ type ManageStore = {
 }
 
 type CreateAlbum = {
-    Artists : (int * string) []
-    Genres : (int * string) []
+    Artists : Artist []
+    Genres : Genre []
 }
 
 type EditAlbum = {
-    Artists : (int * string) []
-    Genres : (int * string) []
+    Artists : Artist []
+    Genres : Genre []
     Album : Album
 }
 
 type DeleteAlbum = {
-    Id : int
-    Title : string
+    Album : Album
 }
 
+let registerType (modelType : Type) = 
+    let fields = Reflection.FSharpType.GetRecordFields(modelType) |> Array.map (fun f -> f.Name)
+    Template.RegisterSafeType(modelType, fields)
+
 let templates =
-    Template.RegisterSafeType(typeof<int * string>, [|"Item1";"Item2"|])
-
-    let registerTemplate modelType = 
-        let fields = Reflection.FSharpType.GetRecordFields(modelType) |> Array.map (fun f -> f.Name)
-        Template.RegisterSafeType(modelType, fields)
-        modelType, Template.Parse(System.IO.File.ReadAllText(modelType.Name + ".html"))
-
-    typeof<Album>.DeclaringType.GetNestedTypes()
-    |> Array.map registerTemplate
+    registerType typeof<IdAndName>
+    registerType typeof<Album>
+    let views = typeof<Index>.DeclaringType.GetNestedTypes()
+    views |> Array.iter registerType
+    views 
+    |> Array.map (fun view -> view.Name, Template.Parse(IO.File.ReadAllText(view.Name + ".html")))
     |> dict
 
 let render model =  
-    let template = templates.[model.GetType()]
+    let template = templates.[model.GetType().Name]
     template.Render(DotLiquid.Hash.FromAnonymousObject(model))

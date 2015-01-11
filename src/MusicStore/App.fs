@@ -41,37 +41,59 @@ let albumForm req = binding {
         return artistId, genreId, title, price, artUrl
     }
 
-let get getF (x: HttpContext) = async {
+let HTML getF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
-        let genres = (getStore ctx).Genres
+        let genres = Db.getGenres ctx
         let model = getF ctx
         
-        let container = View.render(model)
+        let container = View.render model
         let index = {Index.Container = container; Genres = genres}
         return! (OK (View.render index) >>= Writers.set_mime_type "text/html; charset=utf-8") x
     }
 
-let post postF (x: HttpContext) = async {
+let backToManageStore postF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         postF ctx
         return! Redirection.redirect "/store/manage" x   
     }
 
+let home _ = { Placeholder = () }
+let store db = { Store.Genres = Db.getGenres db }
+
+let albumsForGenre name db = 
+    let genre = Db.getGenre name db
+    { AlbumsForGenre.Genre = genre
+      Albums = Db.getAlbumsForGenre genre.Id db }
+
+let albumDetails id db = { AlbumDetails.Album = Db.getAlbum id db }
+let manageStore db = { ManageStore.Albums = Db.getAlbums db }
+
+let createAlbum db = 
+    { CreateAlbum.Artists = Db.getArtists db
+      Genres = Db.getGenres db }
+
+let updateAlbum id db = 
+    { EditAlbum.Album = Db.getAlbum id db
+      Artists = Db.getArtists db
+      Genres = Db.getGenres db }
+
+let deleteAlbum id db = { DeleteAlbum.Album = Db.getAlbum id db }
+
 choose [
     GET >>= choose [
-        url "/" >>= get getHome
-        url "/store" >>= get getStore
+        url "/" >>= (HTML home)
+        url "/store" >>= (HTML store)
         url "/store/browse" 
             >>= Binding.bind_req 
                     (Binding.query "genre" Choice1Of2) 
-                    (getGenre >> get) 
+                    (albumsForGenre >> HTML)
                     BAD_REQUEST
-        url_scan "/store/details/%d" (getAlbum >> get)
+        url_scan "/store/details/%d" (albumDetails >> HTML)
 
-        url "/store/manage" >>= get getManageStore
-        url "/store/manage/create" >>= get getCreateAlbum
-        url_scan "/store/manage/edit/%d" (getEditAlbum >> get)
-        url_scan "/store/manage/delete/%d" (getDeleteAlbum >> get)
+        url "/store/manage" >>= (HTML manageStore)
+        url "/store/manage/create" >>= (HTML createAlbum)
+        url_scan "/store/manage/edit/%d" (updateAlbum >> HTML)
+        url_scan "/store/manage/delete/%d" (deleteAlbum >> HTML)
 
         url_regex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browse'
@@ -81,15 +103,15 @@ choose [
         url "/store/manage/create" 
             >>= (Binding.bind_req 
                     (albumForm >> Choice.map CreateAlbumCommand.create) 
-                    (createAlbum >> post) 
+                    (Db.createAlbum >> backToManageStore) 
                     BAD_REQUEST)
         url_scan "/store/manage/edit/%d" 
             (fun id -> 
                 Binding.bind_req 
                     (albumForm >> Choice.map (UpdateAlbumCommand.create id)) 
-                    (updateAlbum >> post) 
+                    (Db.updateAlbum >> backToManageStore) 
                     BAD_REQUEST)
-        url_scan "/store/manage/delete/%d" (deleteAlbum >> post)
+        url_scan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
     ]
 
     NOT_FOUND "404"
