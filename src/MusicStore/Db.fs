@@ -4,17 +4,10 @@ open System
 open System.Data
 open System.Linq
 
+open MusicStore.Domain
 open MusicStore.View
 
 open FSharp.Data.Sql
-
-type AlbumModel = {
-    ArtistId : int
-    GenreId : int
-    Title : string
-    Price : decimal
-    ArtUrl : string
-}
 
 type sql = SqlDataProvider< 
               "Server=(LocalDb)\\v11.0;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true",
@@ -136,32 +129,32 @@ let getDeleteAlbum id (ctx : DbContext) =
 
     {DeleteAlbum.Id = id; Title = title}
 
-let createAlbum a (ctx : DbContext) =
-    let album = ctx.``[dbo].[Albums]``.Create(a.ArtistId, a.GenreId, a.Price, a.Title)
-    album.AlbumArtUrl <- a.ArtUrl
+let createAlbum (c : CreateAlbumCommand) (ctx : DbContext) =
+    let album = ctx.``[dbo].[Albums]``.Create(c.ArtistId, c.GenreId, c.Price, c.Title)
+    album.AlbumArtUrl <- c.ArtUrl
     ctx.SubmitUpdates()
 
-let updateAlbum id a (ctx : DbContext) = 
+let updateAlbum (c : UpdateAlbumCommand) (ctx : DbContext) = 
     let album = 
         query {
             for a in ctx.``[dbo].[Albums]`` do
-            where (a.AlbumId = id)
+            where (a.AlbumId = c.Id)
             select a
             exactlyOne
         }
         
-    album.ArtistId <- a.ArtistId
-    album.GenreId <- a.GenreId
-    album.Title <- a.Title
-    album.Price <- a.Price
-    album.AlbumArtUrl <- a.ArtUrl
+    album.ArtistId <- c.ArtistId
+    album.GenreId <- c.GenreId
+    album.Title <- c.Title
+    album.Price <- c.Price
+    album.AlbumArtUrl <- c.ArtUrl
 
     ctx.SubmitUpdates()
 
-let deleteAlbum id (ctx : DbContext) =
+let deleteAlbum (c : DeleteAlbumCommand) (ctx : DbContext) =
     let album = query {
         for a in ctx.``[dbo].[Albums]`` do
-        where (a.AlbumId = id)
+        where (a.AlbumId = c)
         select a
         exactlyOne
     }

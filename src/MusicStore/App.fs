@@ -10,7 +10,9 @@ open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
 open Suave.Types
 open Suave.Model
+open Suave.Utils
 
+open MusicStore.Domain
 open MusicStore.Db
 open MusicStore.View
 
@@ -29,20 +31,14 @@ module Parse =
 
 let bindForm key = Binding.form key Choice1Of2
 
-let validateAlbum req = binding {
+let albumForm req = binding {
         let! artistId = req |> bindForm "artist" >>. Parse.int32
         let! genreId = req |> bindForm "genre" >>. Parse.int32
         let! title = req |> bindForm "title"
         let! price = req |> bindForm "price" >>. Parse.decimal
         let! artUrl = req |> bindForm "artUrl"
 
-        return {
-            ArtistId = artistId
-            GenreId = genreId
-            Title = title
-            Price = price
-            ArtUrl = artUrl
-        }
+        return artistId, genreId, title, price, artUrl
     }
 
 let get getF (x: HttpContext) = async {
@@ -65,7 +61,11 @@ choose [
     GET >>= choose [
         url "/" >>= get getHome
         url "/store" >>= get getStore
-        url "/store/browse" >>= Binding.bind_req (Binding.query "genre" Choice1Of2) (getGenre >> get) BAD_REQUEST
+        url "/store/browse" 
+            >>= Binding.bind_req 
+                    (Binding.query "genre" Choice1Of2) 
+                    (getGenre >> get) 
+                    BAD_REQUEST
         url_scan "/store/details/%d" (getAlbum >> get)
 
         url "/store/manage" >>= get getManageStore
@@ -78,8 +78,17 @@ choose [
     ]
 
     POST >>= ParsingAndControl.parse_post_data >>= choose [
-        url "/store/manage/create" >>= (Binding.bind_req validateAlbum (createAlbum >> post) BAD_REQUEST)
-        url_scan "/store/manage/edit/%d" (fun id -> Binding.bind_req validateAlbum (updateAlbum id >> post) BAD_REQUEST)
+        url "/store/manage/create" 
+            >>= (Binding.bind_req 
+                    (albumForm >> Choice.map CreateAlbumCommand.create) 
+                    (createAlbum >> post) 
+                    BAD_REQUEST)
+        url_scan "/store/manage/edit/%d" 
+            (fun id -> 
+                Binding.bind_req 
+                    (albumForm >> Choice.map (UpdateAlbumCommand.create id)) 
+                    (updateAlbum >> post) 
+                    BAD_REQUEST)
         url_scan "/store/manage/delete/%d" (deleteAlbum >> post)
     ]
 
