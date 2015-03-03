@@ -116,4 +116,4 @@ choose [
 
     NOT_FOUND "404"
 ]
-|> web_server default_config 
+|> web_server {default_config with bindings = [HttpBinding.mk' HTTP "127.0.0.1" 8028]}
