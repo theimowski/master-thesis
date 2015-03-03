@@ -16,19 +16,6 @@ open MusicStore.Domain
 open MusicStore.Db
 open MusicStore.View
 
-let private parse_using<'a> (f:string -> bool * 'a) s =
-    match f s with
-    | true, i -> Choice1Of2 i
-    | false, _ -> Choice2Of2 (sprintf "Cound not parse '%s' to %s" s typeof<'a>.Name)
-
-module Parse = 
-    let decimal = 
-        parse_using 
-            (fun s -> 
-            Decimal.TryParse
-                (s, Globalization.NumberStyles.AllowDecimalPoint, 
-                 Globalization.CultureInfo.InvariantCulture))
-
 let bindForm key = Binding.form key Choice1Of2
 
 let albumForm req = binding {
@@ -48,7 +35,7 @@ let HTML getF (x: HttpContext) = async {
         
         let container = View.render model
         let index = {Index.Container = container; Genres = genres}
-        return! (OK (View.render index) >>= Writers.set_mime_type "text/html; charset=utf-8") x
+        return! (OK (View.render index) >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
 let backToManageStore postF (x: HttpContext) = async {
@@ -84,36 +71,36 @@ choose [
         url "/" >>= (HTML home)
         url "/store" >>= (HTML store)
         url "/store/browse" 
-            >>= Binding.bind_req 
+            >>= Binding.bindReq 
                     (Binding.query "genre" Choice1Of2) 
                     (albumsForGenre >> HTML)
                     BAD_REQUEST
-        url_scan "/store/details/%d" (albumDetails >> HTML)
+        urlScan "/store/details/%d" (albumDetails >> HTML)
 
         url "/store/manage" >>= (HTML manageStore)
         url "/store/manage/create" >>= (HTML createAlbum)
-        url_scan "/store/manage/edit/%d" (updateAlbum >> HTML)
-        url_scan "/store/manage/delete/%d" (deleteAlbum >> HTML)
+        urlScan "/store/manage/edit/%d" (updateAlbum >> HTML)
+        urlScan "/store/manage/delete/%d" (deleteAlbum >> HTML)
 
-        url_regex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
-        Files.browse'
+        urlRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
+        Files.browseHome
     ]
 
-    POST >>= ParsingAndControl.parse_post_data >>= choose [
+    POST >>= choose [
         url "/store/manage/create" 
-            >>= (Binding.bind_req 
+            >>= (Binding.bindReq 
                     (albumForm >> Choice.map CreateAlbumCommand.create) 
                     (Db.createAlbum >> backToManageStore) 
                     BAD_REQUEST)
-        url_scan "/store/manage/edit/%d" 
+        urlScan "/store/manage/edit/%d" 
             (fun id -> 
-                Binding.bind_req 
+                Binding.bindReq
                     (albumForm >> Choice.map (UpdateAlbumCommand.create id)) 
                     (Db.updateAlbum >> backToManageStore) 
                     BAD_REQUEST)
-        url_scan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
+        urlScan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
     ]
 
     NOT_FOUND "404"
 ]
-|> web_server {default_config with bindings = [HttpBinding.mk' HTTP "127.0.0.1" 8028]}
+|> startWebServer {defaultConfig with bindings = [HttpBinding.mk' HTTP "127.0.0.1" 8028]}
