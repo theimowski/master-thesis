@@ -68,37 +68,37 @@ let deleteAlbum id db = { DeleteAlbum.Album = Db.getAlbum id db }
 
 choose [
     GET >>= choose [
-        url "/" >>= (HTML home)
-        url "/store" >>= (HTML store)
-        url "/store/browse" 
+        path "/" >>= (HTML home)
+        path "/store" >>= (HTML store)
+        path "/store/browse" 
             >>= Binding.bindReq 
                     (Binding.query "genre" Choice1Of2) 
                     (albumsForGenre >> HTML)
                     BAD_REQUEST
-        urlScan "/store/details/%d" (albumDetails >> HTML)
+        pathScan "/store/details/%d" (albumDetails >> HTML)
 
-        url "/store/manage" >>= (HTML manageStore)
-        url "/store/manage/create" >>= (HTML createAlbum)
-        urlScan "/store/manage/edit/%d" (updateAlbum >> HTML)
-        urlScan "/store/manage/delete/%d" (deleteAlbum >> HTML)
+        path "/store/manage" >>= (HTML manageStore)
+        path "/store/manage/create" >>= (HTML createAlbum)
+        pathScan "/store/manage/edit/%d" (updateAlbum >> HTML)
+        pathScan "/store/manage/delete/%d" (deleteAlbum >> HTML)
 
-        urlRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
+        pathRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browseHome
     ]
 
     POST >>= choose [
-        url "/store/manage/create" 
+        path "/store/manage/create" 
             >>= (Binding.bindReq 
                     (albumForm >> Choice.map CreateAlbumCommand.create) 
                     (Db.createAlbum >> backToManageStore) 
                     BAD_REQUEST)
-        urlScan "/store/manage/edit/%d" 
+        pathScan "/store/manage/edit/%d" 
             (fun id -> 
                 Binding.bindReq
                     (albumForm >> Choice.map (UpdateAlbumCommand.create id)) 
                     (Db.updateAlbum >> backToManageStore) 
                     BAD_REQUEST)
-        urlScan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
+        pathScan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
     ]
 
     NOT_FOUND "404"
