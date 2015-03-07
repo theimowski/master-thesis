@@ -1,0 +1,8 @@
+DotLiquid
+FSharp.Core
+FsPickler
+Microsoft.AspNet.Razor
+RazorEngine
+SQLProvider
+Suave
+Suave.Razor
