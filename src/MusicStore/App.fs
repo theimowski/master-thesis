@@ -38,6 +38,14 @@ let HTML getF (x: HttpContext) = async {
         return! (OK (View.render index) >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
+let HTMLR getF (x: HttpContext) = async {
+        let ctx = sql.GetDataContext()
+        let genres = Db.getGenres ctx
+        let model = getF ctx
+        
+        return! Razor.razor "AlbumDetails.cshtml" model x
+    }
+
 let backToManageStore postF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         postF ctx
@@ -66,6 +74,8 @@ let updateAlbum id db =
 
 let deleteAlbum id db = { DeleteAlbum.Album = Db.getAlbum id db }
 
+RazorEngine.Razor.Compile(IO.File.ReadAllText("layout.cshtml"), "layout");
+
 choose [
     GET >>= choose [
         path "/" >>= (HTML home)
@@ -75,7 +85,7 @@ choose [
                     (Binding.query "genre" Choice1Of2) 
                     (albumsForGenre >> HTML)
                     BAD_REQUEST
-        pathScan "/store/details/%d" (albumDetails >> HTML)
+        pathScan "/store/details/%d" (albumDetails >> HTMLR)
 
         path "/store/manage" >>= (HTML manageStore)
         path "/store/manage/create" >>= (HTML createAlbum)
