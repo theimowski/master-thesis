@@ -143,6 +143,66 @@ let vManageStore (m : ManageStore) =
      tag "table" [] (List.append [headers] (List.map row (m.Albums |> Array.toList)) |> flatten)
     ]
 
+
+let createEditAlbum (current : Album option) caption submit (g: Genre[]) (a: Artist[]) = 
+
+    let artist = current |> Option.map (fun a -> a.Artist)
+    let genre = current |> Option.map (fun a -> a.Genre)
+    let title = 
+        match current with
+        | Some a -> a.Title
+        | None -> ""
+    let price = 
+        match current with 
+        | Some a -> a.Price
+        | None -> ""
+
+    let opt (id : int,name,current) =
+        let attrs =
+            match current with
+            | Some x when x = name ->
+                ["value", id.ToString(); "selected", "selected"]
+            | _ -> 
+                ["value", id.ToString()]
+        tag "option" attrs (text name)
+
+    let fields = 
+        [
+        text "Genre"
+        tag "select" ["name", "genre"] (g |> Array.toList |> List.map (fun g -> g.Id,g.Name,genre) |> List.map opt |> flatten)
+        text "Artist"
+        tag "select" ["name", "artist"] (a |> Array.toList |> List.map (fun g -> g.Id,g.Name,artist) |> List.map opt |> flatten)
+        text "Title"
+        inputAttr ["name", "title"; "type", "text"; "required", ""; "value", title; "maxlength", "100"]
+        text "Price"
+        inputAttr ["name", "price"; "type", "number"; "required", ""; "value", price; "step", "0.01"]
+        text "Album Art Url"
+        inputAttr ["name", "artUrl"; "type", "text"; "required", ""; "value", "placeholder.gif"; "maxlength", "100"; "min", "0.01"; "max", "100.00"]
+        ] 
+        |> List.map (Seq.singleton >> List.ofSeq >> div)
+        |> flatten
+         
+
+    let fieldset = 
+        [ tag "legend" [] (text "Album")
+          fields
+          p [inputAttr ["type", "submit"; "value", submit]]
+        ] |> flatten
+    
+    [
+    tag "h2" [] (text caption)
+    
+    tag "form" ["method","POST"] 
+        (tag "fieldset" [] fieldset)
+    
+    div [
+        tag "a" ["href","/store/manage"] (text "Back to list")
+    ]
+]
+
+let vCreateAlbum (c : CreateAlbum) = createEditAlbum None "Create" "Create" c.Genres c.Artists
+let vEditAlbum (e : EditAlbum)= createEditAlbum (Some e.Album) "Edit" "Save" e.Genres e.Artists 
+
 let vDeleteAlbum (d : DeleteAlbum) = [
     tag "h2" [] (text "Delete Confirmation")
     p [ text "Are you sure you want to delete the album titled"

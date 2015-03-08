@@ -89,8 +89,8 @@ choose [
         pathScan "/store/details/%d" (albumDetails >> HTMLR vAD)
 
         path "/store/manage" >>= (HTMLR vManageStore manageStore)
-        path "/store/manage/create" >>= (HTML createAlbum)
-        pathScan "/store/manage/edit/%d" (updateAlbum >> HTML)
+        path "/store/manage/create" >>= (HTMLR vCreateAlbum createAlbum)
+        pathScan "/store/manage/edit/%d" (updateAlbum >> (HTMLR vEditAlbum))
         pathScan "/store/manage/delete/%d" (deleteAlbum >> (HTMLR vDeleteAlbum))
 
         pathRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
