@@ -49,14 +49,14 @@ let albumDetails id db = Db.getAlbum id db
 
 let albumsForGenre name db = 
     let genre = Db.getGenre name db
-    let albums = Db.getAlbumsForGenre genre.Id db
+    let albums = Db.getAlbumsForGenre genre.GenreId db
     genre.Name, albums
 
 let manageStore db = Db.getAlbums db
 
-let createAlbum db = Db.getArtists db, Db.getGenres db
+let createAlbum db = Db.getGenres db, Db.getArtists db
 
-let updateAlbum id db = Db.getAlbum id db, Db.getArtists db, Db.getGenres db
+let updateAlbum id db = Db.getAlbum id db, Db.getGenres db, Db.getArtists db 
 
 let deleteAlbum id db = Db.getAlbum id db
 

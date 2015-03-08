@@ -1,23 +1,5 @@
 ﻿module MusicStore.Domain
 
-type IdAndName = {
-    Id : int
-    Name : string
-}
-
-type Album = {
-    Id : int 
-    Title : string
-    Artist : string
-    Genre : string
-    Price : string
-    Art : string
-}
-
-type Genre = IdAndName
-type Artist = IdAndName
-
-
 type CreateAlbumCommand = {
     Title : string
     GenreId : int

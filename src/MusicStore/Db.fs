@@ -14,70 +14,51 @@ type sql =
         DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >
 
 type DbContext = sql.dataContext
+type Album = DbContext.``[dbo].[Albums]Entity``
+type Genre = DbContext.``[dbo].[Genres]Entity``
+type Artist = DbContext.``[dbo].[Artists]Entity``
+type AlbumDetails = Album * Artist * Genre
 
-let getAlbums (ctx : DbContext) = 
+let getAlbums (ctx : DbContext) : AlbumDetails list = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
             join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
-            select { Album.Id = album.AlbumId
-                     Title = album.Title
-                     Artist = artist.Name
-                     Genre = genre.Name
-                     Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
-                     Art = album.AlbumArtUrl }
+            select (album, artist, genre)
     }
     |> Seq.toList
 
-let getAlbum id (ctx : DbContext) = 
+let getAlbum id (ctx : DbContext) : AlbumDetails = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             where (album.AlbumId = id)
             join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
             join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
-            select { Album.Id = album.AlbumId
-                     Title = album.Title
-                     Artist = artist.Name
-                     Genre = genre.Name
-                     Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
-                     Art = album.AlbumArtUrl }
+            select (album, artist, genre)
             exactlyOne
     }
 
-let getAlbumsForGenre genreId (ctx : DbContext) = 
+let getAlbumsForGenre genreId (ctx : DbContext) : Album list = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             where (album.GenreId = genreId)
-            select { IdAndName.Id = album.AlbumId
-                     Name = album.Title }
+            select album
     }
     |> Seq.toList
 
-let getGenre name (ctx : DbContext) = 
+let getGenre name (ctx : DbContext) : Genre = 
     query { 
-        for g in ctx.``[dbo].[Genres]`` do
-            where (g.Name = name)
-            select { Genre.Id = g.GenreId
-                     Name = g.Name }
+        for genre in ctx.``[dbo].[Genres]`` do
+            where (genre.Name = name)
+            select genre
             exactlyOne
     }
 
-let getGenres (ctx : DbContext) = 
-    query { 
-        for g in ctx.``[dbo].[Genres]`` do
-            select { Genre.Id = g.GenreId
-                     Name = g.Name }
-    }
-    |> Seq.toList
-
-let getArtists (ctx : DbContext) = 
-    query { 
-        for a in ctx.``[dbo].[Artists]`` do
-            select { Artist.Id = a.ArtistId
-                     Name = a.Name }
-    }
-    |> Seq.toList
-
+let getGenres (ctx : DbContext) : Genre list = 
+    ctx.``[dbo].[Genres]`` |> Seq.toList
+    
+let getArtists (ctx : DbContext) : Artist list = 
+    ctx.``[dbo].[Artists]`` |> Seq.toList
 
 let createAlbum (c : CreateAlbumCommand) (ctx : DbContext) = 
     let album = ctx.``[dbo].[Albums]``.Create(c.ArtistId, c.GenreId, c.Price, c.Title)
