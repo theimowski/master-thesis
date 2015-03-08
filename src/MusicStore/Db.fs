@@ -4,8 +4,6 @@ open System
 open System.Data
 open System.Linq
 
-open MusicStore.Domain
-
 open FSharp.Data.Sql
 
 type sql = 
@@ -19,7 +17,15 @@ type Genre = DbContext.``[dbo].[Genres]Entity``
 type Artist = DbContext.``[dbo].[Artists]Entity``
 type AlbumDetails = Album * Artist * Genre
 
-let getAlbums (ctx : DbContext) : AlbumDetails list = 
+let getAlbum id (ctx : DbContext) : Album = 
+    query { 
+        for album in ctx.``[dbo].[Albums]`` do
+            where (album.AlbumId = id)
+            select album
+            exactlyOne
+    }
+
+let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
@@ -28,7 +34,7 @@ let getAlbums (ctx : DbContext) : AlbumDetails list =
     }
     |> Seq.toList
 
-let getAlbum id (ctx : DbContext) : AlbumDetails = 
+let getAlbumDetails id (ctx : DbContext) : AlbumDetails = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             where (album.AlbumId = id)
@@ -60,33 +66,14 @@ let getGenres (ctx : DbContext) : Genre list =
 let getArtists (ctx : DbContext) : Artist list = 
     ctx.``[dbo].[Artists]`` |> Seq.toList
 
-let createAlbum (c : CreateAlbumCommand) (ctx : DbContext) = 
-    let album = ctx.``[dbo].[Albums]``.Create(c.ArtistId, c.GenreId, c.Price, c.Title)
-    album.AlbumArtUrl <- c.ArtUrl
+let newAlbum (ctx : DbContext) : Album =
+    ctx.``[dbo].[Albums]``.Create()
+
+let save createAlbum f (ctx : DbContext) =
+    f (createAlbum ctx)
     ctx.SubmitUpdates()
 
-let updateAlbum (c : UpdateAlbumCommand) (ctx : DbContext) = 
-    let album = 
-        query { 
-            for a in ctx.``[dbo].[Albums]`` do
-                where (a.AlbumId = c.Id)
-                select a
-                exactlyOne
-        }
-    album.ArtistId <- c.ArtistId
-    album.GenreId <- c.GenreId
-    album.Title <- c.Title
-    album.Price <- c.Price
-    album.AlbumArtUrl <- c.ArtUrl
-    ctx.SubmitUpdates()
-
-let deleteAlbum (c : DeleteAlbumCommand) (ctx : DbContext) = 
-    let album = 
-        query { 
-            for a in ctx.``[dbo].[Albums]`` do
-                where (a.AlbumId = c)
-                select a
-                exactlyOne
-        }
+let deleteAlbum id (ctx : DbContext) = 
+    let album = getAlbum id ctx
     album.Delete()
     ctx.SubmitUpdates()

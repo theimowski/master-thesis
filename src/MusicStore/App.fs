@@ -12,7 +12,6 @@ open Suave.Types
 open Suave.Model
 open Suave.Utils
 
-open MusicStore.Domain
 open MusicStore.Db
 open MusicStore.View
 
@@ -25,7 +24,13 @@ let albumForm req = binding {
         let! price = req |> bindForm "price" >>. Parse.decimal
         let! artUrl = req |> bindForm "artUrl"
 
-        return artistId, genreId, title, price, artUrl
+        return (fun (album : Db.Album) -> 
+            album.ArtistId <- artistId
+            album.GenreId <- genreId
+            album.Title <- title
+            album.Price <- price
+            album.AlbumArtUrl <- artUrl
+        )
     }
 
 let HTML vF getF (x: HttpContext) = async {
@@ -45,20 +50,20 @@ let backToManageStore postF (x: HttpContext) = async {
     }
 
 let store db = Db.getGenres db
-let albumDetails id db = Db.getAlbum id db
+let albumDetails id db = Db.getAlbumDetails id db
 
 let albumsForGenre name db = 
     let genre = Db.getGenre name db
     let albums = Db.getAlbumsForGenre genre.GenreId db
     genre.Name, albums
 
-let manageStore db = Db.getAlbums db
+let manageStore db = Db.getAlbumsDetails db
 
 let createAlbum db = Db.getGenres db, Db.getArtists db
 
-let updateAlbum id db = Db.getAlbum id db, Db.getGenres db, Db.getArtists db 
+let updateAlbum id db = Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db 
 
-let deleteAlbum id db = Db.getAlbum id db
+let deleteAlbum id db = Db.getAlbumDetails id db
 
 choose [
     GET >>= choose [
@@ -81,16 +86,16 @@ choose [
     ]
 
     POST >>= choose [
-        path "/store/manage/create" 
-            >>= (Binding.bindReq 
-                    (albumForm >> Choice.map CreateAlbumCommand.create) 
-                    (Db.createAlbum >> backToManageStore) 
+        path "/store/manage/create"
+            >>= (Binding.bindReq
+                    albumForm
+                    (Db.save Db.newAlbum >> backToManageStore)
                     BAD_REQUEST)
         pathScan "/store/manage/edit/%d" 
             (fun id -> 
                 Binding.bindReq
-                    (albumForm >> Choice.map (UpdateAlbumCommand.create id)) 
-                    (Db.updateAlbum >> backToManageStore) 
+                    albumForm 
+                    (Db.save (Db.getAlbum id) >> backToManageStore) 
                     BAD_REQUEST)
         pathScan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
     ]

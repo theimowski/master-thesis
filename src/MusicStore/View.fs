@@ -2,8 +2,6 @@
 
 open System
 
-open MusicStore.Domain
-
 open Suave.Html
 
 let truncate k (s : string) =
