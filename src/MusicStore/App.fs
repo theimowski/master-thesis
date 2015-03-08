@@ -39,58 +39,12 @@ let HTML getF (x: HttpContext) = async {
         return! (OK (View.render index) >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
-let HTMLR getF (x: HttpContext) = async {
+let HTMLR vF getF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx
-        let model : AlbumDetails = getF ctx
+        let model = getF ctx
         
-        let con =
-            html [ 
-                head [
-                  title "F# Suave Music Store"
-                  linkAttr [ "href", "/Site.css"; "rel", "stylesheet"; "type", "text/css" ]
-                ] 
-                body [
-                  divAttr ["id", "header"] [
-                    tag "h1" [] (tag "a" ["href", "/"] (text "F# Suave Music Store"))
-                    tag "ul" ["id", "navlist"] 
-                        (flatten [
-                            tag "li" ["class", "first"] (tag "a" ["id", "current"; "href", "/"] (text "Home"))
-                            tag "li" [] (tag "a" ["href", "/store"] (text "Store"))
-                            tag "li" [] (tag "a" ["href", "/store/manage"] (text "Admin"))
-                        ])
-                  ]
-
-                  divAttr ["id", "container"] [
-                      tag "h2" [] (text model.Album.Title)
-                      p [ imgAttr [ "src", "/placeholder.gif"] ]
-                      divAttr ["id", "album-details"] [
-                        p [
-                            tag "em" [] (text "Genre:")
-                            text model.Album.Genre
-                        ]
-                        p [
-                            tag "em" [] (text "Artist:")
-                            text model.Album.Artist
-                        ]
-                        p [
-                            tag "em" [] (text "Price:")
-                            text model.Album.Price
-                        ]
-                      ]
-                  ]
-
-                  divAttr ["id", "footer"] [
-                    text "built with "
-                    tag "a" ["href", "http://fsharp.org"] (text "F#")
-                    text " and "
-                    tag "a" ["href", "http://suave.io"] (text "Suave.IO")
-                  ]
-
-                ]
-             ]
-             |> xmlToString
-
+        let con = index genres (vF model) |> xmlToString
 
         return! (OK con >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
@@ -125,19 +79,19 @@ let deleteAlbum id db = { DeleteAlbum.Album = Db.getAlbum id db }
 
 choose [
     GET >>= choose [
-        path "/" >>= (HTML home)
-        path "/store" >>= (HTML store)
+        path "/" >>= (HTMLR vHome (fun _ -> ()))
+        path "/store" >>= (HTMLR vS store)
         path "/store/browse" 
             >>= Binding.bindReq 
                     (Binding.query "genre" Choice1Of2) 
-                    (albumsForGenre >> HTML)
+                    (albumsForGenre >> (HTMLR vAlbumsForGenre))
                     BAD_REQUEST
-        pathScan "/store/details/%d" (albumDetails >> HTMLR)
+        pathScan "/store/details/%d" (albumDetails >> HTMLR vAD)
 
-        path "/store/manage" >>= (HTML manageStore)
+        path "/store/manage" >>= (HTMLR vManageStore manageStore)
         path "/store/manage/create" >>= (HTML createAlbum)
         pathScan "/store/manage/edit/%d" (updateAlbum >> HTML)
-        pathScan "/store/manage/delete/%d" (deleteAlbum >> HTML)
+        pathScan "/store/manage/delete/%d" (deleteAlbum >> (HTMLR vDeleteAlbum))
 
         pathRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browseHome
