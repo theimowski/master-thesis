@@ -5,7 +5,6 @@ open System
 open Suave
 open Suave.Http.Successful
 open Suave.Web
-open Suave.Html
 open Suave.Http
 open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
@@ -31,10 +30,10 @@ let albumForm req = binding {
 
 let HTML vF getF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
-        let genres = Db.getGenres ctx
+        let genres = Db.getGenres ctx 
         let model = getF ctx
         
-        let con = index genres (vF model) |> xmlToString
+        let con = index genres (vF model) |> Html.xmlToString
 
         return! (OK con >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
@@ -45,38 +44,32 @@ let backToManageStore postF (x: HttpContext) = async {
         return! Redirection.redirect "/store/manage" x   
     }
 
-let home _ = { Placeholder = () }
-let store db = { Store.Genres = Db.getGenres db }
+let store db = Db.getGenres db
+let albumDetails id db = Db.getAlbum id db
 
 let albumsForGenre name db = 
     let genre = Db.getGenre name db
-    { AlbumsForGenre.Genre = genre
-      Albums = Db.getAlbumsForGenre genre.Id db }
+    let albums = Db.getAlbumsForGenre genre.Id db
+    genre.Name, albums
 
-let albumDetails id db = { AlbumDetails.Album = Db.getAlbum id db }
-let manageStore db = { ManageStore.Albums = Db.getAlbums db }
+let manageStore db = Db.getAlbums db
 
-let createAlbum db = 
-    { CreateAlbum.Artists = Db.getArtists db
-      Genres = Db.getGenres db }
+let createAlbum db = Db.getArtists db, Db.getGenres db
 
-let updateAlbum id db = 
-    { EditAlbum.Album = Db.getAlbum id db
-      Artists = Db.getArtists db
-      Genres = Db.getGenres db }
+let updateAlbum id db = Db.getAlbum id db, Db.getArtists db, Db.getGenres db
 
-let deleteAlbum id db = { DeleteAlbum.Album = Db.getAlbum id db }
+let deleteAlbum id db = Db.getAlbum id db
 
 choose [
     GET >>= choose [
         path "/" >>= (HTML vHome (fun _ -> ()))
-        path "/store" >>= (HTML vS store)
+        path "/store" >>= (HTML viewStore store)
         path "/store/browse" 
             >>= Binding.bindReq 
                     (Binding.query "genre" Choice1Of2) 
-                    (albumsForGenre >> (HTML vAlbumsForGenre))
+                    (albumsForGenre >> (HTML viewAlbumsForGenre))
                     BAD_REQUEST
-        pathScan "/store/details/%d" (albumDetails >> HTML vAD)
+        pathScan "/store/details/%d" (albumDetails >> HTML viewAlbumDetails)
 
         path "/store/manage" >>= (HTML vManageStore manageStore)
         path "/store/manage/create" >>= (HTML vCreateAlbum createAlbum)

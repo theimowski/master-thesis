@@ -6,82 +6,41 @@ open MusicStore.Domain
 
 open Suave.Html
 
-type Index = {
-    Container : string
-    Genres : Genre []
-}
-
-type Home = { 
-    Placeholder : unit
-}
-
-type Store = {
-    Genres : Genre []
-}
-
-type AlbumDetails = {
-    Album : Album
-}
-
-type AlbumsForGenre = {
-    Genre : Genre
-    Albums : IdAndName [] 
-}
-
-type ManageStore = {
-    Albums : Album []
-}
-
-type CreateAlbum = {
-    Artists : Artist []
-    Genres : Genre []
-}
-
-type EditAlbum = {
-    Artists : Artist []
-    Genres : Genre []
-    Album : Album
-}
-
-type DeleteAlbum = {
-    Album : Album
-}
-
 let truncate k (s : string) =
     if s.Length > k then
         s.Substring(0, k - 3) + "..."
     else s
 
-let vAD (ad : AlbumDetails) = [
-    tag "h2" [] (text ad.Album.Title)
+let viewAlbumDetails (album : Album) = [
+    tag "h2" [] (text album.Title)
     p [ imgAttr [ "src", "/placeholder.gif"] ]
     divAttr ["id", "album-details"] [
         p [
             tag "em" [] (text "Genre:")
-            text ad.Album.Genre
+            text album.Genre
         ]
         p [
             tag "em" [] (text "Artist:")
-            text ad.Album.Artist
+            text album.Artist
         ]
         p [
             tag "em" [] (text "Price:")
-            text ad.Album.Price
+            text album.Price
         ]
     ]
 ]
 
-let vS (s : Store) = [
+let viewStore (genres : IdAndName list) = [
     tag "h3" [] (text "Browse Genres")
     p [ text "Select from genres:" ]
-    tag "ul" [] (s.Genres |> Array.map (fun g -> tag "li" [] (tag "a" ["href", "/store/browse?genre=" + g.Name] (text g.Name) ) ) |> Array.toList |> flatten)
+    tag "ul" [] (genres |> List.map (fun g -> tag "li" [] (tag "a" ["href", "/store/browse?genre=" + g.Name] (text g.Name) ) ) |> flatten)
 ]
 
 let vHome () = [
     divAttr ["id", "promotion"] []
 ]
 
-let vAlbumsForGenre (a : AlbumsForGenre) = 
+let viewAlbumsForGenre (genre, albums : IdAndName list) = 
     let item (a : IdAndName) = 
         tag "li" [] (tag "a" ["href", "/store/details/" + a.Id.ToString()]  
                         ([
@@ -90,12 +49,12 @@ let vAlbumsForGenre (a : AlbumsForGenre) =
                          ] |> flatten))
 
     [divAttr ["class", "genre"] [
-        tag "h3" [] (flatten [tag "em" [] (text a.Genre.Name); text " Albums"])
-        tag "ul" ["id", "album-list"] (a.Albums |> Array.toList |> List.map item |> flatten)
+        tag "h3" [] (flatten [tag "em" [] (text genre); text " Albums"])
+        tag "ul" ["id", "album-list"] (albums |> List.map item |> flatten)
     ]
 ]
 
-let vManageStore (m : ManageStore) = 
+let vManageStore (albums : Album list) = 
     let headers = 
         ["Genre";"Artist";"Title";"Price";""]
         |> List.map (text >> tag "th" [])
@@ -121,11 +80,11 @@ let vManageStore (m : ManageStore) =
 
     [tag "h2" [] (text "Index")
      p [tag "a" ["href", "/store/manage/create"] (text "Create New")]
-     tag "table" [] (List.append [headers] (List.map row (m.Albums |> Array.toList)) |> flatten)
+     tag "table" [] (List.append [headers] (List.map row albums) |> flatten)
     ]
 
 
-let createEditAlbum (current : Album option) caption submit (g: Genre[]) (a: Artist[]) = 
+let createEditAlbum (current : Album option) caption submit ((g: IdAndName list), (a: IdAndName list)) = 
 
     let artist = current |> Option.map (fun a -> a.Artist)
     let genre = current |> Option.map (fun a -> a.Genre)
@@ -150,9 +109,9 @@ let createEditAlbum (current : Album option) caption submit (g: Genre[]) (a: Art
     let fields = 
         [
         text "Genre"
-        tag "select" ["name", "genre"] (g |> Array.toList |> List.map (fun g -> g.Id,g.Name,genre) |> List.map opt |> flatten)
+        tag "select" ["name", "genre"] (g |> List.map (fun g -> g.Id,g.Name,genre) |> List.map opt |> flatten)
         text "Artist"
-        tag "select" ["name", "artist"] (a |> Array.toList |> List.map (fun g -> g.Id,g.Name,artist) |> List.map opt |> flatten)
+        tag "select" ["name", "artist"] (a |> List.map (fun g -> g.Id,g.Name,artist) |> List.map opt |> flatten)
         text "Title"
         inputAttr ["name", "title"; "type", "text"; "required", ""; "value", title; "maxlength", "100"]
         text "Price"
@@ -181,14 +140,14 @@ let createEditAlbum (current : Album option) caption submit (g: Genre[]) (a: Art
     ]
 ]
 
-let vCreateAlbum (c : CreateAlbum) = createEditAlbum None "Create" "Create" c.Genres c.Artists
-let vEditAlbum (e : EditAlbum)= createEditAlbum (Some e.Album) "Edit" "Save" e.Genres e.Artists 
+let vCreateAlbum = createEditAlbum None "Create" "Create" 
+let vEditAlbum (album,g,a) = createEditAlbum (Some album) "Edit" "Save" (g,a)
 
-let vDeleteAlbum (d : DeleteAlbum) = [
+let vDeleteAlbum (a : Album) = [
     tag "h2" [] (text "Delete Confirmation")
     p [ text "Are you sure you want to delete the album titled"
         br
-        tag "strong" [] (text d.Album.Title)
+        tag "strong" [] (text a.Title)
         text "?"
     ]
     tag "form" ["method","POST"] 
@@ -216,7 +175,7 @@ let index genres xml =
                     ])
                 ]
 
-            tag "ul" ["id", "categories"] (genres |> Array.map (fun g -> tag "li" [] (tag "a" ["href", "/store/browse?genre=" + g.Name] (text g.Name) ) ) |> Array.toList |> flatten)
+            tag "ul" ["id", "categories"] (genres |> List.map (fun g -> tag "li" [] (tag "a" ["href", "/store/browse?genre=" + g.Name] (text g.Name) ) ) |> flatten)
 
             divAttr ["id", "container"] xml
 

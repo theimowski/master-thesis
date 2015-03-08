@@ -27,7 +27,7 @@ let getAlbums (ctx : DbContext) =
                      Price = album.Price.ToString(Globalization.CultureInfo.InvariantCulture)
                      Art = album.AlbumArtUrl }
     }
-    |> Seq.toArray
+    |> Seq.toList
 
 let getAlbum id (ctx : DbContext) = 
     query { 
@@ -51,7 +51,7 @@ let getAlbumsForGenre genreId (ctx : DbContext) =
             select { IdAndName.Id = album.AlbumId
                      Name = album.Title }
     }
-    |> Seq.toArray
+    |> Seq.toList
 
 let getGenre name (ctx : DbContext) = 
     query { 
@@ -68,7 +68,7 @@ let getGenres (ctx : DbContext) =
             select { Genre.Id = g.GenreId
                      Name = g.Name }
     }
-    |> Seq.toArray
+    |> Seq.toList
 
 let getArtists (ctx : DbContext) = 
     query { 
@@ -76,7 +76,7 @@ let getArtists (ctx : DbContext) =
             select { Artist.Id = a.ArtistId
                      Name = a.Name }
     }
-    |> Seq.toArray
+    |> Seq.toList
 
 
 let createAlbum (c : CreateAlbumCommand) (ctx : DbContext) = 
