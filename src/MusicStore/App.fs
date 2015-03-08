@@ -47,28 +47,46 @@ let HTMLR getF (x: HttpContext) = async {
         let con =
             html [ 
                 head [
-                  title "Little HTML DSL"
-                  linkAttr [ "rel", "https://instabt.com/instaBT.ico" ]
-                  scriptAttr [ "type", "text/javascript"; "src", "js/jquery-2.1.0.min.js" ] []
-                  scriptAttr [ "type", "text/javascript" ] [ text "$().ready(function () { setup(); });" ]
+                  title "F# Suave Music Store"
+                  linkAttr [ "href", "/Site.css"; "rel", "stylesheet"; "type", "text/css" ]
                 ] 
                 body [
-                  tag "h2" [] (text model.Album.Title)
-                  p [ imgAttr [ "src", "/placeholder.gif"] ]
-                  divAttr ["id", "album-details"] [
-                    p [
-                        tag "em" [] (text "Genre:")
-                        text model.Album.Genre
-                    ]
-                    p [
-                        tag "em" [] (text "Artist:")
-                        text model.Album.Artist
-                    ]
-                    p [
-                        tag "em" [] (text "Price:")
-                        text model.Album.Price
-                    ]
+                  divAttr ["id", "header"] [
+                    tag "h1" [] (tag "a" ["href", "/"] (text "F# Suave Music Store"))
+                    tag "ul" ["id", "navlist"] 
+                        (flatten [
+                            tag "li" ["class", "first"] (tag "a" ["id", "current"; "href", "/"] (text "Home"))
+                            tag "li" [] (tag "a" ["href", "/store"] (text "Store"))
+                            tag "li" [] (tag "a" ["href", "/store/manage"] (text "Admin"))
+                        ])
                   ]
+
+                  divAttr ["id", "container"] [
+                      tag "h2" [] (text model.Album.Title)
+                      p [ imgAttr [ "src", "/placeholder.gif"] ]
+                      divAttr ["id", "album-details"] [
+                        p [
+                            tag "em" [] (text "Genre:")
+                            text model.Album.Genre
+                        ]
+                        p [
+                            tag "em" [] (text "Artist:")
+                            text model.Album.Artist
+                        ]
+                        p [
+                            tag "em" [] (text "Price:")
+                            text model.Album.Price
+                        ]
+                      ]
+                  ]
+
+                  divAttr ["id", "footer"] [
+                    text "built with "
+                    tag "a" ["href", "http://fsharp.org"] (text "F#")
+                    text " and "
+                    tag "a" ["href", "http://suave.io"] (text "Suave.IO")
+                  ]
+
                 ]
              ]
              |> xmlToString
@@ -104,8 +122,6 @@ let updateAlbum id db =
       Genres = Db.getGenres db }
 
 let deleteAlbum id db = { DeleteAlbum.Album = Db.getAlbum id db }
-
-RazorEngine.Razor.Compile(IO.File.ReadAllText("layout.cshtml"), "layout");
 
 choose [
     GET >>= choose [

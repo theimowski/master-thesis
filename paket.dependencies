@@ -6,4 +6,3 @@ nuget FAKE
 nuget SQLProvider
 nuget Suave
 nuget Suave.Experimental
-nuget Suave.Razor
