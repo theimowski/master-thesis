@@ -1,7 +1,8 @@
 #I "../packages/FSharp.Formatting/lib/net40"
-#I "../packages/Microsoft.AspNet.Razor/lib/net40"
+#I "../packages/Microsoft.AspNet.Razor/lib/net45"
 #I "../packages/RazorEngine/lib/net40"
 #I "../packages/FSharp.Compiler.Service/lib/net40"
+#I "../packages/FSharpVSPowerTools.Core/lib/net45"
 #r "System.Web.dll"
 #r "FSharp.Markdown.dll"
 #r "FSharp.CodeFormat.dll"
@@ -10,6 +11,7 @@
 #r "System.Web.Razor.dll"
 #r "RazorEngine.dll"
 #r "FSharp.Compiler.Service.dll"
+#r "FSharpVSPowerTools.Core.dll"
 
 #r "../packages/FAKE/tools/FakeLib.dll"
 
