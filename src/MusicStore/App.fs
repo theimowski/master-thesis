@@ -5,6 +5,7 @@ open System
 open Suave
 open Suave.Http.Successful
 open Suave.Web
+open Suave.Html
 open Suave.Http
 open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
@@ -41,9 +42,39 @@ let HTML getF (x: HttpContext) = async {
 let HTMLR getF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx
-        let model = getF ctx
+        let model : AlbumDetails = getF ctx
         
-        return! Razor.razor "AlbumDetails.cshtml" model x
+        let con =
+            html [ 
+                head [
+                  title "Little HTML DSL"
+                  linkAttr [ "rel", "https://instabt.com/instaBT.ico" ]
+                  scriptAttr [ "type", "text/javascript"; "src", "js/jquery-2.1.0.min.js" ] []
+                  scriptAttr [ "type", "text/javascript" ] [ text "$().ready(function () { setup(); });" ]
+                ] 
+                body [
+                  tag "h2" [] (text model.Album.Title)
+                  p [ imgAttr [ "src", "/placeholder.gif"] ]
+                  divAttr ["id", "album-details"] [
+                    p [
+                        tag "em" [] (text "Genre:")
+                        text model.Album.Genre
+                    ]
+                    p [
+                        tag "em" [] (text "Artist:")
+                        text model.Album.Artist
+                    ]
+                    p [
+                        tag "em" [] (text "Price:")
+                        text model.Album.Price
+                    ]
+                  ]
+                ]
+             ]
+             |> xmlToString
+
+
+        return! (OK con >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
 let backToManageStore postF (x: HttpContext) = async {
