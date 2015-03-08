@@ -29,17 +29,7 @@ let albumForm req = binding {
         return artistId, genreId, title, price, artUrl
     }
 
-let HTML getF (x: HttpContext) = async {
-        let ctx = sql.GetDataContext()
-        let genres = Db.getGenres ctx
-        let model = getF ctx
-        
-        let container = View.render model
-        let index = {Index.Container = container; Genres = genres}
-        return! (OK (View.render index) >>= Writers.setMimeType "text/html; charset=utf-8") x
-    }
-
-let HTMLR vF getF (x: HttpContext) = async {
+let HTML vF getF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx
         let model = getF ctx
@@ -79,19 +69,19 @@ let deleteAlbum id db = { DeleteAlbum.Album = Db.getAlbum id db }
 
 choose [
     GET >>= choose [
-        path "/" >>= (HTMLR vHome (fun _ -> ()))
-        path "/store" >>= (HTMLR vS store)
+        path "/" >>= (HTML vHome (fun _ -> ()))
+        path "/store" >>= (HTML vS store)
         path "/store/browse" 
             >>= Binding.bindReq 
                     (Binding.query "genre" Choice1Of2) 
-                    (albumsForGenre >> (HTMLR vAlbumsForGenre))
+                    (albumsForGenre >> (HTML vAlbumsForGenre))
                     BAD_REQUEST
-        pathScan "/store/details/%d" (albumDetails >> HTMLR vAD)
+        pathScan "/store/details/%d" (albumDetails >> HTML vAD)
 
-        path "/store/manage" >>= (HTMLR vManageStore manageStore)
-        path "/store/manage/create" >>= (HTMLR vCreateAlbum createAlbum)
-        pathScan "/store/manage/edit/%d" (updateAlbum >> (HTMLR vEditAlbum))
-        pathScan "/store/manage/delete/%d" (deleteAlbum >> (HTMLR vDeleteAlbum))
+        path "/store/manage" >>= (HTML vManageStore manageStore)
+        path "/store/manage/create" >>= (HTML vCreateAlbum createAlbum)
+        pathScan "/store/manage/edit/%d" (updateAlbum >> (HTML vEditAlbum))
+        pathScan "/store/manage/delete/%d" (deleteAlbum >> (HTML vDeleteAlbum))
 
         pathRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browseHome

@@ -1,6 +1,5 @@
 source https://nuget.org/api/v2
 
-nuget DotLiquid
 nuget FSharp.Formatting
 nuget FAKE
 nuget SQLProvider
