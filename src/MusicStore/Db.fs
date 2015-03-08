@@ -69,8 +69,8 @@ let getArtists (ctx : DbContext) : Artist list =
 let newAlbum (ctx : DbContext) : Album =
     ctx.``[dbo].[Albums]``.Create()
 
-let save createAlbum f (ctx : DbContext) =
-    f (createAlbum ctx)
+let saveAlbum albumF setterF (ctx : DbContext) =
+    setterF (albumF ctx)
     ctx.SubmitUpdates()
 
 let deleteAlbum id (ctx : DbContext) = 

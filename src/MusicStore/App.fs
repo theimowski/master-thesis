@@ -33,12 +33,12 @@ let albumForm req = binding {
         )
     }
 
-let HTML vF getF (x: HttpContext) = async {
+let HTML viewF getF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx 
         let model = getF ctx
         
-        let con = index genres (vF model) |> Html.xmlToString
+        let con = viewIndex genres (viewF model) |> Html.xmlToString
 
         return! (OK con >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
@@ -49,37 +49,40 @@ let backToManageStore postF (x: HttpContext) = async {
         return! Redirection.redirect "/store/manage" x   
     }
 
-let store db = Db.getGenres db
-let albumDetails id db = Db.getAlbumDetails id db
+let home = HTML viewHome (fun _ -> ())
+
+let store = HTML viewStore Db.getGenres
+
+let albumDetails id = HTML viewAlbumDetails (Db.getAlbumDetails id)
 
 let albumsForGenre name db = 
     let genre = Db.getGenre name db
     let albums = Db.getAlbumsForGenre genre.GenreId db
     genre.Name, albums
 
-let manageStore db = Db.getAlbumsDetails db
+let manage = HTML viewManageStore Db.getAlbumsDetails
 
-let createAlbum db = Db.getGenres db, Db.getArtists db
+let createAlbum = HTML viewCreateAlbum (fun db -> Db.getGenres db, Db.getArtists db)
 
-let updateAlbum id db = Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db 
+let editAlbum id = HTML viewEditAlbum (fun db -> Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db)
 
-let deleteAlbum id db = Db.getAlbumDetails id db
+let deleteAlbum id = HTML viewDeleteAlbum (Db.getAlbumDetails id)
 
 choose [
     GET >>= choose [
-        path "/" >>= (HTML vHome (fun _ -> ()))
-        path "/store" >>= (HTML viewStore store)
+        path "/" >>= home
+        path "/store" >>= store
         path "/store/browse" 
             >>= Binding.bindReq 
                     (Binding.query "genre" Choice1Of2) 
                     (albumsForGenre >> (HTML viewAlbumsForGenre))
                     BAD_REQUEST
-        pathScan "/store/details/%d" (albumDetails >> HTML viewAlbumDetails)
+        pathScan "/store/details/%d" albumDetails
 
-        path "/store/manage" >>= (HTML vManageStore manageStore)
-        path "/store/manage/create" >>= (HTML vCreateAlbum createAlbum)
-        pathScan "/store/manage/edit/%d" (updateAlbum >> (HTML vEditAlbum))
-        pathScan "/store/manage/delete/%d" (deleteAlbum >> (HTML vDeleteAlbum))
+        path "/store/manage" >>= manage
+        path "/store/manage/create" >>= createAlbum
+        pathScan "/store/manage/edit/%d" editAlbum
+        pathScan "/store/manage/delete/%d" deleteAlbum
 
         pathRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browseHome
@@ -89,13 +92,13 @@ choose [
         path "/store/manage/create"
             >>= (Binding.bindReq
                     albumForm
-                    (Db.save Db.newAlbum >> backToManageStore)
+                    (Db.saveAlbum Db.newAlbum >> backToManageStore)
                     BAD_REQUEST)
         pathScan "/store/manage/edit/%d" 
             (fun id -> 
                 Binding.bindReq
                     albumForm 
-                    (Db.save (Db.getAlbum id) >> backToManageStore) 
+                    (Db.saveAlbum (Db.getAlbum id) >> backToManageStore) 
                     BAD_REQUEST)
         pathScan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
     ]

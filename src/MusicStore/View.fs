@@ -34,7 +34,7 @@ let viewStore (genres : Db.Genre list) = [
     tag "ul" [] (genres |> List.map (fun g -> tag "li" [] (tag "a" ["href", "/store/browse?genre=" + g.Name] (text g.Name) ) ) |> flatten)
 ]
 
-let vHome () = [
+let viewHome () = [
     divAttr ["id", "promotion"] []
 ]
 
@@ -52,7 +52,7 @@ let viewAlbumsForGenre (genre, albums : Db.Album list) =
     ]
 ]
 
-let vManageStore (albums : Db.AlbumDetails list) = 
+let viewManageStore (albums : Db.AlbumDetails list) = 
     let headers = 
         ["Genre";"Artist";"Title";"Price";""]
         |> List.map (text >> tag "th" [])
@@ -138,10 +138,10 @@ let createEditAlbum (current : Db.AlbumDetails option) caption submit ((g: Db.Ge
     ]
 ]
 
-let vCreateAlbum = createEditAlbum None "Create" "Create" 
-let vEditAlbum (album,g,a) = createEditAlbum (Some album) "Edit" "Save" (g,a)
+let viewCreateAlbum = createEditAlbum None "Create" "Create" 
+let viewEditAlbum (album,g,a) = createEditAlbum (Some album) "Edit" "Save" (g,a)
 
-let vDeleteAlbum ((a, _, _) as albumDetails : Db.AlbumDetails) = [
+let viewDeleteAlbum ((a, _, _) as albumDetails : Db.AlbumDetails) = [
     tag "h2" [] (text "Delete Confirmation")
     p [ text "Are you sure you want to delete the album titled"
         br
@@ -156,7 +156,7 @@ let vDeleteAlbum ((a, _, _) as albumDetails : Db.AlbumDetails) = [
     ]
 ]
 
-let index (genres : Db.Genre list) xml = 
+let viewIndex (genres : Db.Genre list) xml = 
     html [ 
         head [
             title "F# Suave Music Store"
