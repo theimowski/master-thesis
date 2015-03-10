@@ -15,9 +15,10 @@ open Suave.Utils
 open MusicStore.Db
 open MusicStore.View
 
-let bindForm key = Binding.form key Choice1Of2
-
-let albumForm req = binding {
+let albumForm req = 
+    let bindForm key = Binding.form key Choice1Of2
+    
+    binding {
         let! artistId = req |> bindForm "artist" >>. Parse.int32
         let! genreId = req |> bindForm "genre" >>. Parse.int32
         let! title = req |> bindForm "title"
@@ -43,40 +44,68 @@ let HTML viewF getF (x: HttpContext) = async {
         return! (OK con >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
-let backToManageStore postF (x: HttpContext) = async {
+let postAndRedirectToManage postF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         postF ctx
         return! Redirection.redirect "/store/manage" x   
     }
 
-let home = HTML viewHome (fun _ -> ())
+[<AutoOpen>]
+module Handlers =
 
-let store = HTML viewStore Db.getGenres
+    let home = 
+        ignore 
+        |> HTML viewHome 
 
-let albumDetails id = HTML viewAlbumDetails (Db.getAlbumDetails id)
+    let store = 
+        Db.getGenres 
+        |> HTML viewStore 
 
-let albumsForGenre name db = 
-    let genre = Db.getGenre name db
-    let albums = Db.getAlbumsForGenre genre.GenreId db
-    genre.Name, albums
+    let albumDetails id = 
+        Db.getAlbumDetails id 
+        |> HTML viewAlbumDetails
 
-let manage = HTML viewManageStore Db.getAlbumsDetails
+    let albumsForGenre name = 
+        let getF db =
+            let genre = Db.getGenre name db
+            let albums = Db.getAlbumsForGenre genre.GenreId db
+            genre,albums
+        getF 
+        |> HTML viewAlbumsForGenre 
 
-let createAlbum = HTML viewCreateAlbum (fun db -> Db.getGenres db, Db.getArtists db)
+    let manage = 
+        Db.getAlbumsDetails 
+        |> HTML viewManageStore 
 
-let editAlbum id = HTML viewEditAlbum (fun db -> Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db)
+    let createAlbum = 
+        let getF db = Db.getGenres db, Db.getArtists db
+        getF 
+        |> HTML viewCreateAlbum 
+    
+    let createAlbumP = 
+        Db.saveAlbum Db.newAlbum >> postAndRedirectToManage
 
-let deleteAlbum id = HTML viewDeleteAlbum (Db.getAlbumDetails id)
+    let editAlbum id = 
+        let getF db = Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db
+        getF 
+        |> HTML viewEditAlbum
+    
+    let editAlbumP id = 
+        Db.saveAlbum (Db.getAlbum id) >> postAndRedirectToManage
+
+    let deleteAlbum id = 
+        Db.getAlbumDetails id 
+        |> HTML viewDeleteAlbum
+    
+    let deleteAlbumP = 
+        Db.deleteAlbum >> postAndRedirectToManage
 
 choose [
     GET >>= choose [
         path "/" >>= home
         path "/store" >>= store
         path "/store/browse" 
-            >>= Binding.bindReq 
-                    (Binding.query "genre" Choice1Of2) 
-                    (albumsForGenre >> (HTML viewAlbumsForGenre))
-                    BAD_REQUEST
+            >>= Binding.bindReq (Binding.query "genre" Choice1Of2) albumsForGenre BAD_REQUEST
         pathScan "/store/details/%d" albumDetails
 
         path "/store/manage" >>= manage
@@ -90,17 +119,10 @@ choose [
 
     POST >>= choose [
         path "/store/manage/create"
-            >>= (Binding.bindReq
-                    albumForm
-                    (Db.saveAlbum Db.newAlbum >> backToManageStore)
-                    BAD_REQUEST)
+            >>= Binding.bindReq albumForm createAlbumP BAD_REQUEST
         pathScan "/store/manage/edit/%d" 
-            (fun id -> 
-                Binding.bindReq
-                    albumForm 
-                    (Db.saveAlbum (Db.getAlbum id) >> backToManageStore) 
-                    BAD_REQUEST)
-        pathScan "/store/manage/delete/%d" (Db.deleteAlbum >> backToManageStore)
+            (fun id -> Binding.bindReq albumForm (editAlbumP id) BAD_REQUEST)
+        pathScan "/store/manage/delete/%d" deleteAlbumP
     ]
 
     NOT_FOUND "404"

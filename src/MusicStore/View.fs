@@ -4,50 +4,64 @@ open System
 
 open Suave.Html
 
+let h2Attr attr s = tag "h2" attr (Xml([Text s,Xml []]))
+let h2  = h2Attr [ ]
+
+let h3Attr attr s = tag "h3" attr (Xml([Text s,Xml []]))
+let h3  = h3Attr [ ]
+
+let imgSrc src = imgAttr [ "src", src ]
+
+let divId id = divAttr ["id", id]
+
+let formatDec (d : Decimal) = d.ToString(Globalization.CultureInfo.InvariantCulture)
+
+let em s = tag "em" [] (Xml([Text s, Xml []]))
+
 let truncate k (s : string) =
     if s.Length > k then
         s.Substring(0, k - 3) + "..."
     else s
 
 let viewAlbumDetails ((album, artist, genre) : Db.AlbumDetails) = [
-    tag "h2" [] (text album.Title)
-    p [ imgAttr [ "src", "/placeholder.gif"] ]
-    divAttr ["id", "album-details"] [
+    h2 album.Title
+    p [ imgSrc "/placeholder.gif" ]
+    divId "album-details" [
         p [
-            tag "em" [] (text "Genre:")
+            em "Genre:"
             text genre.Name
         ]
         p [
-            tag "em" [] (text "Artist:")
+            em "Artist:"
             text artist.Name
         ]
         p [
-            tag "em" [] (text "Price:")
-            text (album.Price.ToString())
+            em "Price:"
+            text (formatDec album.Price)
         ]
     ]
 ]
 
 let viewStore (genres : Db.Genre list) = [
-    tag "h3" [] (text "Browse Genres")
+    h3 "Browse Genres"
     p [ text "Select from genres:" ]
     tag "ul" [] (genres |> List.map (fun g -> tag "li" [] (tag "a" ["href", "/store/browse?genre=" + g.Name] (text g.Name) ) ) |> flatten)
 ]
 
 let viewHome () = [
-    divAttr ["id", "promotion"] []
+    divId "promotion" []
 ]
 
-let viewAlbumsForGenre (genre, albums : Db.Album list) = 
+let viewAlbumsForGenre (genre : Db.Genre, albums : Db.Album list) = 
     let item (a : Db.Album) = 
         tag "li" [] (tag "a" ["href", "/store/details/" + a.AlbumId.ToString()]  
                         ([
-                            imgAttr ["src", "/placeholder.gif"]
+                            imgSrc "/placeholder.gif"
                             span (text a.Title)
                          ] |> flatten))
 
     [divAttr ["class", "genre"] [
-        tag "h3" [] (flatten [tag "em" [] (text genre); text " Albums"])
+        h3 (genre.Name + " Albums")
         tag "ul" ["id", "album-list"] (albums |> List.map item |> flatten)
     ]
 ]
@@ -68,7 +82,7 @@ let viewManageStore (albums : Db.AlbumDetails list) =
         |> tag "td" []
 
     let details ((album, artist, genre) : Db.AlbumDetails) =
-        [genre.Name; artist.Name |> truncate 25; album.Title |> truncate 25; album.Price.ToString()]
+        [genre.Name; artist.Name |> truncate 25; album.Title |> truncate 25; formatDec album.Price]
         |> List.map (text >> tag "td" [])
 
     let row ((album, _, _) as albumDetails : Db.AlbumDetails) =
@@ -76,7 +90,7 @@ let viewManageStore (albums : Db.AlbumDetails list) =
         |> flatten
         |> tag "tr" []
 
-    [tag "h2" [] (text "Index")
+    [h2 "Index"
      p [tag "a" ["href", "/store/manage/create"] (text "Create New")]
      tag "table" [] (List.append [headers] (List.map row albums) |> flatten)
     ]
@@ -92,7 +106,7 @@ let createEditAlbum (current : Db.AlbumDetails option) caption submit ((g: Db.Ge
         | None -> ""
     let price = 
         match current with 
-        | Some (a,_,_) -> a.Price.ToString(Globalization.CultureInfo.InvariantCulture)
+        | Some (a,_,_) -> formatDec a.Price
         | None -> ""
 
     let opt (id : int,name,current) =
@@ -128,7 +142,7 @@ let createEditAlbum (current : Db.AlbumDetails option) caption submit ((g: Db.Ge
         ] |> flatten
     
     [
-    tag "h2" [] (text caption)
+    h2 caption
     
     tag "form" ["method","POST"] 
         (tag "fieldset" [] fieldset)
@@ -142,7 +156,7 @@ let viewCreateAlbum = createEditAlbum None "Create" "Create"
 let viewEditAlbum (album,g,a) = createEditAlbum (Some album) "Edit" "Save" (g,a)
 
 let viewDeleteAlbum ((a, _, _) as albumDetails : Db.AlbumDetails) = [
-    tag "h2" [] (text "Delete Confirmation")
+    h2 "Delete Confirmation"
     p [ text "Are you sure you want to delete the album titled"
         br
         tag "strong" [] (text a.Title)
@@ -163,7 +177,7 @@ let viewIndex (genres : Db.Genre list) xml =
             linkAttr [ "href", "/Site.css"; "rel", "stylesheet"; "type", "text/css" ]
         ] 
         body [
-            divAttr ["id", "header"] [
+            divId "header" [
                 tag "h1" [] (tag "a" ["href", "/"] (text "F# Suave Music Store"))
                 tag "ul" ["id", "navlist"] 
                     (flatten [
@@ -175,9 +189,9 @@ let viewIndex (genres : Db.Genre list) xml =
 
             tag "ul" ["id", "categories"] (genres |> List.map (fun g -> tag "li" [] (tag "a" ["href", "/store/browse?genre=" + g.Name] (text g.Name) ) ) |> flatten)
 
-            divAttr ["id", "container"] xml
+            divId "container" xml
 
-            divAttr ["id", "footer"] [
+            divId "footer" [
                 text "built with "
                 tag "a" ["href", "http://fsharp.org"] (text "F#")
                 text " and "
