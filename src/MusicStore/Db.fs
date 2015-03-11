@@ -17,6 +17,10 @@ type Genre = DbContext.``[dbo].[Genres]Entity``
 type Artist = DbContext.``[dbo].[Artists]Entity``
 type AlbumDetails = Album * Artist * Genre
 
+let (|Album|) ((a,_,_) : AlbumDetails) = a
+let (|Artist|) ((_,a,_) : AlbumDetails) = a
+let (|Genre|) ((_,_,g) : AlbumDetails) = g
+
 let getAlbum id (ctx : DbContext) : Album = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
