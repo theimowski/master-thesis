@@ -19,13 +19,20 @@ let imgSrc src = imgAttr [ "src", src ]
 
 let divId id = divAttr ["id", id]
 
-let form xml = tag "form" ["method", "POST"] xml
+let form x = tag "form" ["method", "POST"] (flatten x)
+let fieldset x = tag "fieldset" [] (flatten x)
+let legend txt = tag "legend" [] (text txt)
+let select name x = tag "select" ["name", name] (flatten x)
+let option value txt selected =
+    if selected then
+        tag "option" ["value", value; "selected", "selected"] (text txt)
+    else
+        tag "option" ["value", value] (text txt)
 
 let em s = tag "em" [] (Xml([Text s, Xml []]))
 let strong s = tag "strong" [] (text s)
 
-let liAnchor (href, xml) =
-    tag "li" [] (anchor href xml)
+let liAnchor (href, xml) = tag "li" [] (anchor href xml)
 
 let ulAnchors id links =
     tag "ul" ["id", id] (links |> List.map liAnchor |> flatten)
@@ -117,60 +124,42 @@ let viewManageStore (albums : Db.AlbumDetails list) =
     ]
 
 
-let createEditAlbum (current : Db.AlbumDetails option) caption submit ((g: Db.Genre list), (a: Db.Artist list)) = 
-
-    let artist = current |> Option.map (fun (Db.Artist a) -> a.Name)
-    let genre = current |> Option.map (fun (Db.Genre g) -> g.Name)
-    let title, price = 
+let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: Db.Genre list), (artists: Db.Artist list)) = 
+    let artist, genre, title, price = 
         match current with
-        | Some (Db.Album a) -> a.Title, formatDec a.Price
-        | None -> "", ""
-
-    let opt (id : int,name,current) =
-        let attrs =
-            match current with
-            | Some x when x = name ->
-                ["value", id.ToString(); "selected", "selected"]
-            | _ -> 
-                ["value", id.ToString()]
-        tag "option" attrs (text name)
-
-    let fields = 
-        [
-        text "Genre"
-        tag "select" ["name", "genre"] (g |> List.map (fun g -> g.GenreId,g.Name,genre) |> List.map opt |> flatten)
-        text "Artist"
-        tag "select" ["name", "artist"] (a |> List.map (fun a -> a.ArtistId,a.Name,artist) |> List.map opt |> flatten)
-        text "Title"
-        inputAttr ["name", "title"; "type", "text"; "required", ""; "value", title; "maxlength", "100"]
-        text "Price"
-        inputAttr ["name", "price"; "type", "number"; "required", ""; "value", price; "step", "0.01"]
-        text "Album Art Url"
-        inputAttr ["name", "artUrl"; "type", "text"; "required", ""; "value", "placeholder.gif"; "maxlength", "100"; "min", "0.01"; "max", "100.00"]
-        ] 
-        |> List.map (Seq.singleton >> List.ofSeq >> div)
-        |> flatten
-         
-
-    let fieldset = 
-        [ tag "legend" [] (text "Album")
-          fields
-          p [inputAttr ["type", "submit"; "value", submit]]
-        ] |> flatten
+        | Some (album,genre,artist) -> Some artist.Name, Some genre.Name, album.Title, formatDec album.Price
+        | None -> None, None, "", ""
+    [ 
+        h2 header
     
-    [
-    h2 caption
+        form [
+            fieldset [
+                legend "Album"
+                
+                div [ text "Genre" ]
+                div [ select "genre" [
+                        for g in genres -> option (string g.GenreId) g.Name (Some g.Name = genre) ] ]
+                div [ text "Artist" ]
+                div [ select "artist" [
+                        for a in artists -> option (string a.ArtistId) a.Name (Some a.Name = artist) ] ]
+                div [ text "Title" ]
+                div [ inputAttr ["name", "title"; "type", "text"; "required", ""; "value", title; "maxlength", "100"] ]
+                div [ text "Price" ]
+                div [ inputAttr ["name", "price"; "type", "number"; "required", ""; "value", price; "step", "0.01"] ]
+                div [ text "Album Art Url" ]
+                div [ inputAttr ["name", "artUrl"; "type", "text"; "required", ""; "value", "placeholder.gif"; "maxlength", "100"; "min", "0.01"; "max", "100.00"] ]
+
+                p [ inputAttr ["type", "submit"; "value", submit] ]  
+            ]
+        ]
     
-    tag "form" ["method","POST"] 
-        (tag "fieldset" [] fieldset)
-    
-    div [
-        anchor "/store/manage" (text "Back to list")
+        div [
+            anchor "/store/manage" (text "Back to list")
+        ]
     ]
-]
 
 let viewCreateAlbum = createEditAlbum None "Create" "Create" 
-let viewEditAlbum (album,g,a) = createEditAlbum (Some album) "Edit" "Save" (g,a)
+let viewEditAlbum (album,genres,artists) = createEditAlbum (Some album) "Edit" "Save" (genres,artists)
 
 let viewDeleteAlbum (Db.Album a) = [
     h2 "Delete Confirmation"
@@ -180,7 +169,10 @@ let viewDeleteAlbum (Db.Album a) = [
         strong a.Title
         text "?"
     ]
-    form (inputAttr ["type", "submit"; "value", "Delete"])
+    
+    form [
+        inputAttr ["type", "submit"; "value", "Delete"]
+    ]
 
     div [
         anchor "/store/manage" (text "Back to list")
@@ -208,7 +200,7 @@ let viewIndex (genres : Db.Genre list) xml =
             ]
 
             divId "container" xml
-
+            
             divId "footer" [
                 text "built with "
                 anchor "http://fsharp.org" (text "F#")
