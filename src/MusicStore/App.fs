@@ -34,15 +34,15 @@ let albumForm req =
         )
     }
 
-let HTML viewF getF (x: HttpContext) = async {
+let HTML f (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx 
-        let model = getF ctx
         
-        let con = viewIndex genres (viewF model) |> Html.xmlToString
+        let con = viewIndex genres (f ctx) |> Html.xmlToString
 
         return! (OK con >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
+
 
 let postAndRedirectToManage postF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
@@ -53,49 +53,37 @@ let postAndRedirectToManage postF (x: HttpContext) = async {
 [<AutoOpen>]
 module Handlers =
 
-    let home = 
-        ignore 
-        |> HTML viewHome 
+    let home = ignore >> viewHome |> HTML
+    
+    let store = Db.getGenres >> viewStore |> HTML
 
-    let store = 
-        Db.getGenres 
-        |> HTML viewStore 
-
-    let albumDetails id = 
-        Db.getAlbumDetails id 
-        |> HTML viewAlbumDetails
+    let albumDetails id = Db.getAlbumDetails id >> viewAlbumDetails |> HTML
 
     let albumsForGenre name = 
         let getF db =
             let genre = Db.getGenre name db
             let albums = Db.getAlbumsForGenre genre.GenreId db
             genre,albums
-        getF 
-        |> HTML viewAlbumsForGenre 
+        getF >> viewAlbumsForGenre |> HTML
 
-    let manage = 
-        Db.getAlbumsDetails 
-        |> HTML viewManageStore 
+    let manage = Db.getAlbumsDetails >> viewManageStore |> HTML
 
     let createAlbum = 
         let getF db = Db.getGenres db, Db.getArtists db
-        getF 
-        |> HTML viewCreateAlbum 
+        getF >> viewCreateAlbum |> HTML
     
     let createAlbumP = 
         Db.saveAlbum Db.newAlbum >> postAndRedirectToManage
 
     let editAlbum id = 
         let getF db = Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db
-        getF 
-        |> HTML viewEditAlbum
+        getF >> viewEditAlbum |> HTML
     
     let editAlbumP id = 
         Db.saveAlbum (Db.getAlbum id) >> postAndRedirectToManage
 
     let deleteAlbum id = 
-        Db.getAlbumDetails id 
-        |> HTML viewDeleteAlbum
+        Db.getAlbumDetails id >> viewDeleteAlbum |> HTML
     
     let deleteAlbumP = 
         Db.deleteAlbum >> postAndRedirectToManage
