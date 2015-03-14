@@ -4,19 +4,20 @@ open System
 
 open Suave.Html
 
+let cssLink href = 
+    linkAttr [ "href", href; "rel", "stylesheet"; "type", "text/css" ]
+
 let h1 xml = tag "h1" [] xml
-let h2 s = tag "h2" [] (Xml([Text s,Xml []]))
-let h3 s = tag "h3" [] (Xml([Text s,Xml []]))
+let h2 s = tag "h2" [] (text s)
+let h3 s = tag "h3" [] (text s)
 
-let table = tag "table" []
-let th = tag "th" []
-let td = tag "td" []
-let tr = tag "tr" []
+let table x = tag "table" [] (flatten x)
+let th x = tag "th" [] (flatten x)
+let tr x = tag "tr" [] (flatten x)
+let td x = tag "td" [] (flatten x)
 
-let anchor href = tag "a" ["href", href]
-
+let aHref href = tag "a" ["href", href]
 let imgSrc src = imgAttr [ "src", src ]
-
 let divId id = divAttr ["id", id]
 
 let form x = tag "form" ["method", "POST"] (flatten x)
@@ -28,17 +29,18 @@ let option value txt selected =
         tag "option" ["value", value; "selected", "selected"] (text txt)
     else
         tag "option" ["value", value] (text txt)
+let textInput name value attrs = 
+    let v = match value with Some v -> v | _ -> ""
+    inputAttr (["name", name; "type", "text"; "value", v; "required", ""] @ attrs)
+let numberInput name value attrs = 
+    let v = match value with Some v -> v | _ -> ""
+    inputAttr (["name", name; "type", "number"; "value", v; "required", ""] @ attrs)
 
-let em s = tag "em" [] (Xml([Text s, Xml []]))
+let em s = tag "em" [] (text s)
 let strong s = tag "strong" [] (text s)
 
-let liAnchor (href, xml) = tag "li" [] (anchor href xml)
-
 let ulAnchors id links =
-    tag "ul" ["id", id] (links |> List.map liAnchor |> flatten)
-
-let cssLink href = 
-    linkAttr [ "href", href; "rel", "stylesheet"; "type", "text/css" ]
+    tag "ul" ["id", id] (flatten [ for (href, xml) in links -> tag "li" [] (aHref href xml) ])
 
 let truncate k (s : string) =
     if s.Length > k then
@@ -51,17 +53,10 @@ let viewAlbumDetails ((album, artist, genre) : Db.AlbumDetails) = [
     h2 album.Title
     p [ imgSrc "/placeholder.gif" ]
     divId "album-details" [
+        for (caption,t) in ["Genre:",genre.Name;"Artist:",artist.Name;"Price:",formatDec album.Price] ->
         p [
-            em "Genre:"
-            text genre.Name
-        ]
-        p [
-            em "Artist:"
-            text artist.Name
-        ]
-        p [
-            em "Price:"
-            text (formatDec album.Price)
+            em caption
+            text t
         ]
     ]
 ]
@@ -78,57 +73,46 @@ let viewHome () = [
     divId "promotion" []
 ]
 
-let viewAlbumsForGenre (genre : Db.Genre, albums : Db.Album list) = 
-    let item (a : Db.Album) = 
-        let href = "/store/details/" + a.AlbumId.ToString()
-        let xml = [ imgSrc "/placeholder.gif"
-                    span (text a.Title) ] |> flatten
-        href,xml
-
-    [ divAttr ["class", "genre"] 
-        [ h3 (genre.Name + " Albums")
-          ulAnchors "album-list" (List.map item albums)
+let viewAlbumsForGenre (genre : Db.Genre, albums : Db.Album list) = [ 
+    divAttr ["class", "genre"] [ 
+        h3 (genre.Name + " Albums")
+        ulAnchors "album-list" [
+            for a in albums ->
+            let href = sprintf "/store/details/%d" a.AlbumId
+            let xml = flatten [ imgSrc "/placeholder.gif"; span (text a.Title) ]
+            href,xml
         ]
     ]
+]
 
-let viewManageStore (albums : Db.AlbumDetails list) = 
-    let headers = 
-        ["Genre";"Artist";"Title";"Price";""]
-        |> List.map (text >> th)
-        |> flatten
-        |> tr
+let viewManageStore (albums : Db.AlbumDetails list) = [ 
+    h2 "Index"
+    p [aHref "/store/manage/create" (text "Create New")]
+    table [
+        yield tr [
+            for t in ["Artist";"Title";"Genre";"Price";""] -> th [ text t ]
+        ]
 
-    let actions (Db.Album a) =
-        [ anchor (sprintf "/store/manage/edit/%d" a.AlbumId) (text "Edit")
-          text " | "
-          anchor (sprintf "/store/manage/delete/%d" a.AlbumId) (text "Delete")
-        ] 
-        |> flatten
-        |> td
+        for (album,artist,genre) in albums -> 
+        tr [
+            for t in [ truncate 25 artist.Name; truncate 25 album.Title; genre.Name; formatDec album.Price ] ->
+                td [ text t ]
 
-    let details ((album, artist, genre) : Db.AlbumDetails) =
-        [ genre.Name
-          artist.Name |> truncate 25
-          album.Title |> truncate 25
-          formatDec album.Price 
-        ] |> List.map (text >> td)
-
-    let row (albumDetails : Db.AlbumDetails) =
-        List.append (details albumDetails) [actions albumDetails]
-        |> flatten
-        |> tr
-
-    [ h2 "Index"
-      p [anchor "/store/manage/create" (text "Create New")]
-      table (headers :: (List.map row albums) |> flatten)
+            yield td [
+                aHref (sprintf "/store/manage/edit/%d" album.AlbumId) (text "Edit")
+                text " | "
+                aHref (sprintf "/store/manage/delete/%d" album.AlbumId) (text "Delete")
+            ]
+        ]
     ]
-
+]
 
 let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: Db.Genre list), (artists: Db.Artist list)) = 
     let artist, genre, title, price = 
         match current with
-        | Some (album,genre,artist) -> Some artist.Name, Some genre.Name, album.Title, formatDec album.Price
-        | None -> None, None, "", ""
+        | Some (album,artist,genre) -> Some artist.Name, Some genre.Name, Some album.Title, Some (formatDec album.Price)
+        | None -> None, None, None, None
+    
     [ 
         h2 header
     
@@ -143,30 +127,30 @@ let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: D
                 div [ select "artist" [
                         for a in artists -> option (string a.ArtistId) a.Name (Some a.Name = artist) ] ]
                 div [ text "Title" ]
-                div [ inputAttr ["name", "title"; "type", "text"; "required", ""; "value", title; "maxlength", "100"] ]
+                div [ textInput "title" title ["maxlength", "100"] ]
                 div [ text "Price" ]
-                div [ inputAttr ["name", "price"; "type", "number"; "required", ""; "value", price; "step", "0.01"] ]
+                div [ numberInput "price" price ["step", "0.01";  "min", "0.01"; "max", "100.00"] ]
                 div [ text "Album Art Url" ]
-                div [ inputAttr ["name", "artUrl"; "type", "text"; "required", ""; "value", "placeholder.gif"; "maxlength", "100"; "min", "0.01"; "max", "100.00"] ]
+                div [ textInput "artUrl" (Some "placeholder.gif") ["maxlength", "100"] ]
 
                 p [ inputAttr ["type", "submit"; "value", submit] ]  
             ]
         ]
     
         div [
-            anchor "/store/manage" (text "Back to list")
+            aHref "/store/manage" (text "Back to list")
         ]
     ]
 
 let viewCreateAlbum = createEditAlbum None "Create" "Create" 
 let viewEditAlbum (album,genres,artists) = createEditAlbum (Some album) "Edit" "Save" (genres,artists)
 
-let viewDeleteAlbum (Db.Album a) = [
+let viewDeleteAlbum (Db.Album album) = [
     h2 "Delete Confirmation"
     p [ 
         text "Are you sure you want to delete the album titled"
         br
-        strong a.Title
+        strong album.Title
         text "?"
     ]
     
@@ -175,7 +159,7 @@ let viewDeleteAlbum (Db.Album a) = [
     ]
 
     div [
-        anchor "/store/manage" (text "Back to list")
+        aHref "/store/manage" (text "Back to list")
     ]
 ]
 
@@ -185,27 +169,28 @@ let viewIndex (genres : Db.Genre list) xml =
             title "F# Suave Music Store"
             cssLink "/Site.css"
         ] 
+       
         body [
             divId "header" [
-                h1 (anchor "/" (text "F# Suave Music Store"))
+                h1 (aHref "/" (text "F# Suave Music Store"))
                 ulAnchors "navlist" [ 
                     "/", text "Home"
                     "/store", text "Store"
                     "/store/manage", text "Admin"
-                ]  
+                ]
             ]
 
             ulAnchors "categories" [
-                for g in genres -> sprintf "/store/browse?genre=%s" g.Name, text g.Name
+                for genre in genres -> sprintf "/store/browse?genre=%s" genre.Name, text genre.Name
             ]
 
             divId "container" xml
             
             divId "footer" [
                 text "built with "
-                anchor "http://fsharp.org" (text "F#")
+                aHref "http://fsharp.org" (text "F#")
                 text " and "
-                anchor "http://suave.io" (text "Suave.IO")
+                aHref "http://suave.io" (text "Suave.IO")
             ]
         ]
     ]
