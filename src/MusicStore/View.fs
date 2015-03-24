@@ -49,11 +49,11 @@ let truncate k (s : string) =
 
 let formatDec (d : Decimal) = d.ToString(Globalization.CultureInfo.InvariantCulture)
 
-let viewAlbumDetails ((album, artist, genre) : Db.AlbumDetails) = [
+let viewAlbumDetails (album : Db.AlbumDetails) = [
     h2 album.Title
     p [ imgSrc "/placeholder.gif" ]
     divId "album-details" [
-        for (caption,t) in ["Genre:",genre.Name;"Artist:",artist.Name;"Price:",formatDec album.Price] ->
+        for (caption,t) in ["Genre:",album.Genre;"Artist:",album.Artist;"Price:",formatDec album.Price] ->
         p [
             em caption
             text t
@@ -93,9 +93,9 @@ let viewManageStore (albums : Db.AlbumDetails list) = [
             for t in ["Artist";"Title";"Genre";"Price";""] -> th [ text t ]
         ]
 
-        for (album,artist,genre) in albums -> 
+        for album in albums -> 
         tr [
-            for t in [ truncate 25 artist.Name; truncate 25 album.Title; genre.Name; formatDec album.Price ] ->
+            for t in [ truncate 25 album.Artist; truncate 25 album.Title; album.Genre; formatDec album.Price ] ->
                 td [ text t ]
 
             yield td [
@@ -110,7 +110,7 @@ let viewManageStore (albums : Db.AlbumDetails list) = [
 let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: Db.Genre list), (artists: Db.Artist list)) = 
     let artist, genre, title, price = 
         match current with
-        | Some (album,artist,genre) -> Some artist.Name, Some genre.Name, Some album.Title, Some (formatDec album.Price)
+        | Some album -> Some album.Artist, Some album.Genre, Some album.Title, Some (formatDec album.Price)
         | None -> None, None, None, None
     
     [ 
@@ -145,7 +145,7 @@ let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: D
 let viewCreateAlbum = createEditAlbum None "Create" "Create" 
 let viewEditAlbum (album,genres,artists) = createEditAlbum (Some album) "Edit" "Save" (genres,artists)
 
-let viewDeleteAlbum (Db.Album album) = [
+let viewDeleteAlbum (album : Db.AlbumDetails) = [
     h2 "Delete Confirmation"
     p [ 
         text "Are you sure you want to delete the album titled"

@@ -15,11 +15,7 @@ type DbContext = sql.dataContext
 type Album = DbContext.``[dbo].[Albums]Entity``
 type Genre = DbContext.``[dbo].[Genres]Entity``
 type Artist = DbContext.``[dbo].[Artists]Entity``
-type AlbumDetails = Album * Artist * Genre
-
-let (|Album|) ((a,_,_) : AlbumDetails) = a
-let (|Artist|) ((_,a,_) : AlbumDetails) = a
-let (|Genre|) ((_,_,g) : AlbumDetails) = g
+type AlbumDetails = DbContext.``[dbo].[AlbumDetails]Entity``
 
 let getAlbum id (ctx : DbContext) : Album = 
     query { 
@@ -30,21 +26,13 @@ let getAlbum id (ctx : DbContext) : Album =
     }
 
 let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 
-    query { 
-        for album in ctx.``[dbo].[Albums]`` do
-            join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
-            join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
-            select (album, artist, genre)
-    }
-    |> Seq.toList
+    ctx.``[dbo].[AlbumDetails]`` |> Seq.toList
 
 let getAlbumDetails id (ctx : DbContext) : AlbumDetails = 
     query { 
-        for album in ctx.``[dbo].[Albums]`` do
+        for album in ctx.``[dbo].[AlbumDetails]`` do
             where (album.AlbumId = id)
-            join artist in ctx.``[dbo].[Artists]`` on (album.ArtistId = artist.ArtistId)
-            join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
-            select (album, artist, genre)
+            select album
             exactlyOne
     }
 
