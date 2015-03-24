@@ -34,15 +34,14 @@ let albumForm req =
         )
     }
 
-let HTML f (x: HttpContext) = async {
+let HTML getF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx 
         
-        let con = viewIndex genres (f ctx) |> Html.xmlToString
+        let content = viewIndex genres (getF ctx) |> Html.xmlToString
 
-        return! (OK con >>= Writers.setMimeType "text/html; charset=utf-8") x
+        return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
-
 
 let postAndRedirectToManage postF (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
