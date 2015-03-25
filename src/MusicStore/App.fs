@@ -65,6 +65,8 @@ module Handlers =
             genre,albums
         getF >> viewAlbumsForGenre |> HTML
 
+    let logon = ignore >> viewLogon |> HTML
+
     let manage = Db.getAlbumsDetails >> viewManageStore |> HTML
 
     let createAlbum = 
@@ -94,6 +96,8 @@ choose [
         path "/store/browse" 
             >>= Binding.bindReq (Binding.query "genre" Choice1Of2) albumsForGenre BAD_REQUEST
         pathScan "/store/details/%d" albumDetails
+
+        path "/account/logon" >>= logon
 
         path "/store/manage" >>= manage
         path "/store/manage/create" >>= createAlbum
