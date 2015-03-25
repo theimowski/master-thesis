@@ -19,6 +19,7 @@ let td x = tag "td" [] (flatten x)
 let aHref href = tag "a" ["href", href]
 let imgSrc src = imgAttr [ "src", src ]
 let divId id = divAttr ["id", id]
+let divClass c = divAttr ["class", c]
 
 let form x = tag "form" ["method", "POST"] (flatten x)
 let fieldset x = tag "fieldset" [] (flatten x)
@@ -35,6 +36,8 @@ let textInput name value attrs =
 let numberInput name value attrs = 
     let v = match value with Some v -> v | _ -> ""
     inputAttr (["name", name; "type", "number"; "value", v; "required", ""] @ attrs)
+let passwordInput name =
+    inputAttr ["name", name; "type", "password"; "required", ""]
 
 let em s = tag "em" [] (text s)
 let strong s = tag "strong" [] (text s)
@@ -74,7 +77,7 @@ let viewHome () = [
 ]
 
 let viewAlbumsForGenre (genre : Db.Genre, albums : Db.Album list) = [ 
-    divAttr ["class", "genre"] [ 
+    divClass "genre" [ 
         h3 (genre.Name + " Albums")
         ulAnchors "album-list" [
             for a in albums ->
@@ -163,42 +166,6 @@ let viewDeleteAlbum (album : Db.AlbumDetails) = [
     ]
 ]
 
-(*
-
-@using (Html.BeginForm()) {
-    <div>
-        <fieldset>
-            <legend>Account Information</legend>
-
-            <div class="editor-label">
-                @Html.LabelFor(m => m.UserName)
-            </div>
-            <div class="editor-field">
-                @Html.TextBoxFor(m => m.UserName)
-                @Html.ValidationMessageFor(m => m.UserName)
-            </div>
-
-            <div class="editor-label">
-                @Html.LabelFor(m => m.Password)
-            </div>
-            <div class="editor-field">
-                @Html.PasswordFor(m => m.Password)
-                @Html.ValidationMessageFor(m => m.Password)
-            </div>
-
-            <div class="editor-label">
-                @Html.CheckBoxFor(m => m.RememberMe)
-                @Html.LabelFor(m => m.RememberMe)
-            </div>
-
-            <p>
-                <input type="submit" value="Log On" />
-            </p>
-        </fieldset>
-    </div>
-}
-*)
-
 let viewLogon () = [
     h2 "Log On"
     p [
@@ -209,6 +176,19 @@ let viewLogon () = [
         fieldset [
             legend "Account Information"
             
+            div [ 
+                text "User name" 
+            ]
+            divClass "editor-field" [ 
+                textInput "username" None []
+            ]
+
+            div [ 
+                text "Password" 
+            ]
+            divClass "editor-field" [ 
+                passwordInput "password"
+            ]
 
             p [
                inputAttr ["type", "submit"; "value", "Log On"]
