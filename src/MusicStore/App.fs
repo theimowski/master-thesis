@@ -11,6 +11,7 @@ open Suave.Http.RequestErrors
 open Suave.Types
 open Suave.Model
 open Suave.Utils
+open Suave.Cookie
 
 open MusicStore.Db
 open MusicStore.View
@@ -80,7 +81,14 @@ module Handlers =
         let password = x.request |> bindForm "password"
         match username,password with
         | Choice1Of2 "admin", Choice1Of2 "admin" ->
-            return! (Auth.authenticated Cookie.CookieLife.Session false >>= Redirection.redirect "/")  x
+            return! (
+                Auth.authenticated Cookie.CookieLife.Session false 
+                >>= context (fun x -> 
+                    let cookie = x.response.cookies.[Auth.SessionAuthCookie]
+                    let cookie' = (snd HttpCookie.path_) (Some "/") cookie
+                    setCookie cookie'
+                    )
+                >>= Redirection.redirect "/")  x
         | Choice1Of2 _, Choice1Of2 _ ->
             return! (ignore >> viewLogon |> HTML) x
         | _ ->
@@ -133,10 +141,11 @@ choose [
         path "/account/logon" >>= logonP
 
         path "/store/manage/create"
-            >>= Binding.bindReq albumForm createAlbumP BAD_REQUEST
+            >>= admin (Binding.bindReq albumForm createAlbumP BAD_REQUEST)
         pathScan "/store/manage/edit/%d" 
-            (fun id -> Binding.bindReq albumForm (editAlbumP id) BAD_REQUEST)
-        pathScan "/store/manage/delete/%d" deleteAlbumP
+            (fun id -> admin (Binding.bindReq albumForm (editAlbumP id) BAD_REQUEST))
+        pathScan "/store/manage/delete/%d" 
+            (fun id -> admin (deleteAlbumP id))
     ]
 
     NOT_FOUND "404"
