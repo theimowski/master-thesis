@@ -52,11 +52,14 @@ let postAndRedirectToManage postF (x: HttpContext) = async {
     }
 
 
-let admin f_success = 
-    Auth.authenticateWithLogin
-        Cookie.CookieLife.Session
-        "/account/logon"
-        f_success
+let admin f_success (x: HttpContext) = async { 
+        let path = x.request.url.AbsolutePath
+
+        return! (Auth.authenticateWithLogin
+                    Cookie.CookieLife.Session
+                    (sprintf "/account/logon?returnPath=%s" path)
+                    f_success) x
+    }
 
 [<AutoOpen>]
 module Handlers =
@@ -88,7 +91,9 @@ module Handlers =
                     let cookie' = (snd HttpCookie.path_) (Some "/") cookie
                     setCookie cookie'
                     )
-                >>= Redirection.redirect "/")  x
+                >>= request (fun x -> 
+                    let path = defaultArg (x.queryParam "returnPath") "/"
+                    Redirection.redirect path))  x
         | Choice1Of2 _, Choice1Of2 _ ->
             return! (ignore >> viewLogon |> HTML) x
         | _ ->
