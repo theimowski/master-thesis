@@ -15,8 +15,9 @@ open Suave.Utils
 open MusicStore.Db
 open MusicStore.View
 
+let bindForm key = Binding.form key Choice1Of2
+
 let albumForm req = 
-    let bindForm key = Binding.form key Choice1Of2
     
     binding {
         let! artistId = req |> bindForm "artist" >>. Parse.int32
@@ -49,6 +50,13 @@ let postAndRedirectToManage postF (x: HttpContext) = async {
         return! Redirection.redirect "/store/manage" x   
     }
 
+
+let admin f_success = 
+    Auth.authenticateWithLogin
+        Cookie.CookieLife.Session
+        "/account/logon"
+        f_success
+
 [<AutoOpen>]
 module Handlers =
 
@@ -65,27 +73,42 @@ module Handlers =
             genre,albums
         getF >> viewAlbumsForGenre |> HTML
 
-    let manage = Db.getAlbumsDetails >> viewManageStore |> HTML
+    let logon = ignore >> viewLogon |> HTML
+
+    let logonP (x: HttpContext) = async {
+        let username = x.request |> bindForm "username"
+        let password = x.request |> bindForm "password"
+        match username,password with
+        | Choice1Of2 "admin", Choice1Of2 "admin" ->
+            return! (Auth.authenticated Cookie.CookieLife.Session false >>= Redirection.redirect "/")  x
+        | Choice1Of2 _, Choice1Of2 _ ->
+            return! (ignore >> viewLogon |> HTML) x
+        | _ ->
+            return! BAD_REQUEST "Missing username or password" x
+    }
+
+    let manage = Db.getAlbumsDetails >> viewManageStore |> HTML |> admin
 
     let createAlbum = 
         let getF db = Db.getGenres db, Db.getArtists db
-        getF >> viewCreateAlbum |> HTML
+        getF >> viewCreateAlbum |> HTML |> admin
     
     let createAlbumP = 
-        Db.saveAlbum Db.newAlbum >> postAndRedirectToManage
+        Db.saveAlbum Db.newAlbum >> postAndRedirectToManage 
 
     let editAlbum id = 
         let getF db = Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db
-        getF >> viewEditAlbum |> HTML
+        getF >> viewEditAlbum |> HTML |> admin
     
     let editAlbumP id = 
         Db.saveAlbum (Db.getAlbum id) >> postAndRedirectToManage
 
     let deleteAlbum id = 
-        Db.getAlbumDetails id >> viewDeleteAlbum |> HTML
+        Db.getAlbumDetails id >> viewDeleteAlbum |> HTML |> admin
     
     let deleteAlbumP = 
         Db.deleteAlbum >> postAndRedirectToManage
+
 
 choose [
     GET >>= choose [
@@ -94,6 +117,8 @@ choose [
         path "/store/browse" 
             >>= Binding.bindReq (Binding.query "genre" Choice1Of2) albumsForGenre BAD_REQUEST
         pathScan "/store/details/%d" albumDetails
+
+        path "/account/logon" >>= logon
 
         path "/store/manage" >>= manage
         path "/store/manage/create" >>= createAlbum
@@ -105,6 +130,8 @@ choose [
     ]
 
     POST >>= choose [
+        path "/account/logon" >>= logonP
+
         path "/store/manage/create"
             >>= Binding.bindReq albumForm createAlbumP BAD_REQUEST
         pathScan "/store/manage/edit/%d" 
