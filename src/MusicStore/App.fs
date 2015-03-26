@@ -150,4 +150,7 @@ choose [
 
     NOT_FOUND "404"
 ]
-|> startWebServer {defaultConfig with bindings = [HttpBinding.mk' HTTP "127.0.0.1" 8028]}
+|> startWebServer 
+    { defaultConfig with 
+        bindings = [ HttpBinding.mk' HTTP "127.0.0.1" 8028 ]
+        logger = Logging.Loggers.ConsoleWindowLogger(Logging.Debug) }
