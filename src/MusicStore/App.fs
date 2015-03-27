@@ -45,9 +45,18 @@ let HTML getF (x: HttpContext) = async {
         return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
-let postAndRedirectToManage postF (x: HttpContext) = async {
+let HTML2 html (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
-        postF ctx
+        let genres = Db.getGenres ctx 
+        
+        let content = viewIndex genres html |> Html.xmlToString
+
+        return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
+    }
+
+let postAndRedirectToManage postF (x: HttpContext) = async {
+        //let ctx = sql.GetDataContext()
+        postF ()
         return! Redirection.redirect "/store/manage" x   
     }
 
@@ -61,6 +70,14 @@ let admin f_success (x: HttpContext) = async {
                     f_success) x
     }
 
+let lift success = function
+    | Some x -> success x
+    | None -> (fun x -> fail)
+
+let withCtx dbF = dbF (sql.GetDataContext())
+
+let saveAlbum = withCtx Db.saveAlbum
+
 [<AutoOpen>]
 module Handlers =
 
@@ -68,14 +85,16 @@ module Handlers =
     
     let store = Db.getGenres >> viewStore |> HTML
 
-    let albumDetails id = Db.getAlbumDetails id >> viewAlbumDetails |> HTML
+    let albumDetails = withCtx Db.getAlbumDetails >> lift (viewAlbumDetails >> HTML2)
 
-    let albumsForGenre name = 
-        let getF db =
-            let genre = Db.getGenre name db
-            let albums = Db.getAlbumsForGenre genre.GenreId db
-            genre,albums
-        getF >> viewAlbumsForGenre |> HTML
+    let albumsForGenre = 
+        let getF db name =
+            match Db.getGenre name db with
+            | Some genre ->
+                let albums = Db.getAlbumsForGenre genre.GenreId db
+                Some (genre,albums)
+            | None -> None
+        withCtx getF >> lift (viewAlbumsForGenre >> HTML2)
 
     let logon = ignore >> viewLogon |> HTML
 
@@ -106,21 +125,29 @@ module Handlers =
         let getF db = Db.getGenres db, Db.getArtists db
         getF >> viewCreateAlbum |> HTML |> admin
     
-    let createAlbumP = 
-        Db.saveAlbum Db.newAlbum >> postAndRedirectToManage 
+    let createAlbumP f = 
+        saveAlbum ((fun () -> withCtx Db.newAlbum)) f 
+        Redirection.redirect "/store/manage" 
 
-    let editAlbum id = 
-        let getF db = Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db
-        getF >> viewEditAlbum |> HTML |> admin
+    let editAlbum = 
+        let getF db id =
+            match Db.getAlbumDetails db id with
+            | Some a -> Some (a, Db.getGenres db, Db.getArtists db)
+            | None -> None 
+        withCtx getF >> (lift (viewEditAlbum >> HTML2))
     
-    let editAlbumP id = 
-        Db.saveAlbum (Db.getAlbum id) >> postAndRedirectToManage
+    let editAlbumP id f = 
+        match (withCtx Db.getAlbum) id with
+        | Some album -> 
+            saveAlbum (fun () -> album) f
+            Redirection.redirect "/store/manage" 
+        | None -> fun x -> fail
 
-    let deleteAlbum id = 
-        Db.getAlbumDetails id >> viewDeleteAlbum |> HTML |> admin
+    let deleteAlbum = 
+        withCtx Db.getAlbumDetails >> lift (viewDeleteAlbum >> HTML2 >> admin)
     
     let deleteAlbumP = 
-        Db.deleteAlbum >> postAndRedirectToManage
+        withCtx Db.deleteAlbum >> lift (fun _ -> Redirection.redirect "/store/manage")
 
 
 choose [

@@ -17,24 +17,26 @@ type Genre = DbContext.``[dbo].[Genres]Entity``
 type Artist = DbContext.``[dbo].[Artists]Entity``
 type AlbumDetails = DbContext.``[dbo].[AlbumDetails]Entity``
 
-let getAlbum id (ctx : DbContext) : Album = 
+let option = function | null -> None | x -> Some x
+
+let getAlbum (ctx : DbContext) id : Album option = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             where (album.AlbumId = id)
             select album
-            exactlyOne
-    }
+            exactlyOneOrDefault
+    } |> option
 
 let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 
     ctx.``[dbo].[AlbumDetails]`` |> Seq.toList
 
-let getAlbumDetails id (ctx : DbContext) : AlbumDetails = 
+let getAlbumDetails (ctx : DbContext) id : AlbumDetails option = 
     query { 
         for album in ctx.``[dbo].[AlbumDetails]`` do
             where (album.AlbumId = id)
             select album
-            exactlyOne
-    }
+            exactlyOneOrDefault
+    } |> option
 
 let getAlbumsForGenre genreId (ctx : DbContext) : Album list = 
     query { 
@@ -44,13 +46,13 @@ let getAlbumsForGenre genreId (ctx : DbContext) : Album list =
     }
     |> Seq.toList
 
-let getGenre name (ctx : DbContext) : Genre = 
+let getGenre name (ctx : DbContext) : Genre option = 
     query { 
         for genre in ctx.``[dbo].[Genres]`` do
             where (genre.Name = name)
             select genre
-            exactlyOne
-    }
+            exactlyOneOrDefault
+    } |> option
 
 let getGenres (ctx : DbContext) : Genre list = 
     ctx.``[dbo].[Genres]`` |> Seq.toList
@@ -61,11 +63,14 @@ let getArtists (ctx : DbContext) : Artist list =
 let newAlbum (ctx : DbContext) : Album =
     ctx.``[dbo].[Albums]``.Create()
 
-let saveAlbum albumF setterF (ctx : DbContext) =
-    setterF (albumF ctx)
+let saveAlbum (ctx : DbContext) albumF setterF =
+    setterF (albumF ())
     ctx.SubmitUpdates()
 
-let deleteAlbum id (ctx : DbContext) = 
-    let album = getAlbum id ctx
-    album.Delete()
-    ctx.SubmitUpdates()
+let deleteAlbum (ctx : DbContext) id = 
+    match getAlbum ctx id with
+    | Some album ->
+        album.Delete()
+        ctx.SubmitUpdates()
+        Some ()
+    | None -> None
