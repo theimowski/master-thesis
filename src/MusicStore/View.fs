@@ -57,9 +57,12 @@ let viewAlbumDetails (album : Db.AlbumDetails) = [
     p [ imgSrc "/placeholder.gif" ]
     divId "album-details" [
         for (caption,t) in ["Genre:",album.Genre;"Artist:",album.Artist;"Price:",formatDec album.Price] ->
-        p [
-            em caption
-            text t
+            p [
+                em caption
+                text t
+            ]
+        yield pAttr ["class", "button"] [
+            aHref (sprintf "/cart/add/%d" album.AlbumId) (text "Add to cart")
         ]
     ]
 ]
@@ -193,6 +196,24 @@ let viewLogon = [
             p [
                inputAttr ["type", "submit"; "value", "Log On"]
             ]
+        ]
+    ]
+]
+
+let viewCart = [
+    h3 "Review your cart:"
+    pAttr ["class", "button"] [
+            aHref "/" (text "Checkout >>")
+    ]
+    divId "update-message" []
+    table [
+        yield tr [
+            for h in ["Album Name"; "Price (each)"; "Quantity"; ""] ->
+            th [text h]
+        ]
+        yield tr [
+            for d in ["Total"; ""; ""; ""] ->
+            td [text d]
         ]
     ]
 ]

@@ -105,6 +105,8 @@ module Handlers =
             return! BAD_REQUEST "Missing username or password" x
     }
 
+    let addToCart id = viewCart |> HTML
+
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
 
     let createAlbum = 
@@ -146,6 +148,8 @@ choose [
         pathScan "/store/details/%d" albumDetails
 
         path "/account/logon" >>= logon
+
+        pathScan "/cart/add/%d" addToCart
 
         path "/store/manage" >>= manage
         path "/store/manage/create" >>= createAlbum
