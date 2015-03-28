@@ -36,48 +36,53 @@ let albumForm req =
         )
     }
 
-let HTML getF (x: HttpContext) = async {
+let HTML html (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
-        let genres = Db.getGenres ctx 
+        let genres = Db.getGenres ctx
         
-        let content = viewIndex genres (getF ctx) |> Html.xmlToString
+        let content = viewIndex genres html |> Html.xmlToString
 
         return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
-let postAndRedirectToManage postF (x: HttpContext) = async {
-        let ctx = sql.GetDataContext()
-        postF ctx
-        return! Redirection.redirect "/store/manage" x   
-    }
-
-
 let admin f_success (x: HttpContext) = async { 
         let path = x.request.url.AbsolutePath
-
         return! (Auth.authenticateWithLogin
                     Cookie.CookieLife.Session
                     (sprintf "/account/logon?returnPath=%s" path)
                     f_success) x
     }
 
+let actOnAlbumAndBackToManage f (ctx : DbContext) album =
+    f album
+    ctx.SubmitUpdates()
+    Redirection.redirect "/store/manage"
+
+let lift success = function
+    | Some x -> success x
+    | None -> (fun _ -> fail)
+
+let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
+
 [<AutoOpen>]
 module Handlers =
 
-    let home = ignore >> viewHome |> HTML
+    let home = viewHome |> HTML
     
-    let store = Db.getGenres >> viewStore |> HTML
+    let store = withDb (Db.getGenres >> viewStore >> HTML)
 
-    let albumDetails id = Db.getAlbumDetails id >> viewAlbumDetails |> HTML
+    let albumDetails id = withDb (Db.getAlbumDetails id >> lift (viewAlbumDetails >> HTML))
 
     let albumsForGenre name = 
         let getF db =
-            let genre = Db.getGenre name db
-            let albums = Db.getAlbumsForGenre genre.GenreId db
-            genre,albums
-        getF >> viewAlbumsForGenre |> HTML
+            match Db.getGenre name db with
+            | Some genre ->
+                let albums = Db.getAlbumsForGenre genre.GenreId db
+                Some (genre,albums)
+            | None -> None
+        withDb (getF >> lift (viewAlbumsForGenre >> HTML))
 
-    let logon = ignore >> viewLogon |> HTML
+    let logon = viewLogon |> HTML
 
     let logonP (x: HttpContext) = async {
         let username = x.request |> bindForm "username"
@@ -95,33 +100,42 @@ module Handlers =
                     let path = defaultArg (x.queryParam "returnPath") "/"
                     Redirection.redirect path))  x
         | Choice1Of2 _, Choice1Of2 _ ->
-            return! (ignore >> viewLogon |> HTML) x
+            return! logon x
         | _ ->
             return! BAD_REQUEST "Missing username or password" x
     }
 
-    let manage = Db.getAlbumsDetails >> viewManageStore |> HTML |> admin
+    let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
 
     let createAlbum = 
         let getF db = Db.getGenres db, Db.getArtists db
-        getF >> viewCreateAlbum |> HTML |> admin
+        withDb (getF >> viewCreateAlbum >> HTML >> admin)
     
-    let createAlbumP = 
-        Db.saveAlbum Db.newAlbum >> postAndRedirectToManage 
+    let createAlbumP f = 
+        withDb (fun db -> 
+                Db.newAlbum db 
+                |> actOnAlbumAndBackToManage f db)
 
     let editAlbum id = 
-        let getF db = Db.getAlbumDetails id db, Db.getGenres db, Db.getArtists db
-        getF >> viewEditAlbum |> HTML |> admin
+        let getF db =
+            match Db.getAlbumDetails id db with
+            | Some a -> Some (a, Db.getGenres db, Db.getArtists db)
+            | None -> None 
+        withDb (getF >> lift (viewEditAlbum >> HTML))
     
-    let editAlbumP id = 
-        Db.saveAlbum (Db.getAlbum id) >> postAndRedirectToManage
+    let editAlbumP id f = 
+        withDb (fun db ->
+                Db.getAlbum id db
+                |> lift (actOnAlbumAndBackToManage f db))
 
     let deleteAlbum id = 
-        Db.getAlbumDetails id >> viewDeleteAlbum |> HTML |> admin
+        withDb (Db.getAlbumDetails id >> lift (viewDeleteAlbum >> HTML >> admin))
     
-    let deleteAlbumP = 
-        Db.deleteAlbum >> postAndRedirectToManage
-
+    let deleteAlbumP id =
+        let f (album : Album) = album.Delete()
+        withDb (fun db ->
+                Db.getAlbum id db
+                |> lift (actOnAlbumAndBackToManage f db))
 
 choose [
     GET >>= choose [
