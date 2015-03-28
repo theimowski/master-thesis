@@ -72,7 +72,7 @@ let viewStore (genres : Db.Genre list) = [
     ]
 ]
 
-let viewHome () = [
+let viewHome = [
     divId "promotion" []
 ]
 
@@ -166,7 +166,7 @@ let viewDeleteAlbum (album : Db.AlbumDetails) = [
     ]
 ]
 
-let viewLogon () = [
+let viewLogon = [
     h2 "Log On"
     p [
         text "Please enter your user name and password."
