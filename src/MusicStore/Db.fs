@@ -19,7 +19,7 @@ type AlbumDetails = DbContext.``[dbo].[AlbumDetails]Entity``
 
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
-let getAlbum (ctx : DbContext) id : Album option = 
+let getAlbum id (ctx : DbContext) : Album option = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             where (album.AlbumId = id)
@@ -29,7 +29,7 @@ let getAlbum (ctx : DbContext) id : Album option =
 let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 
     ctx.``[dbo].[AlbumDetails]`` |> Seq.toList
 
-let getAlbumDetails (ctx : DbContext) id : AlbumDetails option = 
+let getAlbumDetails id (ctx : DbContext) : AlbumDetails option = 
     query { 
         for album in ctx.``[dbo].[AlbumDetails]`` do
             where (album.AlbumId = id)
@@ -59,15 +59,3 @@ let getArtists (ctx : DbContext) : Artist list =
 
 let newAlbum (ctx : DbContext) : Album =
     ctx.``[dbo].[Albums]``.Create()
-
-let saveAlbum (ctx : DbContext) albumF setterF =
-    setterF (albumF ())
-    ctx.SubmitUpdates()
-
-let deleteAlbum (ctx : DbContext) id = 
-    match getAlbum ctx id with
-    | Some album ->
-        album.Delete()
-        ctx.SubmitUpdates()
-        Some ()
-    | None -> None
