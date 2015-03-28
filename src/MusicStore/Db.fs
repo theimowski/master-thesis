@@ -8,7 +8,7 @@ open FSharp.Data.Sql
 
 type sql = 
     SqlDataProvider< 
-        "Server=localhost;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true", 
+        "Server=(LocalDb)\\v11.0;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true", 
         DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >
 
 type DbContext = sql.dataContext
@@ -17,15 +17,14 @@ type Genre = DbContext.``[dbo].[Genres]Entity``
 type Artist = DbContext.``[dbo].[Artists]Entity``
 type AlbumDetails = DbContext.``[dbo].[AlbumDetails]Entity``
 
-let option = function | null -> None | x -> Some x
+let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
 let getAlbum (ctx : DbContext) id : Album option = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
             where (album.AlbumId = id)
             select album
-            exactlyOneOrDefault
-    } |> option
+    } |> firstOrNone
 
 let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 
     ctx.``[dbo].[AlbumDetails]`` |> Seq.toList
@@ -35,8 +34,7 @@ let getAlbumDetails (ctx : DbContext) id : AlbumDetails option =
         for album in ctx.``[dbo].[AlbumDetails]`` do
             where (album.AlbumId = id)
             select album
-            exactlyOneOrDefault
-    } |> option
+    } |> firstOrNone
 
 let getAlbumsForGenre genreId (ctx : DbContext) : Album list = 
     query { 
@@ -51,8 +49,7 @@ let getGenre name (ctx : DbContext) : Genre option =
         for genre in ctx.``[dbo].[Genres]`` do
             where (genre.Name = name)
             select genre
-            exactlyOneOrDefault
-    } |> option
+    } |> firstOrNone
 
 let getGenres (ctx : DbContext) : Genre list = 
     ctx.``[dbo].[Genres]`` |> Seq.toList
