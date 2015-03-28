@@ -200,7 +200,28 @@ let viewLogon = [
     ]
 ]
 
-let viewCart = [
+(*
+
+ @foreach (var item in Model.CartItems)
+    {
+        <tr id="row-@item.RecordId">
+            <td>
+                @Html.ActionLink(item.Album.Title, "Details", "Store", new { id = item.AlbumId }, null)
+            </td>
+            <td>
+                @item.Album.Price
+            </td>
+            <td id="item-count-@item.RecordId">
+                @item.Count
+            </td>
+            <td>
+                <a href="#" class="RemoveLink" data-id="@item.RecordId">Remove from cart</a>
+            </td>
+        </tr>
+    }
+*)
+
+let viewCart (carts : Db.Cart list) = [
     h3 "Review your cart:"
     pAttr ["class", "button"] [
             aHref "/" (text "Checkout >>")
@@ -211,6 +232,18 @@ let viewCart = [
             for h in ["Album Name"; "Price (each)"; "Quantity"; ""] ->
             th [text h]
         ]
+        for cart in carts ->
+            tr [
+                td [
+                    text ("dummy")
+                ]
+                td [
+                    text (cart.AlbumId.ToString())
+                ]
+                td [
+                    text (cart.Count.ToString())
+                ]
+            ]
         yield tr [
             for d in ["Total"; ""; ""; ""] ->
             td [text d]

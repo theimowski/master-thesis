@@ -16,6 +16,7 @@ type Album = DbContext.``[dbo].[Albums]Entity``
 type Genre = DbContext.``[dbo].[Genres]Entity``
 type Artist = DbContext.``[dbo].[Artists]Entity``
 type AlbumDetails = DbContext.``[dbo].[AlbumDetails]Entity``
+type Cart = DbContext.``[dbo].[Carts]Entity``
 
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
@@ -59,3 +60,20 @@ let getArtists (ctx : DbContext) : Artist list =
 
 let newAlbum (ctx : DbContext) : Album =
     ctx.``[dbo].[Albums]``.Create()
+
+let getCart cartId albumId (ctx : DbContext) : Cart option =
+    query {
+        for cart in ctx.``[dbo].[Carts]`` do
+            where (cart.CartId = cartId && cart.AlbumId = albumId)
+            select cart
+    } |> firstOrNone
+
+let getCarts cartId (ctx : DbContext) : Cart list =
+    query {
+        for cart in ctx.``[dbo].[Carts]`` do
+            where (cart.CartId = cartId)
+            select cart
+    } |> Seq.toList
+
+let newCart cartId albumId (ctx : DbContext) : Cart =
+    ctx.``[dbo].[Carts]``.Create(albumId, cartId, 1, DateTime.UtcNow)

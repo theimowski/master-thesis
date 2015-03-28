@@ -12,6 +12,7 @@ open Suave.Types
 open Suave.Model
 open Suave.Utils
 open Suave.Cookie
+open Suave.State.CookieStateStore
 
 open MusicStore.Db
 open MusicStore.View
@@ -64,6 +65,12 @@ let lift success = function
 
 let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
 
+let overwriteCookiePathToRoot cookieName =
+    context (fun x ->
+        let cookie = x.response.cookies.[cookieName]
+        let cookie' = (snd HttpCookie.path_) (Some "/") cookie
+        setCookie cookie')
+
 [<AutoOpen>]
 module Handlers =
 
@@ -91,11 +98,7 @@ module Handlers =
         | Choice1Of2 "admin", Choice1Of2 "admin" ->
             return! (
                 Auth.authenticated Cookie.CookieLife.Session false 
-                >>= context (fun x -> 
-                    let cookie = x.response.cookies.[Auth.SessionAuthCookie]
-                    let cookie' = (snd HttpCookie.path_) (Some "/") cookie
-                    setCookie cookie'
-                    )
+                >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
                 >>= request (fun x -> 
                     let path = defaultArg (x.queryParam "returnPath") "/"
                     Redirection.redirect path))  x
@@ -105,7 +108,42 @@ module Handlers =
             return! BAD_REQUEST "Missing username or password" x
     }
 
-    let addToCart id = viewCart |> HTML
+    let cart = 
+        context (fun x ->
+            match x |> HttpContext.state with
+            | None -> 
+                viewCart [] |> HTML
+            | Some store -> 
+                match store.get "cartId" with
+                | Some cartId ->
+                    withDb (Db.getCarts cartId >> viewCart >> HTML)
+                | None ->
+                    viewCart [] |> HTML)
+
+    let addToCart albumId = 
+        let add cartId db  =
+            match Db.getCart cartId albumId db with
+            | Some cart ->
+                cart.Count <- cart.Count + 1
+            | None ->
+                Db.newCart cartId albumId db |> ignore
+            db.SubmitUpdates()
+            Redirection.redirect "/cart"
+
+        statefulForSession
+        >>= context (fun x ->
+            match x |> HttpContext.state with
+            | None -> 
+                Redirection.FOUND (sprintf "/cart/add/%d" albumId)
+            | Some store -> 
+                match store.get "cartId" with
+                | Some cartId ->
+                    withDb (add cartId)
+                | None ->
+                    let cartId = Guid.NewGuid().ToString("N")
+                    store.set "cartId" cartId
+                    >>= withDb (add cartId))
+        >>= overwriteCookiePathToRoot StateCookie
 
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
 
@@ -149,6 +187,7 @@ choose [
 
         path "/account/logon" >>= logon
 
+        path "/cart" >>= cart
         pathScan "/cart/add/%d" addToCart
 
         path "/store/manage" >>= manage
