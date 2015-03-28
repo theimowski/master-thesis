@@ -17,6 +17,7 @@ type Genre = DbContext.``[dbo].[Genres]Entity``
 type Artist = DbContext.``[dbo].[Artists]Entity``
 type AlbumDetails = DbContext.``[dbo].[AlbumDetails]Entity``
 type Cart = DbContext.``[dbo].[Carts]Entity``
+type CartDetails = DbContext.``[dbo].[CartDetails]Entity``
 
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
@@ -68,9 +69,9 @@ let getCart cartId albumId (ctx : DbContext) : Cart option =
             select cart
     } |> firstOrNone
 
-let getCarts cartId (ctx : DbContext) : Cart list =
+let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
     query {
-        for cart in ctx.``[dbo].[Carts]`` do
+        for cart in ctx.``[dbo].[CartDetails]`` do
             where (cart.CartId = cartId)
             select cart
     } |> Seq.toList

@@ -221,7 +221,7 @@ let viewLogon = [
     }
 *)
 
-let viewCart (carts : Db.Cart list) = [
+let viewCart (carts : Db.CartDetails list) = [
     h3 "Review your cart:"
     pAttr ["class", "button"] [
             aHref "/" (text "Checkout >>")
@@ -235,17 +235,20 @@ let viewCart (carts : Db.Cart list) = [
         for cart in carts ->
             tr [
                 td [
-                    text ("dummy")
+                    aHref (sprintf "/store/details/%d" cart.AlbumId) (text cart.AlbumTitle)
                 ]
                 td [
-                    text (cart.AlbumId.ToString())
+                    text (formatDec cart.Price)
                 ]
                 td [
                     text (cart.Count.ToString())
                 ]
+                td [
+                    aHref "#" (text "Remove from cart")
+                ]
             ]
         yield tr [
-            for d in ["Total"; ""; ""; ""] ->
+            for d in ["Total"; ""; ""; carts |> List.sumBy (fun c -> c.Price * (decimal c.Count)) |> formatDec] ->
             td [text d]
         ]
     ]

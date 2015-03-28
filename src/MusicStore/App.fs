@@ -116,7 +116,7 @@ module Handlers =
             | Some store -> 
                 match store.get "cartId" with
                 | Some cartId ->
-                    withDb (Db.getCarts cartId >> viewCart >> HTML)
+                    withDb (Db.getCartsDetails cartId >> viewCart >> HTML)
                 | None ->
                     viewCart [] |> HTML)
 
