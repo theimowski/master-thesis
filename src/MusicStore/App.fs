@@ -71,6 +71,13 @@ let overwriteCookiePathToRoot cookieName =
         let cookie' = (snd HttpCookie.path_) (Some "/") cookie
         setCookie cookie')
 
+let passHash (pass: string) =
+    use sha = Security.Cryptography.SHA256.Create()
+    Text.Encoding.UTF8.GetBytes(pass)
+    |> sha.ComputeHash
+    |> Array.map (fun b -> b.ToString("x2"))
+    |> String.concat ""
+
 [<AutoOpen>]
 module Handlers =
 
@@ -97,15 +104,20 @@ module Handlers =
         let username = x.request |> bindForm "username"
         let password = x.request |> bindForm "password"
         match username,password with
-        | Choice1Of2 "admin", Choice1Of2 "admin" ->
-            return! (
-                Auth.authenticated Cookie.CookieLife.Session false 
-                >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
-                >>= request (fun x -> 
-                    let path = defaultArg (x.queryParam "returnPath") "/"
-                    Redirection.redirect path))  x
-        | Choice1Of2 _, Choice1Of2 _ ->
-            return! logon x
+        | Choice1Of2 username, Choice1Of2 password ->
+            let auth db =
+                match Db.getUser (username, passHash password) db with
+                | Some user when user.Role = "admin" ->
+                        Auth.authenticated Cookie.CookieLife.Session false 
+                        >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
+                        >>= request (fun x -> 
+                            let path = defaultArg (x.queryParam "returnPath") "/"
+                            Redirection.redirect path)
+                | Some _ ->
+                    UNAUTHORIZED "Unauthorized"
+                | _ ->
+                    logon
+            return! (withDb auth) x
         | _ ->
             return! BAD_REQUEST "Missing username or password" x
     }
@@ -117,10 +129,8 @@ module Handlers =
         let confirmpassword = x.request |> bindForm "confirmpassword"
         match username, email, password with
         | Choice1Of2 username, Choice1Of2 email, Choice1Of2 password ->
-            use sha = Security.Cryptography.SHA256.Create()
-            let hash = sha.ComputeHash(Text.Encoding.UTF8.GetBytes(email)) |> Convert.ToBase64String
             let createUser db =
-                Db.newUser (email, hash, "user", username) db |> ignore
+                Db.newUser (email, passHash password, "user", username) db |> ignore
                 db.SubmitUpdates()
                 Redirection.redirect "/"
             return! (withDb createUser) x
