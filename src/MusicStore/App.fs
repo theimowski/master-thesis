@@ -190,6 +190,8 @@ module Handlers =
             for cart in carts do
                 let orderDetails = Db.newOrderDetails (cart.AlbumId, order.OrderId, cart.Count, cart.Price) db
                 orderDetails.OrderId <- order.OrderId
+                Db.getCart cart.CartId cart.AlbumId db
+                |> Option.iter (fun cart -> cart.Delete())
             db.SubmitUpdates()
             viewCheckoutComplete order.OrderId |> HTML
 
