@@ -205,7 +205,7 @@ let viewCart (carts : Db.CartDetails list) = [
     pAttr ["class", "button"] [
             aHref "/" (text "Checkout >>")
     ]
-    spanAttr ["id", "update-message"] (text " ")
+    divId "update-message" [text " "]
     table [
         yield tr [
             for h in ["Album Name"; "Price (each)"; "Quantity"; ""] ->
@@ -223,7 +223,7 @@ let viewCart (carts : Db.CartDetails list) = [
                     text (cart.Count.ToString())
                 ]
                 td [
-                    aHrefAttr "#" ["id", "remove"; "data-id", cart.AlbumId.ToString()] (text "Remove from cart") 
+                    aHrefAttr "#" ["class", "removeFromCart"; "data-id", cart.AlbumId.ToString()] (text "Remove from cart") 
                 ]
             ]
         yield tr [

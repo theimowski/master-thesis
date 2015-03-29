@@ -152,7 +152,7 @@ module Handlers =
                 cart.Count <- cart.Count - 1
                 if cart.Count = 0 then cart.Delete()
                 db.SubmitUpdates()
-                NO_CONTENT
+                (Db.getCartsDetails cartId >> viewCart >> Html.flatten >> Html.xmlToString) (sql.GetDataContext()) |> OK
             | None ->
                 fun x -> fail
         
