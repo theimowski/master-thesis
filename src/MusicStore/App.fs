@@ -182,6 +182,17 @@ module Handlers =
                 )
 
     let checkoutComplete = 
+        let order cartId db =
+            let carts = Db.getCartsDetails cartId db
+            let total = carts |> List.sumBy (fun c -> (decimal) c.Count * c.Price)
+            let order = Db.newOrder total db
+            db.SubmitUpdates()
+            for cart in carts do
+                let orderDetails = Db.newOrderDetails (cart.AlbumId, order.OrderId, cart.Count, cart.Price) db
+                orderDetails.OrderId <- order.OrderId
+            db.SubmitUpdates()
+            viewCheckoutComplete order.OrderId |> HTML
+
         context (fun x ->
             match x |> HttpContext.state with
             | None -> 
@@ -191,7 +202,7 @@ module Handlers =
                 | None ->
                     fun x -> fail
                 | Some cartId ->
-                    viewCheckoutComplete 28 |> HTML
+                    withDb (order cartId)
                 )
 
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)

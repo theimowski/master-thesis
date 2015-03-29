@@ -18,6 +18,8 @@ type Artist = DbContext.``[dbo].[Artists]Entity``
 type AlbumDetails = DbContext.``[dbo].[AlbumDetails]Entity``
 type Cart = DbContext.``[dbo].[Carts]Entity``
 type CartDetails = DbContext.``[dbo].[CartDetails]Entity``
+type Order = DbContext.``[dbo].[Orders]Entity``
+type OrderDetails = DbContext.``[dbo].[OrderDetails]Entity``
 
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
@@ -78,3 +80,9 @@ let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
 
 let newCart cartId albumId (ctx : DbContext) : Cart =
     ctx.``[dbo].[Carts]``.Create(albumId, cartId, 1, DateTime.UtcNow)
+
+let newOrder total (ctx : DbContext) : Order =
+    ctx.``[dbo].[Orders]``.Create(DateTime.UtcNow, total)
+
+let newOrderDetails (albumId, orderId, quantity, unitPrice) (ctx : DbContext) : OrderDetails =
+    ctx.``[dbo].[OrderDetails]``.Create(albumId, orderId, quantity, unitPrice)
