@@ -5,3 +5,5 @@ nuget FAKE
 nuget SQLProvider
 nuget Suave
 nuget Suave.Experimental
+
+http http://code.jquery.com/jquery-1.11.2.js

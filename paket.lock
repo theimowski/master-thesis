@@ -17,3 +17,7 @@ NUGET
     Suave.Experimental (0.26.0)
       FSharp.Core (>= 3.1.2.1)
       Suave (>= 0.26.0)
+HTTP
+  remote: http://code.jquery.com
+  specs:
+    jquery-1.11.2.js (/jquery-1.11.2.js)

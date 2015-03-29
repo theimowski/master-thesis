@@ -145,6 +145,29 @@ module Handlers =
                     >>= withDb (add cartId))
         >>= overwriteCookiePathToRoot StateCookie
 
+    let removeFromCart albumId =
+        let remove cartId db =
+            match Db.getCart cartId albumId db with
+            | Some cart ->
+                cart.Count <- cart.Count - 1
+                if cart.Count = 0 then cart.Delete()
+                db.SubmitUpdates()
+                NO_CONTENT
+            | None ->
+                fun x -> fail
+        
+        context (fun x ->
+            match x |> HttpContext.state with
+            | None -> 
+                fun x -> fail
+            | Some store -> 
+                match store.get "cartId" with
+                | None ->
+                    fun x -> fail
+                | Some cartId ->
+                    withDb (remove cartId)
+                )
+
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
 
     let createAlbum = 
@@ -195,12 +218,15 @@ choose [
         pathScan "/store/manage/edit/%d" editAlbum
         pathScan "/store/manage/delete/%d" deleteAlbum
 
-        pathRegex "(.*?)\.(?!js$|css$|png$|gif$).*" >>= RequestErrors.FORBIDDEN "Access denied."
+        path "/jquery-1.11.2.js" >>= Files.browseFileHome "jquery-1.11.2.js"
+        pathRegex "(.*?)\.(?!js|css|png|gif).*" >>= RequestErrors.FORBIDDEN "Access denied."
         Files.browseHome
     ]
 
     POST >>= choose [
         path "/account/logon" >>= logonP
+        
+        pathScan "/cart/remove/%d" removeFromCart
 
         path "/store/manage/create"
             >>= admin (Binding.bindReq albumForm createAlbumP BAD_REQUEST)

@@ -4,8 +4,7 @@ open System
 
 open Suave.Html
 
-let cssLink href = 
-    linkAttr [ "href", href; "rel", "stylesheet"; "type", "text/css" ]
+let cssLink href = linkAttr [ "href", href; " rel", "stylesheet"; " type", "text/css" ]
 
 let h1 xml = tag "h1" [] xml
 let h2 s = tag "h2" [] (text s)
@@ -17,6 +16,7 @@ let tr x = tag "tr" [] (flatten x)
 let td x = tag "td" [] (flatten x)
 
 let aHref href = tag "a" ["href", href]
+let aHrefAttr href attr = tag "a" (("href", href) :: attr)
 let imgSrc src = imgAttr [ "src", src ]
 let divId id = divAttr ["id", id]
 let divClass c = divAttr ["class", c]
@@ -200,33 +200,12 @@ let viewLogon = [
     ]
 ]
 
-(*
-
- @foreach (var item in Model.CartItems)
-    {
-        <tr id="row-@item.RecordId">
-            <td>
-                @Html.ActionLink(item.Album.Title, "Details", "Store", new { id = item.AlbumId }, null)
-            </td>
-            <td>
-                @item.Album.Price
-            </td>
-            <td id="item-count-@item.RecordId">
-                @item.Count
-            </td>
-            <td>
-                <a href="#" class="RemoveLink" data-id="@item.RecordId">Remove from cart</a>
-            </td>
-        </tr>
-    }
-*)
-
 let viewCart (carts : Db.CartDetails list) = [
     h3 "Review your cart:"
     pAttr ["class", "button"] [
             aHref "/" (text "Checkout >>")
     ]
-    divId "update-message" []
+    spanAttr ["id", "update-message"] (text " ")
     table [
         yield tr [
             for h in ["Album Name"; "Price (each)"; "Quantity"; ""] ->
@@ -244,7 +223,7 @@ let viewCart (carts : Db.CartDetails list) = [
                     text (cart.Count.ToString())
                 ]
                 td [
-                    aHref "#" (text "Remove from cart")
+                    aHrefAttr "#" ["id", "remove"; "data-id", cart.AlbumId.ToString()] (text "Remove from cart") 
                 ]
             ]
         yield tr [
@@ -252,6 +231,8 @@ let viewCart (carts : Db.CartDetails list) = [
             td [text d]
         ]
     ]
+    scriptAttr [ "type", "text/javascript"; " src", "/jquery-1.11.2.js" ] [ text ";" ]
+    scriptAttr [ "type", "text/javascript"; " src", "/script.js" ] [ text ";" ]
 ]
 
 let viewIndex (genres : Db.Genre list) xml = 

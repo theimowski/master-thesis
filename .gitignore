@@ -1,5 +1,6 @@
 /output
 /packages
+/paket-files
 *.suo
 src/packages
 obj
