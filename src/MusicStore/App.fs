@@ -168,6 +168,32 @@ module Handlers =
                     withDb (remove cartId)
                 )
 
+    let checkout =
+        context (fun x ->
+            match x |> HttpContext.state with
+            | None -> 
+                fun x -> fail
+            | Some store -> 
+                match store.get "cartId" with
+                | None ->
+                    fun x -> fail
+                | Some cartId ->
+                    viewCheckout |> HTML
+                )
+
+    let checkoutComplete = 
+        context (fun x ->
+            match x |> HttpContext.state with
+            | None -> 
+                fun x -> fail
+            | Some store -> 
+                match store.get "cartId" with
+                | None ->
+                    fun x -> fail
+                | Some cartId ->
+                    viewCheckoutComplete 28 |> HTML
+                )
+
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
 
     let createAlbum = 
@@ -212,6 +238,7 @@ choose [
 
         path "/cart" >>= cart
         pathScan "/cart/add/%d" addToCart
+        path "/cart/checkout" >>= checkout
 
         path "/store/manage" >>= manage
         path "/store/manage/create" >>= createAlbum
@@ -227,6 +254,7 @@ choose [
         path "/account/logon" >>= logonP
         
         pathScan "/cart/remove/%d" removeFromCart
+        path "/cart/checkout" >>= checkoutComplete
 
         path "/store/manage/create"
             >>= admin (Binding.bindReq albumForm createAlbumP BAD_REQUEST)

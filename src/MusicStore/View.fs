@@ -203,7 +203,7 @@ let viewLogon = [
 let viewCart (carts : Db.CartDetails list) = [
     h3 "Review your cart:"
     pAttr ["class", "button"] [
-            aHref "/" (text "Checkout >>")
+            aHref "/cart/checkout" (text "Checkout >>")
     ]
     divId "update-message" [text " "]
     table [
@@ -233,6 +233,50 @@ let viewCart (carts : Db.CartDetails list) = [
     ]
     scriptAttr [ "type", "text/javascript"; " src", "/jquery-1.11.2.js" ] [ text ";" ]
     scriptAttr [ "type", "text/javascript"; " src", "/script.js" ] [ text ";" ]
+]
+
+let viewCheckout = [
+    h2 "Address And Payment"
+    form [
+        fieldset [
+            yield legend "Shipping Information"
+
+            for field in ["First Name"; "Last Name"; "Address"; "Email Address"] do
+                yield divClass "editor-label" [
+                    text field
+                ]
+                yield divClass "editor-field" [
+                    textInput field None []
+                ]
+        ]
+
+        fieldset [
+            legend "Payment"
+            p [
+                text """We're running a promotion: all music is free with the promo code: "FREE" """
+            ]
+            divClass "editor-label" [
+                text "Promo Code"
+            ]
+            divClass "editor-field" [
+                textInput "promocode" None []
+            ]
+        ]
+
+        inputAttr ["type", "submit"; "value", "Submit Order"]
+    ]
+]
+
+let viewCheckoutComplete orderId = [
+    h2 "Checkout Complete"
+    p [
+        text (sprintf "Thanks for your order! Your order number is: %d" orderId)
+    ]
+    p [
+        text "How about shopping for some more music in our "
+        aHref "/" (text "store")
+        text "?"
+    ]
 ]
 
 let viewIndex (genres : Db.Genre list) xml = 
