@@ -138,7 +138,8 @@ module Handlers =
                             // ??????
                             | None -> fun x -> fail 
                             | Some state ->
-                                state.set "role" user.Role)
+                                state.set "role" user.Role
+                                >>= state.set "username" user.UserName)
                         >>= request (fun x -> 
                             let path = defaultArg (x.queryParam "returnPath") "/"
                             Redirection.redirect path)
@@ -239,10 +240,10 @@ module Handlers =
         |> auth
 
     let checkoutComplete = 
-        let order cartId db =
+        let order cartId username db =
             let carts = Db.getCartsDetails cartId db
             let total = carts |> List.sumBy (fun c -> (decimal) c.Count * c.Price)
-            let order = Db.newOrder total db
+            let order = Db.newOrder total username db
             db.SubmitUpdates()
             for cart in carts do
                 let orderDetails = Db.newOrderDetails (cart.AlbumId, order.OrderId, cart.Count, cart.Price) db
@@ -261,7 +262,11 @@ module Handlers =
                 | None ->
                     fun x -> fail
                 | Some cartId ->
-                    withDb (order cartId)
+                    match store.get "username" with
+                    | None ->
+                        fun x -> fail
+                    | Some username ->
+                        withDb (order cartId username)
                 )
         |> auth
 

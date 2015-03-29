@@ -82,8 +82,10 @@ let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
 let newCart cartId albumId (ctx : DbContext) : Cart =
     ctx.``[dbo].[Carts]``.Create(albumId, cartId, 1, DateTime.UtcNow)
 
-let newOrder total (ctx : DbContext) : Order =
-    ctx.``[dbo].[Orders]``.Create(DateTime.UtcNow, total)
+let newOrder total username (ctx : DbContext) : Order =
+    let order = ctx.``[dbo].[Orders]``.Create(DateTime.UtcNow, total)
+    order.Username <- username
+    order
 
 let newOrderDetails (albumId, orderId, quantity, unitPrice) (ctx : DbContext) : OrderDetails =
     ctx.``[dbo].[OrderDetails]``.Create(albumId, orderId, quantity, unitPrice)
