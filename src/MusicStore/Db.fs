@@ -20,6 +20,7 @@ type Cart = DbContext.``[dbo].[Carts]Entity``
 type CartDetails = DbContext.``[dbo].[CartDetails]Entity``
 type Order = DbContext.``[dbo].[Orders]Entity``
 type OrderDetails = DbContext.``[dbo].[OrderDetails]Entity``
+type User = DbContext.``[dbo].[Users]Entity``
 
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
@@ -86,3 +87,6 @@ let newOrder total (ctx : DbContext) : Order =
 
 let newOrderDetails (albumId, orderId, quantity, unitPrice) (ctx : DbContext) : OrderDetails =
     ctx.``[dbo].[OrderDetails]``.Create(albumId, orderId, quantity, unitPrice)
+
+let newUser (email, password, role, username) (ctx : DbContext) : User =
+    ctx.``[dbo].[Users]``.Create(email, password, role, username)

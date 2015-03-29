@@ -110,6 +110,24 @@ module Handlers =
             return! BAD_REQUEST "Missing username or password" x
     }
 
+    let registerP (x: HttpContext) = async {
+        let username = x.request |> bindForm "username"
+        let email = x.request |> bindForm "email"
+        let password = x.request |> bindForm "password"
+        let confirmpassword = x.request |> bindForm "confirmpassword"
+        match username, email, password with
+        | Choice1Of2 username, Choice1Of2 email, Choice1Of2 password ->
+            use sha = Security.Cryptography.SHA256.Create()
+            let hash = sha.ComputeHash(Text.Encoding.UTF8.GetBytes(email)) |> Convert.ToBase64String
+            let createUser db =
+                Db.newUser (email, hash, "user", username) db |> ignore
+                db.SubmitUpdates()
+                Redirection.redirect "/"
+            return! (withDb createUser) x
+        | _ ->
+            return! BAD_REQUEST "Missing username, email or password" x
+    }
+
     let cart = 
         context (fun x ->
             match x |> HttpContext.state with
@@ -268,6 +286,7 @@ choose [
 
     POST >>= choose [
         path "/account/logon" >>= logonP
+        path "/account/register" >>= registerP
         
         pathScan "/cart/remove/%d" removeFromCart
         path "/cart/checkout" >>= checkoutComplete
