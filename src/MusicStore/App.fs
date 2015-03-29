@@ -46,13 +46,35 @@ let HTML html (x: HttpContext) = async {
         return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
 
-let admin f_success (x: HttpContext) = async { 
+let requireLogon =
+    context (fun x ->
         let path = x.request.url.AbsolutePath
-        return! (Auth.authenticateWithLogin
+        Redirection.FOUND (sprintf "/account/logon?returnPath=%s" path))
+
+let role (r : string) f_success (x: HttpContext) = async {
+        match x |> HttpContext.state with
+        | Some state -> 
+            match state.get "role" with
+            | Some role when role = r ->
+                return! f_success x
+            | Some _ ->
+                return! FORBIDDEN "Forbidden" x
+            | None ->
+                return! requireLogon x 
+        | None -> return! requireLogon x 
+    }
+
+let authent f_success (x: HttpContext) = async { 
+        let path = x.request.url.AbsolutePath
+        return! (Auth.authenticate
                     Cookie.CookieLife.Session
-                    (sprintf "/account/logon?returnPath=%s" path)
+                    false
+                    (fun () -> Choice2Of2(requireLogon))
+                    (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
                     f_success) x
     }
+
+let admin = authent >> role "admin"
 
 let actOnAlbumAndBackToManage f (ctx : DbContext) album =
     f album
@@ -107,14 +129,19 @@ module Handlers =
         | Choice1Of2 username, Choice1Of2 password ->
             let auth db =
                 match Db.getUser (username, passHash password) db with
-                | Some user when user.Role = "admin" ->
+                | Some user ->
                         Auth.authenticated Cookie.CookieLife.Session false 
                         >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
+                        >>= statefulForSession
+                        >>= context (fun x ->
+                            match x |> HttpContext.state with
+                            // ??????
+                            | None -> fun x -> fail 
+                            | Some state ->
+                                state.set "role" user.Role)
                         >>= request (fun x -> 
                             let path = defaultArg (x.queryParam "returnPath") "/"
                             Redirection.redirect path)
-                | Some _ ->
-                    UNAUTHORIZED "Unauthorized"
                 | _ ->
                     logon
             return! (withDb auth) x
