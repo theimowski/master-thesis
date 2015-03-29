@@ -173,6 +173,8 @@ let viewLogon = [
     h2 "Log On"
     p [
         text "Please enter your user name and password."
+        aHref "/account/register" (text "Register")
+        text " if you don't have an account yet."
     ]
 
     form [
@@ -196,6 +198,46 @@ let viewLogon = [
             p [
                inputAttr ["type", "submit"; "value", "Log On"]
             ]
+        ]
+    ]
+]
+
+let viewRegister = [
+    h2 "Create a New Account"
+    p [
+        text "Use the form below to create a new account."
+    ]
+    form [
+        fieldset [
+            legend "Account Information"
+
+            divClass "editor-label" [ 
+                text "User name" 
+            ]
+            divClass "editor-field" [ 
+                textInput "username" None []
+            ]
+            divClass "editor-label" [ 
+                text "Email address" 
+            ]
+            divClass "editor-field" [ 
+                textInput "email" None []
+            ]
+
+            divClass "editor-label" [ 
+                text "Password" 
+            ]
+            divClass "editor-field" [ 
+                passwordInput "password"
+            ]
+            divClass "editor-label" [ 
+                text "Confirm Password" 
+            ]
+            divClass "editor-field" [ 
+                passwordInput "confirmpassword"
+            ]
+
+            inputAttr ["type", "submit"; "value", "Register"]
         ]
     ]
 ]

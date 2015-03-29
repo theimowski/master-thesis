@@ -91,6 +91,8 @@ module Handlers =
 
     let logon = viewLogon |> HTML
 
+    let register = viewRegister |> HTML
+
     let logonP (x: HttpContext) = async {
         let username = x.request |> bindForm "username"
         let password = x.request |> bindForm "password"
@@ -248,6 +250,7 @@ choose [
         pathScan "/store/details/%d" albumDetails
 
         path "/account/logon" >>= logon
+        path "/account/register" >>= register
 
         path "/cart" >>= cart
         pathScan "/cart/add/%d" addToCart
