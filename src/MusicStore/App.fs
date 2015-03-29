@@ -64,7 +64,7 @@ let role (r : string) f_success (x: HttpContext) = async {
         | None -> return! requireLogon x 
     }
 
-let authent f_success (x: HttpContext) = async { 
+let auth f_success (x: HttpContext) = async { 
         let path = x.request.url.AbsolutePath
         return! (Auth.authenticate
                     Cookie.CookieLife.Session
@@ -74,7 +74,7 @@ let authent f_success (x: HttpContext) = async {
                     f_success) x
     }
 
-let admin = authent >> role "admin"
+let admin = auth >> role "admin"
 
 let actOnAlbumAndBackToManage f (ctx : DbContext) album =
     f album
@@ -235,8 +235,8 @@ module Handlers =
                 | None ->
                     fun x -> fail
                 | Some cartId ->
-                    viewCheckout |> HTML
-                )
+                    viewCheckout |> HTML)
+        |> auth
 
     let checkoutComplete = 
         let order cartId db =
@@ -263,6 +263,7 @@ module Handlers =
                 | Some cartId ->
                     withDb (order cartId)
                 )
+        |> auth
 
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
 
