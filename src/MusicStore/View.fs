@@ -75,8 +75,15 @@ let viewStore (genres : Db.Genre list) = [
     ]
 ]
 
-let viewHome = [
-    divId "promotion" []
+let viewHome (bestSellers : Db.Album list) = [
+    divId "promotion" [text " "]
+    h3 "Fresh off the grill"
+    ulAnchors "album-list" [
+        for album in bestSellers -> 
+            let href = sprintf "/store/details/%d" album.AlbumId
+            let xml = flatten [ imgSrc "/placeholder.gif"; span (text album.Title)]
+            href,xml
+    ]
 ]
 
 let viewAlbumsForGenre (genre : Db.Genre, albums : Db.Album list) = [ 

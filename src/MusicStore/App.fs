@@ -111,7 +111,7 @@ let passHash (pass: string) =
 [<AutoOpen>]
 module Handlers =
 
-    let home = viewHome |> HTML
+    let home = withDb (Db.getBestSellers 5 >> viewHome >> HTML)
     
     let store = withDb (Db.getGenres >> viewStore >> HTML)
 

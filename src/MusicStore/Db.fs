@@ -31,6 +31,14 @@ let getAlbum id (ctx : DbContext) : Album option =
             select album
     } |> firstOrNone
 
+let getBestSellers count (ctx : DbContext) : Album list  =
+    query {
+        for album in ctx.``[dbo].[Albums]`` do
+        for order in album.FK_OrderDetail_Album do
+        select album
+        take 5
+    } |> Seq.toList
+
 let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 
     ctx.``[dbo].[AlbumDetails]`` |> Seq.toList
 
