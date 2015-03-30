@@ -40,8 +40,16 @@ let albumForm req =
 let HTML html (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx
-        
-        let content = viewIndex genres html |> Html.xmlToString
+        let cartItems = 
+            match x |> HttpContext.state with
+            | Some state -> 
+                match state.get "cartId" with
+                | Some cartId ->
+                    Db.getCartsDetails cartId ctx |> List.sumBy (fun c -> c.Count)
+                | _ -> 0
+            | _ -> 0
+
+        let content = viewIndex (genres, cartItems) html |> Html.xmlToString
 
         return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
     }

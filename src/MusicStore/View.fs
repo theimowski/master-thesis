@@ -321,7 +321,7 @@ let viewCheckoutComplete orderId = [
     ]
 ]
 
-let viewIndex (genres : Db.Genre list) xml = 
+let viewIndex (genres : Db.Genre list, cartItems : int) xml = 
     html [ 
         head [
             title "F# Suave Music Store"
@@ -334,6 +334,7 @@ let viewIndex (genres : Db.Genre list) xml =
                 ulAnchors "navlist" [ 
                     "/", text "Home"
                     "/store", text "Store"
+                    "/cart", text (sprintf "Cart (%d)" cartItems)
                     "/store/manage", text "Admin"
                 ]
             ]
