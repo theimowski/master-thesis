@@ -12,3 +12,13 @@ as
 select c.CartId, c.Count, a.Title as AlbumTitle, a.AlbumId as AlbumId, a.Price
 from Carts c
 join Albums a on c.AlbumId = a.AlbumId
+
+go
+
+create view BestSellers 
+as
+select top 5 a.AlbumId, a.Title, count(*) as Count
+from Albums as a
+inner join OrderDetails as o on a.AlbumId = o.AlbumId
+group by a.AlbumId, a.Title
+order by Count DESC

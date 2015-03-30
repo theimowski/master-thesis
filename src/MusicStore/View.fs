@@ -75,7 +75,7 @@ let viewStore (genres : Db.Genre list) = [
     ]
 ]
 
-let viewHome (bestSellers : Db.Album list) = [
+let viewHome (bestSellers : Db.BestSeller list) = [
     divId "promotion" [text " "]
     h3 "Fresh off the grill"
     ulAnchors "album-list" [

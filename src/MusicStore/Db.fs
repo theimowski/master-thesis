@@ -21,6 +21,7 @@ type CartDetails = DbContext.``[dbo].[CartDetails]Entity``
 type Order = DbContext.``[dbo].[Orders]Entity``
 type OrderDetails = DbContext.``[dbo].[OrderDetails]Entity``
 type User = DbContext.``[dbo].[Users]Entity``
+type BestSeller = DbContext.``[dbo].[BestSellers]Entity``
 
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
@@ -31,13 +32,8 @@ let getAlbum id (ctx : DbContext) : Album option =
             select album
     } |> firstOrNone
 
-let getBestSellers count (ctx : DbContext) : Album list  =
-    query {
-        for album in ctx.``[dbo].[Albums]`` do
-        for order in album.FK_OrderDetail_Album do
-        select album
-        take 5
-    } |> Seq.toList
+let getBestSellers count (ctx : DbContext) : BestSeller list  =
+    ctx.``[dbo].[BestSellers]`` |> Seq.toList
 
 let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 
     ctx.``[dbo].[AlbumDetails]`` |> Seq.toList
