@@ -40,16 +40,19 @@ let albumForm req =
 let HTML html (x: HttpContext) = async {
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx
-        let cartItems = 
+        let cartItems, username = 
             match x |> HttpContext.state with
             | Some state -> 
-                match state.get "cartId" with
-                | Some cartId ->
-                    Db.getCartsDetails cartId ctx |> List.sumBy (fun c -> c.Count)
-                | _ -> 0
-            | _ -> 0
+                let cartId = 
+                    match state.get "cartId" with
+                    | Some cartId ->
+                        Db.getCartsDetails cartId ctx |> List.sumBy (fun c -> c.Count)
+                    | _ -> 0
+                let username = state.get "username"
+                cartId, username
+            | _ -> 0, None
 
-        let content = viewIndex (genres, cartItems) html |> Html.xmlToString
+        let content = viewIndex (genres, cartItems, username) html |> Html.xmlToString
 
         return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
     }
@@ -128,6 +131,11 @@ module Handlers =
 
     let logon = viewLogon |> HTML
 
+    let logoff =
+        unsetCookie Auth.SessionAuthCookie
+        >>= unsetCookie State.CookieStateStore.StateCookie
+        >>= Redirection.redirect "/"
+
     let register = viewRegister |> HTML
 
     let logonP (x: HttpContext) = async {
@@ -141,6 +149,7 @@ module Handlers =
                         Auth.authenticated Cookie.CookieLife.Session false 
                         >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
                         >>= statefulForSession
+                        >>= overwriteCookiePathToRoot State.CookieStateStore.StateCookie
                         >>= context (fun x ->
                             match x |> HttpContext.state with
                             // ??????
@@ -318,6 +327,7 @@ choose [
         pathScan "/store/details/%d" albumDetails
 
         path "/account/logon" >>= logon
+        path "/account/logoff" >>= logoff
         path "/account/register" >>= register
 
         path "/cart" >>= cart

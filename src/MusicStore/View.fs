@@ -328,7 +328,7 @@ let viewCheckoutComplete orderId = [
     ]
 ]
 
-let viewIndex (genres : Db.Genre list, cartItems : int) xml = 
+let viewIndex (genres : Db.Genre list, cartItems : int, username : string option) xml = 
     html [ 
         head [
             title "F# Suave Music Store"
@@ -344,6 +344,17 @@ let viewIndex (genres : Db.Genre list, cartItems : int) xml =
                     "/cart", text (sprintf "Cart (%d)" cartItems)
                     "/store/manage", text "Admin"
                 ]
+                spanAttr 
+                    ["style", "'float:right'"] 
+                    (flatten [
+                        match username with
+                        | Some name -> 
+                            yield text (sprintf "Hello, %s" name)
+                            yield aHref "/account/logoff" (text "Log off")
+                        | None ->
+                            yield text ("Hello, Guest")
+                            yield aHref "/account/logon" (text "Log on")
+                    ])
             ]
 
             ulAnchors "categories" [
