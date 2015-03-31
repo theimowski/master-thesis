@@ -111,6 +111,10 @@ let passHash (pass: string) =
     |> Array.map (fun b -> b.ToString("x2"))
     |> String.concat ""
 
+let clearUserState (x: HttpContext) = async {
+    return! succeed {x with userState = Map.empty}
+}
+
 [<AutoOpen>]
 module Handlers =
 
@@ -132,8 +136,9 @@ module Handlers =
     let logon = viewLogon |> HTML
 
     let logoff =
-        unsetCookie Auth.SessionAuthCookie
-        >>= unsetCookie State.CookieStateStore.StateCookie
+        unsetPair Auth.SessionAuthCookie
+        >>= unsetPair State.CookieStateStore.StateCookie
+        >>= clearUserState
         >>= Redirection.redirect "/"
 
     let register = viewRegister |> HTML
