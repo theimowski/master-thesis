@@ -97,7 +97,7 @@ let newOrderDetails (albumId, orderId, quantity, unitPrice) (ctx : DbContext) : 
 let newUser (email, password, role, username) (ctx : DbContext) : User =
     ctx.``[dbo].[Users]``.Create(email, password, role, username)
 
-let getUser (username, password) (ctx : DbContext) : User option =
+let validateUser (username, password) (ctx : DbContext) : User option =
     query {
         for user in ctx.``[dbo].[Users]`` do
             where (user.UserName = username && user.Password = password)

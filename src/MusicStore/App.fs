@@ -20,7 +20,6 @@ open MusicStore.View
 let bindForm key = Binding.form key Choice1Of2
 
 let albumForm req = 
-    
     binding {
         let! artistId = req |> bindForm "artist" >>. Parse.int32
         let! genreId = req |> bindForm "genre" >>. Parse.int32
@@ -37,7 +36,16 @@ let albumForm req =
         )
     }
 
-let HTML html (x: HttpContext) = async {
+let logonForm req =
+    binding {
+        let! username = req |> bindForm "username"
+        let! password = req |> bindForm "password"
+
+        return username,password
+    }
+
+let HTML html = 
+    context (fun x ->
         let ctx = sql.GetDataContext()
         let genres = Db.getGenres ctx
         let cartItems, username = 
@@ -54,43 +62,47 @@ let HTML html (x: HttpContext) = async {
 
         let content = viewIndex (genres, cartItems, username) html |> Html.xmlToString
 
-        return! (OK content >>= Writers.setMimeType "text/html; charset=utf-8") x
-    }
+        OK content >>= Writers.setMimeType "text/html; charset=utf-8")
 
 let requireLogon =
     context (fun x ->
         let path = x.request.url.AbsolutePath
         Redirection.FOUND (sprintf "/account/logon?returnPath=%s" path))
 
-let role (r : string) f_success (x: HttpContext) = async {
+let returnPathOrRoot = 
+    request (fun x -> 
+        let path = defaultArg (x.queryParam "returnPath") "/"
+        Redirection.FOUND path)
+
+let auth f_success =
+    context (fun x  -> 
+        let path = x.request.url.AbsolutePath
+        Auth.authenticate
+            Cookie.CookieLife.Session
+            false
+            (fun () -> Choice2Of2(requireLogon))
+            (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
+            f_success)
+
+let role (r : string) f_success = 
+    context (fun x ->
         match x |> HttpContext.state with
         | Some state -> 
             match state.get "role" with
             | Some role when role = r ->
-                return! f_success x
+                f_success
             | Some _ ->
-                return! FORBIDDEN "Forbidden" x
+                FORBIDDEN (sprintf "Only for %s role" r)
             | None ->
-                return! requireLogon x 
-        | None -> return! requireLogon x 
-    }
-
-let auth f_success (x: HttpContext) = async { 
-        let path = x.request.url.AbsolutePath
-        return! (Auth.authenticate
-                    Cookie.CookieLife.Session
-                    false
-                    (fun () -> Choice2Of2(requireLogon))
-                    (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
-                    f_success) x
-    }
+                requireLogon 
+        | None -> requireLogon)
 
 let admin = auth >> role "admin"
 
 let actOnAlbumAndBackToManage f (ctx : DbContext) album =
     f album
     ctx.SubmitUpdates()
-    Redirection.redirect "/store/manage"
+    Redirection.FOUND "/store/manage"
 
 let lift success = function
     | Some x -> success x
@@ -111,9 +123,9 @@ let passHash (pass: string) =
     |> Array.map (fun b -> b.ToString("x2"))
     |> String.concat ""
 
-let clearUserState (x: HttpContext) = async {
-    return! succeed {x with userState = Map.empty}
-}
+let clearUserState = 
+    context (fun x ->
+        fun _ -> succeed {x with userState = Map.empty})
 
 [<AutoOpen>]
 module Handlers =
@@ -139,38 +151,29 @@ module Handlers =
         unsetPair Auth.SessionAuthCookie
         >>= unsetPair State.CookieStateStore.StateCookie
         >>= clearUserState
-        >>= Redirection.redirect "/"
+        >>= Redirection.FOUND "/"
 
     let register = viewRegister |> HTML
 
-    let logonP (x: HttpContext) = async {
-        let username = x.request |> bindForm "username"
-        let password = x.request |> bindForm "password"
-        match username,password with
-        | Choice1Of2 username, Choice1Of2 password ->
-            let auth db =
-                match Db.getUser (username, passHash password) db with
-                | Some user ->
-                        Auth.authenticated Cookie.CookieLife.Session false 
-                        >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
-                        >>= statefulForSession
-                        >>= overwriteCookiePathToRoot State.CookieStateStore.StateCookie
-                        >>= context (fun x ->
-                            match x |> HttpContext.state with
-                            // ??????
-                            | None -> fun x -> fail 
-                            | Some state ->
-                                state.set "role" user.Role
-                                >>= state.set "username" user.UserName)
-                        >>= request (fun x -> 
-                            let path = defaultArg (x.queryParam "returnPath") "/"
-                            Redirection.redirect path)
-                | _ ->
-                    logon
-            return! (withDb auth) x
-        | _ ->
-            return! BAD_REQUEST "Missing username or password" x
-    }
+    let logonP (username,password) =
+        let auth db =
+            match Db.validateUser (username, passHash password) db with
+            | Some user ->
+                    Auth.authenticated Cookie.CookieLife.Session false 
+                    >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
+                    >>= statefulForSession
+                    >>= overwriteCookiePathToRoot State.CookieStateStore.StateCookie
+                    >>= context (fun x ->
+                        match x |> HttpContext.state with
+                        | None -> Redirection.FOUND "/account/logon" 
+                        | Some state ->
+                            state.set "role" user.Role
+                            >>= state.set "username" user.UserName)
+                    >>= returnPathOrRoot
+            | _ ->
+                logon
+
+        withDb auth
 
     let registerP (x: HttpContext) = async {
         let username = x.request |> bindForm "username"
@@ -182,7 +185,7 @@ module Handlers =
             let createUser db =
                 Db.newUser (email, passHash password, "user", username) db |> ignore
                 db.SubmitUpdates()
-                Redirection.redirect "/"
+                Redirection.FOUND "/"
             return! (withDb createUser) x
         | _ ->
             return! BAD_REQUEST "Missing username, email or password" x
@@ -208,7 +211,7 @@ module Handlers =
             | None ->
                 Db.newCart cartId albumId db |> ignore
             db.SubmitUpdates()
-            Redirection.redirect "/cart"
+            Redirection.FOUND "/cart"
 
         statefulForSession
         >>= context (fun x ->
@@ -350,7 +353,8 @@ choose [
     ]
 
     POST >>= choose [
-        path "/account/logon" >>= logonP
+        path "/account/logon" 
+            >>= (Binding.bindReq logonForm logonP BAD_REQUEST)
         path "/account/register" >>= registerP
         
         pathScan "/cart/remove/%d" removeFromCart
