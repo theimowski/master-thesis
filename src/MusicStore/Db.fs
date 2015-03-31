@@ -32,7 +32,7 @@ let getAlbum id (ctx : DbContext) : Album option =
             select album
     } |> firstOrNone
 
-let getBestSellers count (ctx : DbContext) : BestSeller list  =
+let getBestSellers (ctx : DbContext) : BestSeller list  =
     ctx.``[dbo].[BestSellers]`` |> Seq.toList
 
 let getAlbumsDetails (ctx : DbContext) : AlbumDetails list = 

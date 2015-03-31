@@ -127,10 +127,22 @@ let clearUserState =
     context (fun x ->
         fun _ -> succeed {x with userState = Map.empty})
 
+let cartSession no_session no_cart f_success= 
+    context (fun x ->
+        match x |> HttpContext.state with
+        | None ->
+            no_session
+        | Some store ->
+            match store.get "cartId" with
+            | Some cartId ->
+                f_success cartId
+            | None -> 
+                no_cart)
+
 [<AutoOpen>]
 module Handlers =
 
-    let home = withDb (Db.getBestSellers 5 >> viewHome >> HTML)
+    let home = withDb (Db.getBestSellers >> viewHome >> HTML)
     
     let store = withDb (Db.getGenres >> viewStore >> HTML)
 
@@ -185,23 +197,17 @@ module Handlers =
             let createUser db =
                 Db.newUser (email, passHash password, "user", username) db |> ignore
                 db.SubmitUpdates()
-                Redirection.FOUND "/"
+                Redirection.FOUND "/account/logon"
             return! (withDb createUser) x
         | _ ->
             return! BAD_REQUEST "Missing username, email or password" x
     }
-
+    
     let cart = 
-        context (fun x ->
-            match x |> HttpContext.state with
-            | None -> 
-                viewCart [] |> HTML
-            | Some store -> 
-                match store.get "cartId" with
-                | Some cartId ->
-                    withDb (Db.getCartsDetails cartId >> viewCart >> HTML)
-                | None ->
-                    viewCart [] |> HTML)
+        cartSession
+            (viewCart [] |> HTML)
+            (viewCart [] |> HTML)
+            (fun cartId -> withDb (Db.getCartsDetails cartId >> viewCart >> HTML))
 
     let addToCart albumId = 
         let add cartId db  =
@@ -239,32 +245,20 @@ module Handlers =
             | None ->
                 fun x -> fail
         
-        context (fun x ->
-            match x |> HttpContext.state with
-            | None -> 
-                fun x -> fail
-            | Some store -> 
-                match store.get "cartId" with
-                | None ->
-                    fun x -> fail
-                | Some cartId ->
-                    withDb (remove cartId)
-                )
+        cartSession
+            (fun _ -> fail)
+            (fun _ -> fail)
+            (fun cartId -> withDb (remove cartId))
+
 
     let checkout =
-        context (fun x ->
-            match x |> HttpContext.state with
-            | None -> 
-                fun x -> fail
-            | Some store -> 
-                match store.get "cartId" with
-                | None ->
-                    fun x -> fail
-                | Some cartId ->
-                    viewCheckout |> HTML)
-        |> auth
-
-    let checkoutComplete = 
+        cartSession
+            (fun _ -> fail)
+            (fun _ -> fail)
+            (fun _ -> viewCheckout |> HTML)
+        |> auth 
+        
+    let checkoutP = 
         let order cartId username db =
             let carts = Db.getCartsDetails cartId db
             let total = carts |> List.sumBy (fun c -> (decimal) c.Count * c.Price)
@@ -358,7 +352,7 @@ choose [
         path "/account/register" >>= registerP
         
         pathScan "/cart/remove/%d" removeFromCart
-        path "/cart/checkout" >>= checkoutComplete
+        path "/cart/checkout" >>= checkoutP
 
         path "/store/manage/create"
             >>= admin (Binding.bindReq albumForm createAlbumP BAD_REQUEST)
