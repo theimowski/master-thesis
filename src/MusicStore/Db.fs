@@ -76,6 +76,9 @@ let getCart cartId albumId (ctx : DbContext) : Cart option =
             select cart
     } |> firstOrNone
 
+let getCarts cartId (ctx : DbContext) : Cart list =
+    ctx.``[dbo].[Carts]`` |> Seq.toList
+
 let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
     query {
         for cart in ctx.``[dbo].[CartDetails]`` do

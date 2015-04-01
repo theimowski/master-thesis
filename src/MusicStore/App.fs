@@ -44,25 +44,7 @@ let logonForm req =
         return username,password
     }
 
-let HTML html = 
-    context (fun x ->
-        let ctx = sql.GetDataContext()
-        let genres = Db.getGenres ctx
-        let cartItems, username = 
-            match x |> HttpContext.state with
-            | Some state -> 
-                let cartId = 
-                    match state.get "cartId" with
-                    | Some cartId ->
-                        Db.getCartsDetails cartId ctx |> List.sumBy (fun c -> c.Count)
-                    | _ -> 0
-                let username = state.get "username"
-                cartId, username
-            | _ -> 0, None
 
-        let content = viewIndex (genres, cartItems, username) html |> Html.xmlToString
-
-        OK content >>= Writers.setMimeType "text/html; charset=utf-8")
 
 let requireLogon =
     context (fun x ->
@@ -84,20 +66,7 @@ let auth f_success =
             (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
             f_success)
 
-let role (r : string) f_success = 
-    context (fun x ->
-        match x |> HttpContext.state with
-        | Some state -> 
-            match state.get "role" with
-            | Some role when role = r ->
-                f_success
-            | Some _ ->
-                FORBIDDEN (sprintf "Only for %s role" r)
-            | None ->
-                requireLogon 
-        | None -> requireLogon)
 
-let admin = auth >> role "admin"
 
 let actOnAlbumAndBackToManage f (ctx : DbContext) album =
     f album
@@ -124,20 +93,101 @@ let passHash (pass: string) =
     |> String.concat ""
 
 let clearUserState = 
-    context (fun x ->
-        fun _ -> succeed {x with userState = Map.empty})
+    Writers.unsetUserData StateStoreType
 
-let cartSession no_session no_cart f_success= 
+type UserLoggedOnSession = {
+    Username : string
+    Role : string
+}
+
+type Session = 
+    | NoSession
+    | CartIdOnly of string
+    | UserLoggedOn of UserLoggedOnSession
+
+let getSession (x: HttpContext) =
+    match x |> HttpContext.state with
+    | None -> NoSession
+    | Some store ->
+        match store.get "cartid", store.get "username", store.get "role" with
+        | Some cartId, None, None -> CartIdOnly cartId
+        | None, Some username, Some role -> UserLoggedOn {Username = username; Role = role}
+        | _ -> NoSession
+
+let session f = 
+    context (fun x -> f (getSession x))
+
+let rec storeSetCartId =
+    session (function
+    | NoSession -> 
+        statefulForSession
+        >>= context (fun x ->
+            match x |> HttpContext.state with
+            //?
+            | None -> storeSetCartId 
+            | Some store -> 
+                let cartId = Guid.NewGuid().ToString("N")
+                store.set "cartid" cartId)
+    | _ -> succeed)
+
+let rec storeLogOnUser  (username,role) =
+    session (function
+    | NoSession ->
+        statefulForSession
+        >>= context (fun x ->
+            match x |> HttpContext.state with
+            //? 
+            | None -> storeLogOnUser (username,role)
+            | Some store ->
+                store.set "username" username
+                >>= store.set "role" role)
+    | CartIdOnly cartId ->
+        let upgradeCartId db = 
+            for cart in Db.getCarts cartId db do
+                cart.CartId <- username
+            db.SubmitUpdates()
+            succeed
+        context (fun x ->
+            match x |> HttpContext.state with
+            //?
+            | None -> storeLogOnUser (username,role)
+            | Some store ->
+                clearUserState
+                >>= store.set "username" username
+                >>= store.set "role" role
+                >>= withDb upgradeCartId)
+    | UserLoggedOn _ -> fun _ -> fail)
+
+let storeLogOffUser = 
+    session (function
+    | NoSession | CartIdOnly _ -> fun _ -> fail
+    | UserLoggedOn _ -> clearUserState)
+
+let role (r : string) f_success = 
+    session (function
+    | NoSession | CartIdOnly _ -> requireLogon
+    | UserLoggedOn { Role = role } ->
+        if role = r 
+        then f_success
+        else FORBIDDEN (sprintf "Only for %s role" r))
+    
+let admin = auth >> role "admin"
+
+let HTML html = 
     context (fun x ->
-        match x |> HttpContext.state with
-        | None ->
-            no_session
-        | Some store ->
-            match store.get "cartId" with
-            | Some cartId ->
-                f_success cartId
-            | None -> 
-                no_cart)
+        let ctx = sql.GetDataContext()
+        let genres = Db.getGenres ctx
+        let cartItems, username = 
+            match getSession x with
+            | NoSession -> 0, None
+            | CartIdOnly cartId ->
+                Db.getCartsDetails cartId ctx |> List.sumBy (fun c -> c.Count), None
+            | UserLoggedOn {Username = username} ->
+                Db.getCartsDetails username ctx |> List.sumBy (fun c -> c.Count), Some username
+
+        let content = viewIndex (genres, cartItems, username) html |> Html.xmlToString
+
+        OK content >>= Writers.setMimeType "text/html; charset=utf-8")
 
 [<AutoOpen>]
 module Handlers =
@@ -160,9 +210,9 @@ module Handlers =
     let logon = viewLogon |> HTML
 
     let logoff =
-        unsetPair Auth.SessionAuthCookie
-        >>= unsetPair State.CookieStateStore.StateCookie
-        >>= clearUserState
+        storeLogOffUser
+        >>= unsetPair Auth.SessionAuthCookie
+        >>= unsetPair StateCookie
         >>= Redirection.FOUND "/"
 
     let register = viewRegister |> HTML
@@ -172,15 +222,7 @@ module Handlers =
             match Db.validateUser (username, passHash password) db with
             | Some user ->
                     Auth.authenticated Cookie.CookieLife.Session false 
-                    >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
-                    >>= statefulForSession
-                    >>= overwriteCookiePathToRoot State.CookieStateStore.StateCookie
-                    >>= context (fun x ->
-                        match x |> HttpContext.state with
-                        | None -> Redirection.FOUND "/account/logon" 
-                        | Some state ->
-                            state.set "role" user.Role
-                            >>= state.set "username" user.UserName)
+                    >>= storeLogOnUser (username, user.Role)
                     >>= returnPathOrRoot
             | _ ->
                 logon
@@ -204,10 +246,10 @@ module Handlers =
     }
     
     let cart = 
-        cartSession
-            (viewCart [] |> HTML)
-            (viewCart [] |> HTML)
-            (fun cartId -> withDb (Db.getCartsDetails cartId >> viewCart >> HTML))
+        session (function
+            | NoSession -> viewCart [] |> HTML
+            | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
+                withDb (Db.getCartsDetails cartId >> viewCart >> HTML))
 
     let addToCart albumId = 
         let add cartId db  =
@@ -219,20 +261,11 @@ module Handlers =
             db.SubmitUpdates()
             Redirection.FOUND "/cart"
 
-        statefulForSession
-        >>= context (fun x ->
-            match x |> HttpContext.state with
-            | None -> 
-                Redirection.FOUND (sprintf "/cart/add/%d" albumId)
-            | Some store -> 
-                match store.get "cartId" with
-                | Some cartId ->
-                    withDb (add cartId)
-                | None ->
-                    let cartId = Guid.NewGuid().ToString("N")
-                    store.set "cartId" cartId
-                    >>= withDb (add cartId))
-        >>= overwriteCookiePathToRoot StateCookie
+        storeSetCartId
+        >>= session (function
+            | NoSession -> fun _ -> fail
+            | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
+                withDb (add cartId))
 
     let removeFromCart albumId =
         let remove cartId db =
@@ -245,22 +278,20 @@ module Handlers =
             | None ->
                 fun x -> fail
         
-        cartSession
-            (fun _ -> fail)
-            (fun _ -> fail)
-            (fun cartId -> withDb (remove cartId))
-
+        session (function
+        | NoSession -> fun _ -> fail
+        | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
+            withDb (remove cartId))
 
     let checkout =
-        cartSession
-            (fun _ -> fail)
-            (fun _ -> fail)
-            (fun _ -> viewCheckout |> HTML)
+        session (function
+        | NoSession | CartIdOnly _ -> fun _ -> fail
+        | UserLoggedOn _ -> viewCheckout |> HTML)
         |> auth 
         
     let checkoutP = 
-        let order cartId username db =
-            let carts = Db.getCartsDetails cartId db
+        let placeOrder username db =
+            let carts = Db.getCartsDetails username db
             let total = carts |> List.sumBy (fun c -> (decimal) c.Count * c.Price)
             let order = Db.newOrder total username db
             db.SubmitUpdates()
@@ -271,21 +302,10 @@ module Handlers =
             db.SubmitUpdates()
             viewCheckoutComplete order.OrderId |> HTML
 
-        context (fun x ->
-            match x |> HttpContext.state with
-            | None -> 
-                fun x -> fail
-            | Some store -> 
-                match store.get "cartId" with
-                | None ->
-                    fun x -> fail
-                | Some cartId ->
-                    match store.get "username" with
-                    | None ->
-                        fun x -> fail
-                    | Some username ->
-                        withDb (order cartId username)
-                )
+        session (function
+        | NoSession | CartIdOnly _ -> fun _ -> fail
+        | UserLoggedOn { Username = username } ->
+            withDb (placeOrder username))
         |> auth
 
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
