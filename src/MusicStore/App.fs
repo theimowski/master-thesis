@@ -66,14 +66,13 @@ let loggedOn f_success =
             f_success)
 
 
-let actOnAlbumAndBackToManage f (ctx : DbContext) album =
-    f album
-    ctx.SubmitUpdates()
-    Redirection.FOUND "/store/manage"
-
 let lift success = function
     | Some x -> success x
-    | None -> (fun _ -> fail)
+    | None -> never
+
+let tee f x = 
+    f x
+    succeed
 
 let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
 
@@ -141,11 +140,11 @@ let sessionLogOnUser  (username,role) =
             >>= store.set "username" username
             >>= store.set "role" role
             >>= withDb upgradeCartId))
-    | UserLoggedOn _ -> fun _ -> fail)
+    | UserLoggedOn _ -> never)
 
 let sessionLogOffUser = 
     session (function
-    | NoSession | CartIdOnly _ -> fun _ -> fail
+    | NoSession | CartIdOnly _ -> never
     | UserLoggedOn _ -> clearUserState)
 
 let role (r : string) f_success = 
@@ -236,14 +235,14 @@ module Handlers =
     let addToCart albumId = 
         sessionSetCartId
         >>= session (function
-            | NoSession -> fun _ -> fail
+            | NoSession -> never
             | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
                 Db.addToCart cartId albumId (sql.GetDataContext())
                 Redirection.FOUND "/cart")
 
     let removeFromCart albumId =
         session (function
-        | NoSession -> fun _ -> fail
+        | NoSession -> never
         | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
             let db = sql.GetDataContext()
             Db.getCart cartId albumId db 
@@ -253,13 +252,13 @@ module Handlers =
 
     let checkout =
         session (function
-        | NoSession | CartIdOnly _ -> fun _ -> fail
+        | NoSession | CartIdOnly _ -> never
         | UserLoggedOn _ -> viewCheckout |> HTML)
         |> loggedOn 
         
     let checkoutP = 
         session (function
-        | NoSession | CartIdOnly _ -> fun _ -> fail
+        | NoSession | CartIdOnly _ -> never
         | UserLoggedOn { Username = username } ->
             let order = Db.placeOrder username (sql.GetDataContext())
             viewCheckoutComplete order.OrderId |> HTML)
@@ -272,9 +271,8 @@ module Handlers =
         withDb (getF >> viewCreateAlbum >> HTML >> admin)
     
     let createAlbumP f = 
-        withDb (fun db -> 
-                Db.newAlbum db 
-                |> actOnAlbumAndBackToManage f db)
+        sql.GetDataContext() |> (Db.newAlbum >> f)
+        Redirection.FOUND "/store/manage"
 
     let editAlbum id = 
         let getF db =
@@ -284,18 +282,15 @@ module Handlers =
         withDb (getF >> lift (viewEditAlbum >> HTML))
     
     let editAlbumP id f = 
-        withDb (fun db ->
-                Db.getAlbum id db
-                |> lift (actOnAlbumAndBackToManage f db))
+        sql.GetDataContext() |> (Db.getAlbum id >> lift (tee f))
+        >>= Redirection.FOUND "/store/manage"
 
     let deleteAlbum id = 
         withDb (Db.getAlbumDetails id >> lift (viewDeleteAlbum >> HTML >> admin))
     
     let deleteAlbumP id =
-        let f (album : Album) = album.Delete()
-        withDb (fun db ->
-                Db.getAlbum id db
-                |> lift (actOnAlbumAndBackToManage f db))
+        sql.GetDataContext() |> (Db.getAlbum id >> lift (tee (fun a -> a.Delete())))
+        >>= Redirection.FOUND "/store/manage"
 
 choose [
     GET >>= choose [
