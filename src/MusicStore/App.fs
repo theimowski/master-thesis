@@ -117,48 +117,35 @@ let getSession (x: HttpContext) =
 let session f = 
     context (fun x -> f (getSession x))
 
-let rec storeSetCartId =
+let sessionSetCartId =
     session (function
     | NoSession -> 
         statefulForSession
-        >>= context (fun x ->
-            match x |> HttpContext.state with
-            //?
-            | None -> storeSetCartId 
-            | Some store -> 
-                let cartId = Guid.NewGuid().ToString("N")
-                store.set "cartid" cartId)
+        >>= context (HttpContext.state >> lift (fun store -> 
+            store.set "cartid" (Guid.NewGuid().ToString("N"))))
     | _ -> succeed)
 
-let rec storeLogOnUser  (username,role) =
+let sessionLogOnUser  (username,role) =
     session (function
     | NoSession ->
         statefulForSession
-        >>= context (fun x ->
-            match x |> HttpContext.state with
-            //? 
-            | None -> storeLogOnUser (username,role)
-            | Some store ->
-                store.set "username" username
-                >>= store.set "role" role)
+        >>= context (HttpContext.state >> lift (fun store ->
+            store.set "username" username
+            >>= store.set "role" role))
     | CartIdOnly cartId ->
         let upgradeCartId db = 
             for cart in Db.getCarts cartId db do
                 cart.CartId <- username
             db.SubmitUpdates()
             succeed
-        context (fun x ->
-            match x |> HttpContext.state with
-            //?
-            | None -> storeLogOnUser (username,role)
-            | Some store ->
-                clearUserState
-                >>= store.set "username" username
-                >>= store.set "role" role
-                >>= withDb upgradeCartId)
+        context (HttpContext.state >> lift (fun store -> 
+            clearUserState
+            >>= store.set "username" username
+            >>= store.set "role" role
+            >>= withDb upgradeCartId))
     | UserLoggedOn _ -> fun _ -> fail)
 
-let storeLogOffUser = 
+let sessionLogOffUser = 
     session (function
     | NoSession | CartIdOnly _ -> fun _ -> fail
     | UserLoggedOn _ -> clearUserState)
@@ -175,15 +162,15 @@ let admin = auth >> role "admin"
 
 let HTML html = 
     context (fun x ->
-        let ctx = sql.GetDataContext()
-        let genres = Db.getGenres ctx
+        let db = sql.GetDataContext()
+        let genres = Db.getGenres db
         let cartItems, username = 
             match getSession x with
             | NoSession -> 0, None
             | CartIdOnly cartId ->
-                Db.getCartsDetails cartId ctx |> List.sumBy (fun c -> c.Count), None
+                Db.getCartsDetails cartId db |> List.sumBy (fun c -> c.Count), None
             | UserLoggedOn {Username = username} ->
-                Db.getCartsDetails username ctx |> List.sumBy (fun c -> c.Count), Some username
+                Db.getCartsDetails username db |> List.sumBy (fun c -> c.Count), Some username
 
         let content = viewIndex (genres, cartItems, username) html |> Html.xmlToString
 
@@ -210,7 +197,7 @@ module Handlers =
     let logon = viewLogon |> HTML
 
     let logoff =
-        storeLogOffUser
+        sessionLogOffUser
         >>= unsetPair Auth.SessionAuthCookie
         >>= unsetPair StateCookie
         >>= Redirection.FOUND "/"
@@ -222,7 +209,7 @@ module Handlers =
             match Db.validateUser (username, passHash password) db with
             | Some user ->
                     Auth.authenticated Cookie.CookieLife.Session false 
-                    >>= storeLogOnUser (username, user.Role)
+                    >>= sessionLogOnUser (username, user.Role)
                     >>= returnPathOrRoot
             | _ ->
                 logon
@@ -261,7 +248,7 @@ module Handlers =
             db.SubmitUpdates()
             Redirection.FOUND "/cart"
 
-        storeSetCartId
+        sessionSetCartId
         >>= session (function
             | NoSession -> fun _ -> fail
             | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
