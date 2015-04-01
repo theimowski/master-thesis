@@ -86,9 +86,9 @@ let viewHome (bestSellers : Db.BestSeller list) = [
     ]
 ]
 
-let viewAlbumsForGenre (genre : Db.Genre, albums : Db.Album list) = [ 
+let viewAlbumsForGenre (genre : string) (albums : Db.Album list) = [ 
     divClass "genre" [ 
-        h3 (genre.Name + " Albums")
+        h3 (genre + " Albums")
         ulAnchors "album-list" [
             for a in albums ->
             let href = sprintf "/store/details/%d" a.AlbumId

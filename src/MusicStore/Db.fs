@@ -86,9 +86,6 @@ let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
             select cart
     } |> Seq.toList
 
-let newCart cartId albumId (ctx : DbContext) : Cart =
-    ctx.``[dbo].[Carts]``.Create(albumId, cartId, 1, DateTime.UtcNow)
-
 let newOrder total username (ctx : DbContext) : Order =
     let order = ctx.``[dbo].[Orders]``.Create(DateTime.UtcNow, total)
     order.Username <- username
@@ -106,3 +103,28 @@ let validateUser (username, password) (ctx : DbContext) : User option =
             where (user.UserName = username && user.Password = password)
             select user
     } |> firstOrNone
+
+let addToCart cartId albumId (ctx : DbContext)  =
+    match getCart cartId albumId ctx with
+    | Some cart ->
+        cart.Count <- cart.Count + 1
+    | None ->
+        ctx.``[dbo].[Carts]``.Create(albumId, cartId, 1, DateTime.UtcNow) |> ignore
+    ctx.SubmitUpdates()
+
+let removeFromCart (cart : Cart) albumId (ctx : DbContext) = 
+    cart.Count <- cart.Count - 1
+    if cart.Count = 0 then cart.Delete()
+    ctx.SubmitUpdates()
+
+let placeOrder (username : string) (ctx : DbContext) =
+    let carts = getCartsDetails username ctx
+    let total = carts |> List.sumBy (fun c -> (decimal) c.Count * c.Price)
+    let order = newOrder total username ctx
+    ctx.SubmitUpdates()
+    for cart in carts do
+        let orderDetails = newOrderDetails (cart.AlbumId, order.OrderId, cart.Count, cart.Price) ctx
+        getCart cart.CartId cart.AlbumId ctx
+        |> Option.iter (fun cart -> cart.Delete())
+    ctx.SubmitUpdates()
+    order

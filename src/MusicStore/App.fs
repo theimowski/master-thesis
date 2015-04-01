@@ -45,7 +45,6 @@ let logonForm req =
     }
 
 
-
 let requireLogon =
     context (fun x ->
         let path = x.request.url.AbsolutePath
@@ -56,7 +55,7 @@ let returnPathOrRoot =
         let path = defaultArg (x.queryParam "returnPath") "/"
         Redirection.FOUND path)
 
-let auth f_success =
+let loggedOn f_success =
     context (fun x  -> 
         let path = x.request.url.AbsolutePath
         Auth.authenticate
@@ -65,7 +64,6 @@ let auth f_success =
             (fun () -> Choice2Of2(requireLogon))
             (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
             f_success)
-
 
 
 let actOnAlbumAndBackToManage f (ctx : DbContext) album =
@@ -158,7 +156,7 @@ let role (r : string) f_success =
         then f_success
         else FORBIDDEN (sprintf "Only for %s role" r))
     
-let admin = auth >> role "admin"
+let admin = loggedOn >> role "admin"
 
 let HTML html = 
     context (fun x ->
@@ -187,12 +185,9 @@ module Handlers =
 
     let albumsForGenre name = 
         let getF db =
-            match Db.getGenre name db with
-            | Some genre ->
-                let albums = Db.getAlbumsForGenre genre.GenreId db
-                Some (genre,albums)
-            | None -> None
-        withDb (getF >> lift (viewAlbumsForGenre >> HTML))
+            Db.getGenre name db 
+            |> Option.map (fun genre -> Db.getAlbumsForGenre genre.GenreId db)
+        withDb (getF >> lift (viewAlbumsForGenre name >> HTML))
 
     let logon = viewLogon |> HTML
 
@@ -239,61 +234,36 @@ module Handlers =
                 withDb (Db.getCartsDetails cartId >> viewCart >> HTML))
 
     let addToCart albumId = 
-        let add cartId db  =
-            match Db.getCart cartId albumId db with
-            | Some cart ->
-                cart.Count <- cart.Count + 1
-            | None ->
-                Db.newCart cartId albumId db |> ignore
-            db.SubmitUpdates()
-            Redirection.FOUND "/cart"
-
         sessionSetCartId
         >>= session (function
             | NoSession -> fun _ -> fail
             | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
-                withDb (add cartId))
+                Db.addToCart cartId albumId (sql.GetDataContext())
+                Redirection.FOUND "/cart")
 
     let removeFromCart albumId =
-        let remove cartId db =
-            match Db.getCart cartId albumId db with
-            | Some cart ->
-                cart.Count <- cart.Count - 1
-                if cart.Count = 0 then cart.Delete()
-                db.SubmitUpdates()
-                (Db.getCartsDetails cartId >> viewCart >> Html.flatten >> Html.xmlToString) (sql.GetDataContext()) |> OK
-            | None ->
-                fun x -> fail
-        
         session (function
         | NoSession -> fun _ -> fail
         | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
-            withDb (remove cartId))
+            let db = sql.GetDataContext()
+            Db.getCart cartId albumId db 
+            |> lift (fun cart -> 
+                Db.removeFromCart cart albumId db
+                db |> (Db.getCartsDetails cartId >> viewCart >> Html.flatten >> Html.xmlToString) |> OK))
 
     let checkout =
         session (function
         | NoSession | CartIdOnly _ -> fun _ -> fail
         | UserLoggedOn _ -> viewCheckout |> HTML)
-        |> auth 
+        |> loggedOn 
         
     let checkoutP = 
-        let placeOrder username db =
-            let carts = Db.getCartsDetails username db
-            let total = carts |> List.sumBy (fun c -> (decimal) c.Count * c.Price)
-            let order = Db.newOrder total username db
-            db.SubmitUpdates()
-            for cart in carts do
-                let orderDetails = Db.newOrderDetails (cart.AlbumId, order.OrderId, cart.Count, cart.Price) db
-                Db.getCart cart.CartId cart.AlbumId db
-                |> Option.iter (fun cart -> cart.Delete())
-            db.SubmitUpdates()
-            viewCheckoutComplete order.OrderId |> HTML
-
         session (function
         | NoSession | CartIdOnly _ -> fun _ -> fail
         | UserLoggedOn { Username = username } ->
-            withDb (placeOrder username))
-        |> auth
+            let order = Db.placeOrder username (sql.GetDataContext())
+            viewCheckoutComplete order.OrderId |> HTML)
+        |> loggedOn
 
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
 
