@@ -19,6 +19,14 @@ open MusicStore.View
 
 let bindForm key = Binding.form key Choice1Of2
 
+
+let passHash (pass: string) =
+    use sha = Security.Cryptography.SHA256.Create()
+    Text.Encoding.UTF8.GetBytes(pass)
+    |> sha.ComputeHash
+    |> Array.map (fun b -> b.ToString("x2"))
+    |> String.concat ""
+
 let albumForm req = 
     binding {
         let! artistId = req |> bindForm "artist" >>. Parse.int32
@@ -33,6 +41,23 @@ let albumForm req =
             album.Title <- title
             album.Price <- price
             album.AlbumArtUrl <- artUrl
+        )
+    }
+
+let registerForm request =
+    binding {
+        let! username = request |> bindForm "username"
+        let! email = request |> bindForm "email"
+        let! password = request |> bindForm "password"
+        let matchesPassword = function 
+        | p when p = password -> Choice1Of2 password 
+        | _ -> Choice2Of2 "Passwords do not match"
+        let! confirmpassword = request |> bindForm "confirmpassword" >>. matchesPassword
+
+        return (fun (user : Db.User) ->
+            user.UserName <- username
+            user.Email <- email
+            user.Password <- passHash password
         )
     }
 
@@ -82,12 +107,6 @@ let overwriteCookiePathToRoot cookieName =
         let cookie' = (snd HttpCookie.path_) (Some "/") cookie
         setCookie cookie')
 
-let passHash (pass: string) =
-    use sha = Security.Cryptography.SHA256.Create()
-    Text.Encoding.UTF8.GetBytes(pass)
-    |> sha.ComputeHash
-    |> Array.map (fun b -> b.ToString("x2"))
-    |> String.concat ""
 
 let clearUserState = 
     Writers.unsetUserData StateStoreType
@@ -210,21 +229,9 @@ module Handlers =
 
         withDb auth
 
-    let registerP (x: HttpContext) = async {
-        let username = x.request |> bindForm "username"
-        let email = x.request |> bindForm "email"
-        let password = x.request |> bindForm "password"
-        let confirmpassword = x.request |> bindForm "confirmpassword"
-        match username, email, password with
-        | Choice1Of2 username, Choice1Of2 email, Choice1Of2 password ->
-            let createUser db =
-                Db.newUser (email, passHash password, "user", username) db |> ignore
-                db.SubmitUpdates()
-                Redirection.FOUND "/account/logon"
-            return! (withDb createUser) x
-        | _ ->
-            return! BAD_REQUEST "Missing username, email or password" x
-    }
+    let registerP set =
+        Db.newUser set (sql.GetDataContext())
+        Redirection.FOUND "/account/logon"
     
     let cart = 
         session (function
@@ -270,8 +277,8 @@ module Handlers =
         let getF db = Db.getGenres db, Db.getArtists db
         withDb (getF >> viewCreateAlbum >> HTML >> admin)
     
-    let createAlbumP f = 
-        sql.GetDataContext() |> (Db.newAlbum >> f)
+    let createAlbumP set = 
+        sql.GetDataContext() |> Db.newAlbum set
         Redirection.FOUND "/store/manage"
 
     let editAlbum id = 
@@ -281,15 +288,15 @@ module Handlers =
             | None -> None 
         withDb (getF >> lift (viewEditAlbum >> HTML))
     
-    let editAlbumP id f = 
-        sql.GetDataContext() |> (Db.getAlbum id >> lift (tee f))
+    let editAlbumP id set = 
+        sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> set a; db.SubmitUpdates(); succeed))
         >>= Redirection.FOUND "/store/manage"
 
     let deleteAlbum id = 
         withDb (Db.getAlbumDetails id >> lift (viewDeleteAlbum >> HTML >> admin))
     
     let deleteAlbumP id =
-        sql.GetDataContext() |> (Db.getAlbum id >> lift (tee (fun a -> a.Delete())))
+        sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> a.Delete(); db.SubmitUpdates(); succeed))
         >>= Redirection.FOUND "/store/manage"
 
 choose [
@@ -321,7 +328,8 @@ choose [
     POST >>= choose [
         path "/account/logon" 
             >>= (Binding.bindReq logonForm logonP BAD_REQUEST)
-        path "/account/register" >>= registerP
+        path "/account/register" 
+            >>= (Binding.bindReq registerForm registerP BAD_REQUEST)
         
         pathScan "/cart/remove/%d" removeFromCart
         path "/cart/checkout" >>= checkoutP

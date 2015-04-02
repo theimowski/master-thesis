@@ -8,7 +8,7 @@ open FSharp.Data.Sql
 
 type sql = 
     SqlDataProvider< 
-        "Server=(LocalDb)\\v11.0;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true", 
+        "Server=localhost;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true", 
         DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >
 
 type DbContext = sql.dataContext
@@ -66,8 +66,9 @@ let getGenres (ctx : DbContext) : Genre list =
 let getArtists (ctx : DbContext) : Artist list = 
     ctx.``[dbo].[Artists]`` |> Seq.toList
 
-let newAlbum (ctx : DbContext) : Album =
-    ctx.``[dbo].[Albums]``.Create()
+let newAlbum set (ctx : DbContext) =
+    ctx.``[dbo].[Albums]``.Create() |> set
+    ctx.SubmitUpdates()
 
 let getCart cartId albumId (ctx : DbContext) : Cart option =
     query {
@@ -94,8 +95,9 @@ let newOrder total username (ctx : DbContext) : Order =
 let newOrderDetails (albumId, orderId, quantity, unitPrice) (ctx : DbContext) : OrderDetails =
     ctx.``[dbo].[OrderDetails]``.Create(albumId, orderId, quantity, unitPrice)
 
-let newUser (email, password, role, username) (ctx : DbContext) : User =
-    ctx.``[dbo].[Users]``.Create(email, password, role, username)
+let newUser set (ctx : DbContext) =
+    ctx.``[dbo].[Users]``.Create() |> set
+    ctx.SubmitUpdates()
 
 let validateUser (username, password) (ctx : DbContext) : User option =
     query {
