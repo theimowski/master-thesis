@@ -47,6 +47,82 @@ let registerForm request =
         )
     }
 
+type TextFieldProperty =
+    | MinLength of int
+    | MaxLength of int
+
+let testText (text : string) = function
+    | MinLength len -> text.Length >= len
+    | MaxLength len -> text.Length <= len
+
+let reasonText = function
+    | MinLength len -> sprintf "must be at least %d characters" len
+    | MaxLength len -> sprintf "must be at most %d characters" len
+
+let verifyText value prop name =
+    if testText value prop then Choice1Of2 value
+    else name + " " + reasonText prop |> Choice2Of2
+
+type FormField = 
+    | TextField of string * TextFieldProperty list
+
+open Suave.Utils
+
+let verify = function
+    | TextField (name, props), value ->
+        props
+        |> List.fold
+            (fun value prop ->
+                value |> Choice.bind (fun value -> verifyText value prop name))
+            (Choice1Of2 value)
+
+let name = function
+    | TextField (name, _) -> name
+
+type Form = 
+    | Form of FormField list
+
+let bindingForm form req =
+    let (Form fields) = form
+    let names = fields |> List.map name
+    let values =
+        names
+        |> List.fold 
+            (fun ch name -> 
+                ch |> Choice.bind (fun xs -> 
+                    req |> bindForm name |> Choice.map (fun x -> x :: xs))) 
+            (Choice1Of2 [])
+        |> Choice.map List.rev 
+
+    values
+    |> Choice.bind (fun values ->
+        (fields, values)
+        ||> List.zip
+        |> List.fold
+            (fun map (field,value) ->
+                map |> Choice.bind (fun map ->
+                    verify (field,value) |> Choice.map (fun x -> map |> Map.add (name field) x)))
+            (Choice1Of2 Map.empty)
+        |> Choice.map (fun map ->
+            fun key -> map.[key]
+        )
+    )
+
+module Logon = 
+    let Username = "username"
+    let Password = "password"
+    
+    let form = 
+        Form [ TextField(Username, 
+                         [ MinLength 5
+                           MaxLength 20 ])
+               TextField(Password, []) ]
+
+let x = ["a", box "b"] |> dict
+let get<'a> key = x.[key] :?> 'a
+let test : string = get "a"
+
+(*
 let logonForm req =
     binding {
         let! username = req |> bindForm "username"
@@ -54,3 +130,6 @@ let logonForm req =
 
         return username,password
     }
+*)
+
+let logonForm = bindingForm Logon.form

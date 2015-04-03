@@ -162,15 +162,16 @@ module Handlers =
         >>= unsetPair Auth.SessionAuthCookie
         >>= unsetPair StateCookie
         >>= Redirection.FOUND "/"
+        |> loggedOn
 
     let register = viewRegister |> HTML
 
-    let logonP (username,password) =
+    let logonP get =
         let auth db =
-            match Db.validateUser (username, passHash password) db with
+            match Db.validateUser (get Form.Logon.Username, passHash (get Form.Logon.Username)) db with
             | Some user ->
                     Auth.authenticated Cookie.CookieLife.Session false 
-                    >>= sessionLogOnUser (username, user.Role)
+                    >>= sessionLogOnUser (get Form.Logon.Username, user.Role)
                     >>= returnPathOrRoot
             | _ ->
                 logon
