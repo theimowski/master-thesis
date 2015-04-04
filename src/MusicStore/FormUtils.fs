@@ -11,6 +11,37 @@ type TextFieldProperty =
     | MinLength of int
     | MaxLength of int
 
+type DecimalFieldProperty =
+    | Minimum of decimal
+    | Maximum of decimal
+    | Step of decimal
+
+type IntegerFieldProperty =
+    | Min of int
+    | Max of int
+
+type TextField    = TextField of string * TextFieldProperty list
+type DecimalField = DecimalField of string * DecimalFieldProperty list
+type IntegerField = IntegerField of string * IntegerFieldProperty list
+
+type FormField =
+    | TextFormField of TextField
+    | DecimalFormField of DecimalField
+    | IntegerFormField of IntegerField
+
+type FormResult = {
+    GetText : TextField -> string
+    GetDecimal : DecimalField -> decimal
+    GetInteger : IntegerField -> int
+}
+
+type ServerSideValidation = FormResult -> bool * string
+
+type Form = {
+    Fields : FormField list
+    ServerSideValidations : ServerSideValidation list
+}
+
 let testText (text : string) = function
     | MinLength len -> text.Length >= len
     | MaxLength len -> text.Length <= len
@@ -18,15 +49,6 @@ let testText (text : string) = function
 let reasonText = function
     | MinLength len -> sprintf "must be at least %d characters" len
     | MaxLength len -> sprintf "must be at most %d characters" len
-
-let verifyText value prop name =
-    if testText value prop then Choice1Of2 value
-    else sprintf "'%s' %s" name (reasonText prop) |> Choice2Of2
-
-type DecimalFieldProperty =
-    | Minimum of decimal
-    | Maximum of decimal
-    | Step of decimal
 
 let testDecimal (decimal : decimal) = function
     | Minimum min -> decimal >= min
@@ -38,14 +60,6 @@ let reasonDecimal = function
     | Maximum max -> sprintf "must be at most %M" max
     | Step step -> sprintf "must be a multiply of %M" step
 
-let verifyDecimal value prop name =
-    if testDecimal value prop then Choice1Of2 value
-    else sprintf "'%s' %s" name (reasonDecimal prop) |> Choice2Of2
-
-type IntegerFieldProperty =
-    | Min of int
-    | Max of int
-
 let testInteger (int : int) = function
     | Min min -> int >= min
     | Max max -> int <= max
@@ -54,68 +68,34 @@ let reasonInteger = function
     | Min min -> sprintf "must be at least %d" min
     | Max max -> sprintf "must be at most %d" max
 
-let verifyInteger value prop name =
-    if testInteger value prop then Choice1Of2 value
-    else sprintf "'%s' %s" name (reasonInteger prop) |> Choice2Of2
+let verify (name,props) (testF, reasonF) value =
+    let verify' prop = 
+        if testF value prop then Choice1Of2 value
+        else sprintf "'%s' %s" name (reasonF prop) |> Choice2Of2
 
-type TextFieldName = TextFieldName of string
-type DecimalFieldName= DecimalFieldName of string
-type IntegerFieldName= IntegerFieldName of string
+    props
+    |> List.fold
+        (fun value prop ->
+            value |> Choice.bind (fun value -> verify' prop))
+        (Choice1Of2 value)
 
-type FormField = 
-    | TextField of TextFieldName * TextFieldProperty list
-    | DecimalField of DecimalFieldName * DecimalFieldProperty list
-    | IntegerField of IntegerFieldName * IntegerFieldProperty list
-
-type FormResult = {
-    GetText : TextFieldName -> string
-    GetDecimal : DecimalFieldName -> decimal
-    GetInteger : IntegerFieldName -> int
-}
-
-type ServerSideValidation = FormResult -> bool * string
-
-type Form<'a> = 
-    | Form of FormField list * ServerSideValidation list
-
-
-let verify (field, value : obj) = 
-    match (field, value) with
-    | TextField ((TextFieldName name), props), (:? string as value) ->
-        props
-        |> List.fold
-            (fun value prop ->
-                value |> Choice.bind (fun value -> verifyText value prop name))
-            (Choice1Of2 value)
-        |> Choice.map box
-    | DecimalField ((DecimalFieldName name), props), (:? decimal as value) ->
-        props
-        |> List.fold
-            (fun value prop ->
-                value |> Choice.bind (fun value -> verifyDecimal value prop name))
-            (Choice1Of2 value)
-        |> Choice.map box
-    | IntegerField ((IntegerFieldName name), props), (:? int as value) ->
-        props
-        |> List.fold
-            (fun value prop ->
-                value |> Choice.bind (fun value -> verifyInteger value prop name))
-            (Choice1Of2 value)
-        |> Choice.map box
-    | _, v -> failwithf "Unexpected type %s" (v.GetType().FullName)
+let verifyText (TextField (n,ps)) = verify (n,ps) (testText, reasonText) 
+let verifyDecimal (DecimalField (n,ps)) = verify (n,ps) (testDecimal, reasonDecimal) 
+let verifyInteger (IntegerField (n,ps)) = verify (n,ps) (testInteger, reasonInteger)
 
 let name = function
-    | TextField ((TextFieldName name), _) -> name
-    | DecimalField ((DecimalFieldName name), _) -> name
-    | IntegerField ((IntegerFieldName name), _) -> name
+    | TextFormField (TextField (name, _)) -> name
+    | DecimalFormField (DecimalField (name, _)) -> name
+    | IntegerFormField (IntegerField (name, _)) -> name
 
 let parse = function
-    | TextField _, value -> Choice1Of2 value |> Choice.map box
-    | DecimalField _, value -> Parse.decimal value |> Choice.map box
-    | IntegerField _, value -> Parse.int32 value |> Choice.map box
+    | TextFormField f, value -> Choice1Of2 value >>. verifyText f |> Choice.map box
+    | DecimalFormField f, value -> Parse.decimal value >>. verifyDecimal f |> Choice.map box
+    | IntegerFormField f, value -> Parse.int32 value >>. verifyInteger f |> Choice.map box
 
 let bindingForm form req =
-    let (Form (fields, validations)) = form
+    let fields = form.Fields
+    let validations = form.ServerSideValidations
     let names = fields |> List.map name
     let values =
         names
@@ -134,16 +114,14 @@ let bindingForm form req =
             (fun map (field,value) ->
                 map |> Choice.bind (fun map ->
                     parse (field, value) 
-                    |> Choice.bind(fun value -> 
-                        verify (field,value) 
-                        |> Choice.map (fun x -> 
-                            map |> Map.add (name field) x))))
+                    |> Choice.map (fun x -> 
+                        map |> Map.add (name field) x)))
             (Choice1Of2 Map.empty)
         |> Choice.map (fun map ->
             let result = {
-                GetText = fun (TextFieldName key) -> map.[key] :?> _
-                GetDecimal = fun (DecimalFieldName key) -> map.[key] :?> _
-                GetInteger = fun (IntegerFieldName key) -> map.[key] :?> _
+                GetText = fun (TextField (name,_)) -> map.[name] :?> _
+                GetDecimal = fun (DecimalField (name,_)) -> map.[name] :?> _
+                GetInteger = fun (IntegerField (name,_)) -> map.[name] :?> _
             }
             result
         ))

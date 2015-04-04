@@ -13,7 +13,7 @@ let decimalAttr = function
     | Maximum max -> "max", formatDec max
     | Step step -> "step", formatDec step
 
-let decimalInput (DecimalFieldName name, props) attrs = 
+let decimalInput (DecimalField(name, props)) attrs = 
     inputAttr (["name", name; "type", "number"; "required", ""] 
                 @ attrs
                 @ (props |> List.map decimalAttr))

@@ -142,9 +142,8 @@ let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: D
                 div [ text "Title" ]
                 div [ textInput "title" title ["maxlength", "100"] ]
                 div [ text "Price" ]
-                //div [ FormHtml.decimalInput Form.Album.Price [] ]
-                div [ numberInput "price" price ["step", "0.01";  "min", "0.01"; "max", "100.00"] ]
-                div [ text "Album Art Url" ]
+                div [ FormHtml.decimalInput Form.Album.Price (price |> Option.toList |> List.map (fun p -> "value",p)) ]
+                div [ text "Album Art Url" ]    
                 div [ textInput "artUrl" (Some "placeholder.gif") ["maxlength", "100"] ]
 
                 p [ inputAttr ["type", "submit"; "value", submit] ]  
