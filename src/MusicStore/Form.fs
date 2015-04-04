@@ -42,8 +42,8 @@ module Album =
     let form = 
         Form ([ IntegerField(ArtistId, [])
                 IntegerField(GenreId, [])
-                TextField(Title, [])
-                DecimalField(Price, []) 
-                TextField(ArtUrl, []) ], [ ])
+                TextField(Title, [ MinLength 1; MaxLength 100 ])
+                DecimalField(Price, [ Minimum 0.01M; Maximum 100.0M; Step 0.01M ]) 
+                TextField(ArtUrl, [ MinLength 1; MaxLength 100 ]) ], [ ])
 
 let albumForm req = bindingForm Album.form req

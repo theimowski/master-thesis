@@ -24,16 +24,19 @@ let verifyText value prop name =
     else sprintf "'%s' %s" name (reasonText prop) |> Choice2Of2
 
 type DecimalFieldProperty =
-    | Min of decimal
-    | Max of decimal
+    | Minimum of decimal
+    | Maximum of decimal
+    | Step of decimal
 
 let testDecimal (decimal : decimal) = function
-    | Min min -> decimal >= min
-    | Max max -> decimal <= max
+    | Minimum min -> decimal >= min
+    | Maximum max -> decimal <= max
+    | Step step -> decimal % step = 0.0M
 
 let reasonDecimal = function
-    | Min min -> sprintf "must be at least %M" min
-    | Max max -> sprintf "must be at most %M" max
+    | Minimum min -> sprintf "must be at least %M" min
+    | Maximum max -> sprintf "must be at most %M" max
+    | Step step -> sprintf "must be a multiply of %M" step
 
 let verifyDecimal value prop name =
     if testDecimal value prop then Choice1Of2 value
