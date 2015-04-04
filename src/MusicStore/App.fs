@@ -166,19 +166,27 @@ module Handlers =
 
     let register = viewRegister |> HTML
 
-    let logonP get =
+    let logonP (result : FormResult) =
         let auth db =
-            match Db.validateUser (get Form.Logon.Username, passHash (get Form.Logon.Username)) db with
+            match Db.validateUser 
+                    (result.GetText Form.Logon.Username, 
+                     passHash (result.GetText Form.Logon.Password)) db with
             | Some user ->
                     Auth.authenticated Cookie.CookieLife.Session false 
-                    >>= sessionLogOnUser (get Form.Logon.Username, user.Role)
+                    >>= sessionLogOnUser (result.GetText Form.Logon.Username, user.Role)
                     >>= returnPathOrRoot
             | _ ->
                 logon
 
         withDb auth
 
-    let registerP set =
+    let registerP (result : FormResult) =
+        let set = (fun (user : User) ->
+                user.UserName <- result.GetText Form.Register.Username
+                user.Email <- result.GetText Form.Register.Email
+                user.Password <- result.GetText Form.Register.Password |> passHash
+                user.Role <- "user"
+            )   
         Db.newUser set (sql.GetDataContext())
         Redirection.FOUND "/account/logon"
     

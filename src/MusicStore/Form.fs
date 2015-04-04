@@ -6,47 +6,6 @@ open Suave.Model
 
 let bindForm key = Binding.form key Choice1Of2
 
-let passHash (pass: string) =
-    use sha = Security.Cryptography.SHA256.Create()
-    Text.Encoding.UTF8.GetBytes(pass)
-    |> sha.ComputeHash
-    |> Array.map (fun b -> b.ToString("x2"))
-    |> String.concat ""
-
-let albumForm req = 
-    binding {
-        let! artistId = req |> bindForm "artist" >>. Parse.int32
-        let! genreId = req |> bindForm "genre" >>. Parse.int32
-        let! title = req |> bindForm "title"
-        let! price = req |> bindForm "price" >>. Parse.decimal
-        let! artUrl = req |> bindForm "artUrl"
-
-        return (fun (album : Db.Album) -> 
-            album.ArtistId <- artistId
-            album.GenreId <- genreId
-            album.Title <- title
-            album.Price <- price
-            album.AlbumArtUrl <- artUrl
-        )
-    }
-
-let registerForm request =
-    binding {
-        let! username = request |> bindForm "username"
-        let! email = request |> bindForm "email"
-        let! password = request |> bindForm "password"
-        let matchesPassword = function 
-        | p when p = password -> Choice1Of2 password 
-        | _ -> Choice2Of2 "Passwords do not match"
-        let! confirmpassword = request |> bindForm "confirmpassword" >>. matchesPassword
-
-        return (fun (user : Db.User) ->
-            user.UserName <- username
-            user.Email <- email
-            user.Password <- passHash password
-        )
-    }
-
 type TextFieldProperty =
     | MinLength of int
     | MaxLength of int
@@ -61,29 +20,76 @@ let reasonText = function
 
 let verifyText value prop name =
     if testText value prop then Choice1Of2 value
-    else name + " " + reasonText prop |> Choice2Of2
+    else sprintf "'%s' %s" name (reasonText prop) |> Choice2Of2
+
+type DecimalFieldProperty =
+    | Min of decimal
+    | Max of decimal
+
+let testDecimal (decimal : decimal) = function
+    | Min min -> decimal >= min
+    | Max max -> decimal <= max
+
+let reasonDecimal = function
+    | Min min -> sprintf "must be at least %M" min
+    | Max max -> sprintf "must be at most %M" max
+
+let verifyDecimal value prop name =
+    if testDecimal value prop then Choice1Of2 value
+    else sprintf "'%s' %s" name (reasonDecimal prop) |> Choice2Of2
+
+
+type FormFieldName<'a>(name : string) = 
+    member __.Name = name
+type TextFieldName(name) =
+    inherit FormFieldName<string>(name)
+type DecimalFieldName(name) =
+    inherit FormFieldName<decimal>(name)
 
 type FormField = 
-    | TextField of string * TextFieldProperty list
+    | TextField of TextFieldName * TextFieldProperty list
+    | DecimalField of DecimalFieldName * DecimalFieldProperty list
+
+type FormResult = {
+    GetText : TextFieldName -> string
+    GetDecimal : DecimalFieldName -> decimal
+}
+
+type ServerSideValidation = FormResult -> bool * string
+
+type Form<'a> = 
+    | Form of FormField list * ServerSideValidation list
 
 open Suave.Utils
 
-let verify = function
-    | TextField (name, props), value ->
+let verify (field, value : obj) = 
+    match (field, value) with
+    | TextField (name, props), (:? string as value) ->
         props
         |> List.fold
             (fun value prop ->
-                value |> Choice.bind (fun value -> verifyText value prop name))
+                value |> Choice.bind (fun value -> verifyText value prop name.Name))
             (Choice1Of2 value)
+        |> Choice.map box
+    | DecimalField (name, props), (:? decimal as value) ->
+        props
+        |> List.fold
+            (fun value prop ->
+                value |> Choice.bind (fun value -> verifyDecimal value prop name.Name))
+            (Choice1Of2 value)
+        |> Choice.map box
+    | _, v -> failwithf "Unexpected type %s" (v.GetType().FullName)
 
 let name = function
-    | TextField (name, _) -> name
+    | TextField (name, _) -> name.Name
+    | DecimalField (name, _) -> name.Name
 
-type Form = 
-    | Form of FormField list
+let parse = function
+    | TextField _, value -> Choice1Of2 value |> Choice.map box
+    | DecimalField _, value -> Parse.decimal value |> Choice.map box
 
 let bindingForm form req =
-    let (Form fields) = form
+    let (Form (fields, validations)) = form
     let names = fields |> List.map name
     let values =
         names
@@ -101,35 +107,107 @@ let bindingForm form req =
         |> List.fold
             (fun map (field,value) ->
                 map |> Choice.bind (fun map ->
-                    verify (field,value) |> Choice.map (fun x -> map |> Map.add (name field) x)))
+                    parse (field, value) 
+                    |> Choice.bind(fun value -> 
+                        verify (field,value) 
+                        |> Choice.map (fun x -> 
+                            map |> Map.add (name field) x))))
             (Choice1Of2 Map.empty)
         |> Choice.map (fun map ->
-            fun key -> map.[key]
-        )
-    )
+            let result = {
+                GetText = fun key -> map.[key.Name] :?> _
+                GetDecimal = fun key -> map.[key.Name] :?> _
+            }
+            result
+        ))
+    |> Choice.bind (fun result ->
+        validations
+        |> List.fold
+            (fun result validation -> 
+                result 
+                |> Choice.bind (fun result -> 
+                    match validation result with
+                    | true, _ -> Choice1Of2 result
+                    | false, reason -> Choice2Of2 reason))
+            (Choice1Of2 result))
 
 module Logon = 
-    let Username = "username"
-    let Password = "password"
+    let Username = TextFieldName("username")
+    let Password = TextFieldName("password")
     
     let form = 
-        Form [ TextField(Username, 
+        Form([ TextField(Username, 
                          [ MinLength 5
                            MaxLength 20 ])
-               TextField(Password, []) ]
-
-let x = ["a", box "b"] |> dict
-let get<'a> key = x.[key] :?> 'a
-let test : string = get "a"
-
+               TextField(Password, []) ], [])
 (*
 let logonForm req =
     binding {
-        let! username = req |> bindForm "username"
+        let! username = req |> bindForm "usern`ame"
         let! password = req |> bindForm "password"
 
         return username,password
     }
 *)
 
-let logonForm = bindingForm Logon.form
+let logonForm req = bindingForm Logon.form req
+
+module Register =
+    let Username = TextFieldName("username")
+    let Email = TextFieldName("email")
+    let Password = TextFieldName("password")
+    let ConfirmPassword = TextFieldName("confirmpassword")
+
+    let passwordsMatch result =
+        result.GetText Password = result.GetText ConfirmPassword, "Passwords must match"
+    
+    let form = 
+        Form ([ TextField(Username, [])
+                TextField(Email, [])
+                TextField(Password, [])
+                TextField(ConfirmPassword, []) ], [ passwordsMatch ])
+
+let passHash (pass: string) =
+    use sha = Security.Cryptography.SHA256.Create()
+    Text.Encoding.UTF8.GetBytes(pass)
+    |> sha.ComputeHash
+    |> Array.map (fun b -> b.ToString("x2"))
+    |> String.concat ""
+
+let registerForm req = bindingForm Register.form req
+
+(*
+let registerForm request =
+    binding {
+        let! username = request |> bindForm "username"
+        let! email = request |> bindForm "email"
+        let! password = request |> bindForm "password"
+        let matchesPassword = function 
+        | p when p = password -> Choice1Of2 password 
+        | _ -> Choice2Of2 "Passwords do not match"
+        let! confirmpassword = request |> bindForm "confirmpassword" >>. matchesPassword
+
+        return (fun (user : Db.User) ->
+            user.UserName <- username
+            user.Email <- email
+            user.Password <- passHash password
+        )
+    }
+*)
+
+let albumForm req = 
+    binding {
+        let! artistId = req |> bindForm "artist" >>. Parse.int32
+        let! genreId = req |> bindForm "genre" >>. Parse.int32
+        let! title = req |> bindForm "title"
+        let! price = req |> bindForm "price" >>. Parse.decimal
+        let! artUrl = req |> bindForm "artUrl"
+
+        return (fun (album : Db.Album) -> 
+            album.ArtistId <- artistId
+            album.GenreId <- genreId
+            album.Title <- title
+            album.Price <- price
+            album.AlbumArtUrl <- artUrl
+        )
+    }
