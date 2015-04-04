@@ -18,6 +18,13 @@ open MusicStore.Db
 open MusicStore.Form
 open MusicStore.View
 
+let passHash (pass: string) =
+    use sha = Security.Cryptography.SHA256.Create()
+    Text.Encoding.UTF8.GetBytes(pass)
+    |> sha.ComputeHash
+    |> Array.map (fun b -> b.ToString("x2"))
+    |> String.concat ""
+
 let requireLogon =
     context (fun x ->
         let path = x.request.url.AbsolutePath
@@ -42,10 +49,6 @@ let loggedOn f_success =
 let lift success = function
     | Some x -> success x
     | None -> never
-
-let tee f x = 
-    f x
-    succeed
 
 let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
 
@@ -142,6 +145,7 @@ let HTML html =
 
 [<AutoOpen>]
 module Handlers =
+    open FormUtils
 
     let home = withDb (Db.getBestSellers >> viewHome >> HTML)
     
@@ -234,8 +238,16 @@ module Handlers =
         let getF db = Db.getGenres db, Db.getArtists db
         withDb (getF >> viewCreateAlbum >> HTML >> admin)
     
-    let createAlbumP set = 
-        sql.GetDataContext() |> Db.newAlbum set
+    let setAlbum (result : FormResult) = (fun (album : Db.Album) -> 
+            album.ArtistId <- result.GetInteger Form.Album.ArtistId
+            album.GenreId <- result.GetInteger Form.Album.GenreId
+            album.Title <- result.GetText Form.Album.Title
+            album.Price <- result.GetDecimal Form.Album.Price
+            album.AlbumArtUrl <- result.GetText Form.Album.ArtUrl
+        )
+
+    let createAlbumP result = 
+        sql.GetDataContext() |> Db.newAlbum (setAlbum result)
         Redirection.FOUND "/store/manage"
 
     let editAlbum id = 
@@ -245,8 +257,8 @@ module Handlers =
             | None -> None 
         withDb (getF >> lift (viewEditAlbum >> HTML))
     
-    let editAlbumP id set = 
-        sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> set a; db.SubmitUpdates(); succeed))
+    let editAlbumP id result = 
+        sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> (setAlbum result) a; db.SubmitUpdates(); succeed))
         >>= Redirection.FOUND "/store/manage"
 
     let deleteAlbum id = 

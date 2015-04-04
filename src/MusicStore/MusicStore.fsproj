@@ -60,6 +60,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="Db.fs" />
+    <Compile Include="FormUtils.fs" />
     <Compile Include="Form.fs" />
     <Compile Include="View.fs" />
     <Compile Include="App.fs" />
