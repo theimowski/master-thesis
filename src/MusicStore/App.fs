@@ -188,7 +188,7 @@ module Handlers =
         let set = (fun (user : User) ->
                 user.UserName <- result.GetText Form.Register.Username
                 user.Email <- result.GetText Form.Register.Email
-                user.Password <- result.GetText Form.Register.Password |> passHash
+                user.Password <- result.GetPassword Form.Register.Password |> passHash
                 user.Role <- "user"
             )   
         Db.newUser set (sql.GetDataContext())

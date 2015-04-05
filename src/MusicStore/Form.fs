@@ -16,16 +16,19 @@ let logonForm req = bindingForm Logon.form req
 module Register =
     let Username = TextField("username", [])
     let Email = TextField("email", [])
-    let Password = TextField("password", [])
-    let ConfirmPassword = TextField("confirmpassword", [])
+    let Password = PasswordField("password", [])
+    let ConfirmPassword = PasswordField("confirmpassword", [])
 
     let passwordsMatch result =
-        result.GetText Password = result.GetText ConfirmPassword, "Passwords must match"
+        result.GetPassword Password = result.GetPassword ConfirmPassword, "Passwords must match"
     
-    let form = {
-        Fields = [TextFormField Username; TextFormField Email; TextFormField Password; TextFormField ConfirmPassword]
-        ServerSideValidations = [ passwordsMatch ]
-    }
+    let form = 
+        { Fields = 
+              [ TextFormField Username
+                TextFormField Email
+                PasswordFormField Password
+                PasswordFormField ConfirmPassword ]
+          ServerSideValidations = [ passwordsMatch ] }
 
 let registerForm req = bindingForm Register.form req
 

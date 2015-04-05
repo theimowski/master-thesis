@@ -227,26 +227,26 @@ let viewRegister = [
                 text "User name" 
             ]
             divClass "editor-field" [ 
-                textInput "username" None []
+                FormHtml.textInput Form.Register.Username []
             ]
             divClass "editor-label" [ 
                 text "Email address" 
             ]
             divClass "editor-field" [ 
-                textInput "email" None []
+                FormHtml.textInput Form.Register.Email []
             ]
 
             divClass "editor-label" [ 
                 text "Password" 
             ]
             divClass "editor-field" [ 
-                passwordInput "password"
+                FormHtml.passwordInput Form.Register.Password []
             ]
             divClass "editor-label" [ 
                 text "Confirm Password" 
             ]
             divClass "editor-field" [ 
-                passwordInput "confirmpassword"
+                FormHtml.passwordInput Form.Register.ConfirmPassword []
             ]
 
             submitInput "Register"
