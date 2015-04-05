@@ -293,15 +293,26 @@ let viewCheckout = [
     h2 "Address And Payment"
     form [
         fieldset [
-            yield legend "Shipping Information"
+            legend "Shipping Information"
 
-            for field in ["First Name"; "Last Name"; "Address"; "Email Address"] do
-                yield divClass "editor-label" [
-                    text field
-                ]
-                yield divClass "editor-field" [
-                    textInput field None []
-                ]
+            divClass "editor-label" [
+                text "First Name"
+            ]
+            divClass "editor-field" [
+                FormHtml.textInput Form.Checkout.FirstName []
+            ]
+            divClass "editor-label" [
+                text "Last Name"
+            ]
+            divClass "editor-field" [
+                FormHtml.textInput Form.Checkout.LastName []
+            ]
+            divClass "editor-label" [
+                text "Address"
+            ]
+            divClass "editor-field" [
+                FormHtml.textInput Form.Checkout.Address []
+            ]
         ]
 
         fieldset [
@@ -313,7 +324,7 @@ let viewCheckout = [
                 text "Promo Code"
             ]
             divClass "editor-field" [
-                textInput "promocode" None []
+                FormHtml.textInput Form.Checkout.PromoCode []
             ]
         ]
 

@@ -224,7 +224,7 @@ module Handlers =
         | UserLoggedOn _ -> viewCheckout |> HTML)
         |> loggedOn 
         
-    let checkoutP = 
+    let checkoutP result = 
         session (function
         | NoSession | CartIdOnly _ -> never
         | UserLoggedOn { Username = username } ->
@@ -301,7 +301,8 @@ choose [
             >>= (Binding.bindReq registerForm registerP BAD_REQUEST)
         
         pathScan "/cart/remove/%d" removeFromCart
-        path "/cart/checkout" >>= checkoutP
+        path "/cart/checkout"
+            >>= (Binding.bindReq checkoutForm checkoutP BAD_REQUEST)
 
         path "/store/manage/create"
             >>= admin (Binding.bindReq albumForm createAlbumP BAD_REQUEST)

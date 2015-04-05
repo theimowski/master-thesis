@@ -49,3 +49,19 @@ module Album =
           ServerSideValidations = [] }
 
 let albumForm req = bindingForm Album.form req
+
+module Checkout =
+    let FirstName = TextField("firstname", [])
+    let LastName = TextField("lastname", [])
+    let Address = TextField("address", [])
+    let PromoCode = TextField("promocode", [])
+
+    let form = 
+        { Fields =
+            [ TextFormField FirstName
+              TextFormField LastName
+              TextFormField Address
+              TextFormField PromoCode ]
+          ServerSideValidations = [] }
+
+let checkoutForm req = bindingForm Checkout.form req
