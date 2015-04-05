@@ -63,6 +63,7 @@
     <Compile Include="FormUtils.fs" />
     <Compile Include="FormHtml.fs" />
     <Compile Include="Form.fs" />
+    <Compile Include="Path.fs" />
     <Compile Include="View.fs" />
     <Compile Include="App.fs" />
     <None Include="App.config" />

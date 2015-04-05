@@ -89,7 +89,7 @@ let viewAlbumDetails (album : Db.AlbumDetails) = [
                 text t
             ]
         yield pAttr ["class", "button"] [
-            aHref (sprintf "/cart/add/%d" album.AlbumId) (text "Add to cart")
+            aHref (sprintf Path.Cart.addAlbum album.AlbumId) (text "Add to cart")
         ]
     ]
 ]
@@ -107,7 +107,7 @@ let viewHome (bestSellers : Db.BestSeller list) = [
     h3 "Fresh off the grill"
     ulAnchors "album-list" [
         for album in bestSellers -> 
-            let href = sprintf "/store/details/%d" album.AlbumId
+            let href = sprintf Path.Store.details album.AlbumId
             let xml = flatten [ imgSrc "/placeholder.gif"; span (text album.Title)]
             href,xml
     ]
@@ -118,7 +118,7 @@ let viewAlbumsForGenre (genre : string) (albums : Db.Album list) = [
         h3 (genre + " Albums")
         ulAnchors "album-list" [
             for a in albums ->
-            let href = sprintf "/store/details/%d" a.AlbumId
+            let href = sprintf Path.Store.details a.AlbumId
             let xml = flatten [ imgSrc "/placeholder.gif"; span (text a.Title) ]
             href,xml
         ]
@@ -127,7 +127,7 @@ let viewAlbumsForGenre (genre : string) (albums : Db.Album list) = [
 
 let viewManageStore (albums : Db.AlbumDetails list) = [ 
     h2 "Index"
-    p [aHref "/store/manage/create" (text "Create New")]
+    p [aHref Path.Admin.createAlbum (text "Create New")]
     table [
         yield tr [
             for t in ["Artist";"Title";"Genre";"Price";""] -> th [ text t ]
@@ -139,9 +139,9 @@ let viewManageStore (albums : Db.AlbumDetails list) = [
                 td [ text t ]
 
             yield td [
-                aHref (sprintf "/store/manage/edit/%d" album.AlbumId) (text "Edit")
+                aHref (sprintf Path.Admin.editAlbum album.AlbumId) (text "Edit")
                 text " | "
-                aHref (sprintf "/store/manage/delete/%d" album.AlbumId) (text "Delete")
+                aHref (sprintf Path.Admin.deleteAlbum album.AlbumId) (text "Delete")
             ]
         ]
     ]
@@ -176,7 +176,7 @@ let createEditAlbum (current : Db.Album option) header submit ((genres: Db.Genre
               Form = Form.album }
     
         div [
-            aHref "/store/manage" (text "Back to list")
+            aHref Path.Admin.manage (text "Back to list")
         ]
     ]
 
@@ -197,7 +197,7 @@ let viewDeleteAlbum (album : Db.AlbumDetails) = [
     ]
 
     div [
-        aHref "/store/manage" (text "Back to list")
+        aHref Path.Admin.manage (text "Back to list")
     ]
 ]
 
@@ -205,7 +205,7 @@ let viewLogon = [
     h2 "Log On"
     p [
         text "Please enter your user name and password."
-        aHref "/account/register" (text "Register")
+        aHref Path.Account.register (text "Register")
         text " if you don't have an account yet."
     ]
 
@@ -247,7 +247,7 @@ let viewRegister = [
 let viewCart (carts : Db.CartDetails list) = [
     h3 "Review your cart:"
     pAttr ["class", "button"] [
-            aHref "/cart/checkout" (text "Checkout >>")
+            aHref Path.Cart.checkout (text "Checkout >>")
     ]
     divId "update-message" [text " "]
     table [
@@ -258,7 +258,7 @@ let viewCart (carts : Db.CartDetails list) = [
         for cart in carts ->
             tr [
                 td [
-                    aHref (sprintf "/store/details/%d" cart.AlbumId) (text cart.AlbumTitle)
+                    aHref (sprintf Path.Store.details cart.AlbumId) (text cart.AlbumTitle)
                 ]
                 td [
                     text (formatDec cart.Price)
@@ -307,7 +307,7 @@ let viewCheckoutComplete orderId = [
     ]
     p [
         text "How about shopping for some more music in our "
-        aHref "/" (text "store")
+        aHref Path.home (text "store")
         text "?"
     ]
 ]
@@ -321,12 +321,12 @@ let viewIndex (genres : Db.Genre list, cartItems : int, username : string option
        
         body [
             divId "header" [
-                h1 (aHref "/" (text "F# Suave Music Store"))
+                h1 (aHref Path.home (text "F# Suave Music Store"))
                 ulAnchors "navlist" [ 
-                    "/", text "Home"
-                    "/store", text "Store"
-                    "/cart", text (sprintf "Cart (%d)" cartItems)
-                    "/store/manage", text "Admin"
+                    Path.home, text "Home"
+                    Path.Store.overview, text "Store"
+                    Path.Cart.overview, text (sprintf "Cart (%d)" cartItems)
+                    Path.Admin.manage, text "Admin"
                 ]
                 spanAttr 
                     ["style", "'float:right'"] 
@@ -334,10 +334,10 @@ let viewIndex (genres : Db.Genre list, cartItems : int, username : string option
                         match username with
                         | Some name -> 
                             yield text (sprintf "Hello, %s" name)
-                            yield aHref "/account/logoff" (text "Log off")
+                            yield aHref Path.Account.logoff (text "Log off")
                         | None ->
                             yield text ("Hello, Guest")
-                            yield aHref "/account/logon" (text "Log on")
+                            yield aHref Path.Account.logon (text "Log on")
                     ])
             ]
 

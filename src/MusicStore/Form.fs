@@ -8,7 +8,6 @@ type Logon = {
 }
 
 let logon : Form<Logon> = Form ([],[])
-let bindLogonForm2 = bindRequest logon
 
 type Register = {
     Username : string
@@ -20,7 +19,6 @@ type Register = {
 let passwordsMatch f = 
     f.Password = f.ConfirmPassword, "Passwords must match"
 let register : Form<Register> = Form ([],[ passwordsMatch ])
-let bindRegisterForm2 = bindRequest register
 
 type Album = {
     ArtistId : int
@@ -36,7 +34,6 @@ let album : Form<Album> =
             DecimalProp ((fun f -> <@ f.Price @>), [ minimum 0.01M; maximum 100.0M; step 0.01M ])
             ],
           [])
-let bindAlbumForm2 = bindRequest album
 
 type Checkout = {
     FirstName : string
@@ -46,4 +43,3 @@ type Checkout = {
 }
 
 let checkout : Form<Checkout> = Form ([], [])
-let bindCheckoutForm2 = bindRequest checkout

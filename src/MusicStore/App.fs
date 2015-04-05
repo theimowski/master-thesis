@@ -32,7 +32,7 @@ let requireLogon =
 
 let returnPathOrRoot = 
     request (fun x -> 
-        let path = defaultArg (x.queryParam "returnPath") "/"
+        let path = defaultArg (x.queryParam "returnPath") Path.home
         Redirection.FOUND path)
 
 let loggedOn f_success =
@@ -55,7 +55,7 @@ let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
 let overwriteCookiePathToRoot cookieName =
     context (fun x ->
         let cookie = x.response.cookies.[cookieName]
-        let cookie' = (snd HttpCookie.path_) (Some "/") cookie
+        let cookie' = (snd HttpCookie.path_) (Some Path.home) cookie
         setCookie cookie')
 
 
@@ -168,7 +168,7 @@ module Handlers =
         sessionLogOffUser
         >>= unsetPair Auth.SessionAuthCookie
         >>= unsetPair StateCookie
-        >>= Redirection.FOUND "/"
+        >>= Redirection.FOUND Path.home
         |> loggedOn
 
     let register = viewRegister |> HTML
@@ -195,7 +195,7 @@ module Handlers =
                 user.Role <- "user"
             )   
         Db.newUser set (sql.GetDataContext())
-        Redirection.FOUND "/account/logon"
+        Redirection.FOUND Path.Account.logon
     
     let cart = 
         session (function
@@ -209,7 +209,7 @@ module Handlers =
             | NoSession -> never
             | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
                 Db.addToCart cartId albumId (sql.GetDataContext())
-                Redirection.FOUND "/cart")
+                Redirection.FOUND Path.Cart.overview)
 
     let removeFromCart albumId =
         session (function
@@ -251,7 +251,7 @@ module Handlers =
 
     let createAlbumP result = 
         sql.GetDataContext() |> Db.newAlbum (setAlbum result)
-        Redirection.FOUND "/store/manage"
+        Redirection.FOUND Path.Admin.manage
 
     let editAlbum id = 
         let getF db =
@@ -262,35 +262,35 @@ module Handlers =
     
     let editAlbumP id result = 
         sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> (setAlbum result) a; db.SubmitUpdates(); succeed))
-        >>= Redirection.FOUND "/store/manage"
+        >>= Redirection.FOUND Path.Admin.manage
 
     let deleteAlbum id = 
         withDb (Db.getAlbumDetails id >> lift (viewDeleteAlbum >> HTML >> admin))
     
     let deleteAlbumP id =
         sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> a.Delete(); db.SubmitUpdates(); succeed))
-        >>= Redirection.FOUND "/store/manage"
+        >>= Redirection.FOUND Path.Admin.manage
 
 choose [
     GET >>= choose [
-        path "/" >>= home
-        path "/store" >>= store
-        path "/store/browse" 
+        path Path.home >>= home
+        path Path.Store.overview >>= store
+        path Path.Store.browse 
             >>= Binding.bindReq (Binding.query "genre" Choice1Of2) albumsForGenre BAD_REQUEST
-        pathScan "/store/details/%d" albumDetails
+        pathScan Path.Store.details albumDetails
 
-        path "/account/logon" >>= logon
-        path "/account/logoff" >>= logoff
-        path "/account/register" >>= register
+        path Path.Account.logon >>= logon
+        path Path.Account.logoff >>= logoff
+        path Path.Account.register >>= register
 
-        path "/cart" >>= cart
-        pathScan "/cart/add/%d" addToCart
-        path "/cart/checkout" >>= checkout
+        path Path.Cart.overview >>= cart
+        pathScan Path.Cart.addAlbum addToCart
+        path Path.Cart.checkout >>= checkout
 
-        path "/store/manage" >>= manage
-        path "/store/manage/create" >>= createAlbum
-        pathScan "/store/manage/edit/%d" editAlbum
-        pathScan "/store/manage/delete/%d" deleteAlbum
+        path Path.Admin.manage >>= manage
+        path Path.Admin.createAlbum >>= createAlbum
+        pathScan Path.Admin.editAlbum editAlbum
+        pathScan Path.Admin.deleteAlbum deleteAlbum
 
         path "/jquery-1.11.2.js" >>= Files.browseFileHome "jquery-1.11.2.js"
         pathRegex "(.*?)\.(?!js|css|png|gif).*" >>= RequestErrors.FORBIDDEN "Access denied."
@@ -298,16 +298,16 @@ choose [
     ]
 
     POST >>= choose [
-        path "/account/logon" >>= bindForm Form.logon logonP
-        path "/account/register" >>= bindForm Form.register registerP
+        path Path.Account.logon >>= bindForm Form.logon logonP
+        path Path.Account.register >>= bindForm Form.register registerP
         
-        pathScan "/cart/remove/%d" removeFromCart
-        path "/cart/checkout" >>= bindForm Form.checkout checkoutP
+        pathScan Path.Cart.removeAlbum removeFromCart
+        path Path.Cart.checkout >>= bindForm Form.checkout checkoutP
 
-        path "/store/manage/create" >>= bindForm Form.album createAlbumP
-        pathScan "/store/manage/edit/%d" 
+        path Path.Admin.createAlbum >>= bindForm Form.album createAlbumP
+        pathScan Path.Admin.editAlbum 
             (fun id -> admin (bindForm Form.album (editAlbumP id)))
-        pathScan "/store/manage/delete/%d" 
+        pathScan Path.Admin.deleteAlbum 
             (fun id -> admin (deleteAlbumP id))
     ]
 
