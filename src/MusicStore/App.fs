@@ -184,11 +184,11 @@ module Handlers =
 
         withDb auth
 
-    let registerP (result : FormResult) =
+    let registerP (f : Register2) =
         let set = (fun (user : User) ->
-                user.UserName <- result.GetText Form.Register.Username
-                user.Email <- result.GetText Form.Register.Email
-                user.Password <- result.GetPassword Form.Register.Password |> passHash
+                user.UserName <- f.Username
+                user.Email <- f.Email
+                user.Password <- passHash f.Password
                 user.Role <- "user"
             )   
         Db.newUser set (sql.GetDataContext())
@@ -238,12 +238,12 @@ module Handlers =
         let getF db = Db.getGenres db, Db.getArtists db
         withDb (getF >> viewCreateAlbum >> HTML >> admin)
     
-    let setAlbum (result : FormResult) = (fun (album : Db.Album) -> 
-            album.ArtistId <- result.GetInteger Form.Album.ArtistId
-            album.GenreId <- result.GetInteger Form.Album.GenreId
-            album.Title <- result.GetText Form.Album.Title
-            album.Price <- result.GetDecimal Form.Album.Price
-            album.AlbumArtUrl <- result.GetText Form.Album.ArtUrl
+    let setAlbum (f : Album2) = (fun (album : Db.Album) -> 
+            album.ArtistId <- f.ArtistId
+            album.GenreId <- f.GenreId
+            album.Title <- f.Title
+            album.Price <- f.Price
+            album.AlbumArtUrl <- f.ArtUrl
         )
 
     let createAlbumP result = 
@@ -298,16 +298,16 @@ choose [
         path "/account/logon" 
             >>= (Binding.bindReq bindLogonForm2 logonP BAD_REQUEST)
         path "/account/register" 
-            >>= (Binding.bindReq registerForm registerP BAD_REQUEST)
+            >>= (Binding.bindReq bindRegisterForm2 registerP BAD_REQUEST)
         
         pathScan "/cart/remove/%d" removeFromCart
         path "/cart/checkout"
             >>= (Binding.bindReq bindCheckoutForm2 checkoutP BAD_REQUEST)
 
         path "/store/manage/create"
-            >>= admin (Binding.bindReq albumForm createAlbumP BAD_REQUEST)
+            >>= admin (Binding.bindReq bindAlbumForm2 createAlbumP BAD_REQUEST)
         pathScan "/store/manage/edit/%d" 
-            (fun id -> admin (Binding.bindReq albumForm (editAlbumP id) BAD_REQUEST))
+            (fun id -> admin (Binding.bindReq bindAlbumForm2 (editAlbumP id) BAD_REQUEST))
         pathScan "/store/manage/delete/%d" 
             (fun id -> admin (deleteAlbumP id))
     ]

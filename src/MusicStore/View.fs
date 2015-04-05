@@ -73,6 +73,8 @@ let renderForm (layout : Form.FormLayout<_>) =
                         field.InputF []
                     ]
             ]
+
+        yield submitInput layout.SubmitText
     ]
 
 
@@ -160,17 +162,17 @@ let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: D
                 legend "Album"
                 
                 div [ text "Genre" ]
-                div [ select Form.Album.GenreId.Name [
+                div [ select "GenreId" [
                         for g in genres -> option (string g.GenreId) g.Name (Some g.Name = genre) ] ]
                 div [ text "Artist" ]
-                div [ select Form.Album.ArtistId.Name [
+                div [ select "ArtistId" [
                         for a in artists -> option (string a.ArtistId) a.Name (Some a.Name = artist) ] ]
                 div [ text "Title" ]
-                div [ FormHtml.textInput Form.Album.Title (optionalValue title) ]
+                div [ FormUtils2.textInput Form.albumForm2 (fun f -> <@ f.Title @>) (optionalValue title) ]
                 div [ text "Price" ]
-                div [ FormHtml.decimalInput Form.Album.Price (optionalValue price) ]
+                div [ FormUtils2.decimalInput Form.albumForm2 (fun f -> <@ f.Price @>) (optionalValue price) ]
                 div [ text "Album Art Url" ]    
-                div [ FormHtml.textInput Form.Album.ArtUrl (optionalValue (Some "placeholder.gif")) ]
+                div [ FormUtils2.textInput Form.albumForm2 (fun f -> <@ f.ArtUrl @>) (optionalValue (Some "placeholder.gif")) ]
 
                 p [ submitInput submit ]  
             ]
@@ -218,39 +220,8 @@ let viewRegister = [
     p [
         text "Use the form below to create a new account."
     ]
-    form [
-        fieldset [
-            legend "Account Information"
 
-            divClass "editor-label" [ 
-                text "User name" 
-            ]
-            divClass "editor-field" [ 
-                FormHtml.textInput Form.Register.Username []
-            ]
-            divClass "editor-label" [ 
-                text "Email address" 
-            ]
-            divClass "editor-field" [ 
-                FormHtml.textInput Form.Register.Email []
-            ]
-
-            divClass "editor-label" [ 
-                text "Password" 
-            ]
-            divClass "editor-field" [ 
-                FormHtml.passwordInput Form.Register.Password []
-            ]
-            divClass "editor-label" [ 
-                text "Confirm Password" 
-            ]
-            divClass "editor-field" [ 
-                FormHtml.passwordInput Form.Register.ConfirmPassword []
-            ]
-
-            submitInput "Register"
-        ]
-    ]
+    renderForm Form.registerLayout
 ]
 
 let viewCart (carts : Db.CartDetails list) = [

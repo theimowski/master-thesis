@@ -13,6 +13,7 @@ open Suave.Types
 type ServerSideMsg = string
 type HtmlAttribute = string * string
 type Validation<'a> = ('a -> bool) * ServerSideMsg * HtmlAttribute
+type ServerSideValidation<'a> = 'a -> bool * ServerSideMsg
 
 type Property<'a, 'b> = ('a -> Expr<'b>) * Validation<'b> list
 
@@ -21,13 +22,29 @@ type FormProp<'a> =
     | DecimalProp of Property<'a, decimal>
     | IntProp of Property<'a, int>
 
-type Form<'a> = Form of FormProp<'a> list
+type Form<'a> = Form of FormProp<'a> list * ServerSideValidation<'a> list
 
 let formatDec (d : Decimal) = d.ToString(Globalization.CultureInfo.InvariantCulture)
 
-let maxLength max : Validation<string> = (fun s -> s.Length <= max), "is to looong", ("maxlength", max.ToString())
-let step step : Validation<decimal> = (fun d -> d % step = 0.0M), "must be multiply", ("step", formatDec step)
+let maxLength max : Validation<string> = 
+    (fun s -> s.Length <= max), 
+    (sprintf "must be at most %d characters" max), 
+    ("maxlength", max.ToString())
 
+let minimum min : Validation<decimal> =
+    (fun d -> d >= min),
+    (sprintf "must be at least %M" min),
+    ("min", formatDec min)
+
+let maximum max : Validation<decimal> =
+    (fun d -> d <= max),
+    (sprintf "must be at most %M" max),
+    ("min", formatDec max)
+
+let step step : Validation<decimal> = 
+    (fun d -> d % step = 0.0M), 
+    (sprintf "must be a multiply of %M" step), 
+    ("step", formatDec step)
 
 
 let isOptional (typ : Type) =
@@ -84,7 +101,7 @@ let getHtmlAttrs = function
     | DecimalProp (_,xs) -> xs |> List.map thrd
     | IntProp (_,xs) -> xs |> List.map thrd
 
-let getHtmlProps (Form props) (quotF : 'a -> Expr<'b>) : (string * string) list =
+let getHtmlProps (Form (props,_)) (quotF : 'a -> Expr<'b>) : (string * string) list =
     props
     |> List.filter (fun p -> getName quotF = (p |> getQuotName))
     |> List.collect (fun p -> p |> getHtmlAttrs)
@@ -128,13 +145,23 @@ let bindRequest<'a> (form : Form<'a>) (req : HttpRequest) =
         (Choice1Of2 [])
     |> Choice.map (List.rev >> List.toArray >> (fun objs -> FSharpValue.MakeRecord(t, objs) :?> 'a))
     |> Choice.bind (fun record ->
-        let (Form props) = form
+        let (Form (props,validations)) = form
         props
         |> List.fold 
             (fun record prop ->
                 record |> Choice.bind (fun record ->
                     validate' (prop, record)))
             (Choice1Of2 record)
+        |> Choice.bind (fun record ->
+            validations
+            |> List.fold
+                (fun record validation ->
+                    record |> Choice.bind (fun record ->
+                        match validation record with
+                        | true, _ -> Choice1Of2 record
+                        | false, reason -> Choice2Of2 reason))
+                (Choice1Of2 record)
+        )
     ))
 
 let input<'a, 'b> (form : Form<'a>) (quotF : 'a -> Expr<'b>) typ required attrs =
@@ -147,22 +174,7 @@ let input<'a, 'b> (form : Form<'a>) (quotF : 'a -> Expr<'b>) typ required attrs 
                 @ (props))
 
 let textInput<'a> form quotF = input<'a, string> form quotF "text" true
+let passwordInput<'a> form quotF = input<'a, string> form quotF "password" true
 let optionalTextInput<'a> form quotF = input<'a, string option> form quotF "text" false
 let decimalInput<'a> form quotF = input<'a, decimal> form quotF "number" true
-let passwordInput<'a> form quotF = input<'a, string> form quotF "password" true
-
-
-type Logon = {
-    UserName : string
-    Price : decimal
-    Age : int
-    Details : string option
-}
-
-let logonForm = Form [ StringProp ((fun f -> <@ f.UserName @>), [ maxLength 4 ]) 
-                       DecimalProp ((fun f -> <@ f.Price @>), [ step 0.01M ]) ]
-
-let bi = bindRequest logonForm 
-
-let h = passwordInput logonForm (fun f -> <@ f.UserName @>) []
-let h2 = decimalInput logonForm (fun f -> <@ f.Price @>) []
+let integerInput<'a> form quotF attr = input<'a, int> form quotF "number" true (("step","1") :: attr)
