@@ -197,14 +197,14 @@ let viewLogon = [
                 text "User name" 
             ]
             divClass "editor-field" [ 
-                textInput "username" None []
+                FormHtml.textInput Form.Logon.Username []
             ]
 
             div [ 
                 text "Password" 
             ]
             divClass "editor-field" [ 
-                passwordInput "password"
+                FormHtml.passwordInput Form.Logon.Password []
             ]
 
             p [

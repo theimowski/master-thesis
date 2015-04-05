@@ -4,10 +4,10 @@ open MusicStore.FormUtils
 
 module Logon = 
     let Username = TextField("username", [ MaxLength 20 ])
-    let Password = TextField("password", [])
+    let Password = PasswordField("password", [])
     
     let form = {
-        Fields = [TextFormField Username; TextFormField Password]
+        Fields = [TextFormField Username; PasswordFormField Password]
         ServerSideValidations = []
     }
         

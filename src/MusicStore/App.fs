@@ -174,7 +174,7 @@ module Handlers =
         let auth db =
             match Db.validateUser 
                     (result.GetText Form.Logon.Username, 
-                     passHash (result.GetText Form.Logon.Password)) db with
+                     passHash (result.GetPassword Form.Logon.Password)) db with
             | Some user ->
                     Auth.authenticated Cookie.CookieLife.Session false 
                     >>= sessionLogOnUser (result.GetText Form.Logon.Username, user.Role)

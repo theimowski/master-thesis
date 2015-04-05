@@ -19,8 +19,13 @@ type IntegerFieldProperty =
     | Min of int
     | Max of int
 
+type PasswordFieldProperty =
+    | MaxPassLength of int
+
 type TextField    = TextField of string * TextFieldProperty list
     with member this.Name = match this with TextField (n, _) -> n
+type PasswordField = PasswordField of string * PasswordFieldProperty list
+    with member this.Name = match this with PasswordField (n, _) -> n
 type DecimalField = DecimalField of string * DecimalFieldProperty list
     with member this.Name = match this with DecimalField (n, _) -> n
 type IntegerField = IntegerField of string * IntegerFieldProperty list
@@ -28,11 +33,13 @@ type IntegerField = IntegerField of string * IntegerFieldProperty list
 
 type FormField =
     | TextFormField of TextField
+    | PasswordFormField of PasswordField
     | DecimalFormField of DecimalField
     | IntegerFormField of IntegerField
 
 type FormResult = {
     GetText : TextField -> string
+    GetPassword : PasswordField -> string
     GetDecimal : DecimalField -> decimal
     GetInteger : IntegerField -> int
 }
@@ -49,6 +56,12 @@ let testText (text : string) = function
 
 let reasonText = function
     | MaxLength len -> sprintf "must be at most %d characters" len
+
+let testPassword (text : string) = function
+    | MaxPassLength len -> text.Length <= len
+
+let reasonPassword = function
+    | MaxPassLength len -> sprintf "must be at most %d characters" len
 
 let testDecimal (decimal : decimal) = function
     | Minimum min -> decimal >= min
@@ -82,16 +95,19 @@ let verify (name,props) (testF, reasonF) value =
 let verifyText (TextField (n,ps)) = verify (n,ps) (testText, reasonText) 
 let verifyDecimal (DecimalField (n,ps)) = verify (n,ps) (testDecimal, reasonDecimal) 
 let verifyInteger (IntegerField (n,ps)) = verify (n,ps) (testInteger, reasonInteger)
+let verifyPassword (PasswordField (n,ps)) = verify (n,ps) (testPassword, reasonPassword)
 
 let name = function
-    | TextFormField (TextField (name, _)) -> name
-    | DecimalFormField (DecimalField (name, _)) -> name
-    | IntegerFormField (IntegerField (name, _)) -> name
+    | TextFormField f -> f.Name
+    | DecimalFormField f -> f.Name
+    | IntegerFormField f -> f.Name
+    | PasswordFormField f -> f.Name
 
 let parseAndVerify = function
     | TextFormField f, value -> Choice1Of2 value >>. verifyText f |> Choice.map box
     | DecimalFormField f, value -> Parse.decimal value >>. verifyDecimal f |> Choice.map box
     | IntegerFormField f, value -> Parse.int32 value >>. verifyInteger f |> Choice.map box
+    | PasswordFormField f, value -> Choice1Of2 value >>. verifyPassword f |> Choice.map box
 
 let bindingForm form req =
     let fields = form.Fields
@@ -120,6 +136,7 @@ let bindingForm form req =
         |> Choice.map (fun map ->
             let result = {
                 GetText = fun (TextField (name,_)) -> map.[name] :?> _
+                GetPassword = fun (PasswordField (name,_)) -> map.[name] :?> _
                 GetDecimal = fun (DecimalField (name,_)) -> map.[name] :?> _
                 GetInteger = fun (IntegerField (name,_)) -> map.[name] :?> _
             }
