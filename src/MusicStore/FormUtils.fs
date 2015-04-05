@@ -8,7 +8,6 @@ open Suave.Utils
 let bindForm key = Binding.form key Choice1Of2
 
 type TextFieldProperty =
-    | MinLength of int
     | MaxLength of int
 
 type DecimalFieldProperty =
@@ -21,8 +20,11 @@ type IntegerFieldProperty =
     | Max of int
 
 type TextField    = TextField of string * TextFieldProperty list
+    with member this.Name = match this with TextField (n, _) -> n
 type DecimalField = DecimalField of string * DecimalFieldProperty list
+    with member this.Name = match this with DecimalField (n, _) -> n
 type IntegerField = IntegerField of string * IntegerFieldProperty list
+    with member this.Name = match this with IntegerField (n, _) -> n
 
 type FormField =
     | TextFormField of TextField
@@ -43,11 +45,9 @@ type Form = {
 }
 
 let testText (text : string) = function
-    | MinLength len -> text.Length >= len
     | MaxLength len -> text.Length <= len
 
 let reasonText = function
-    | MinLength len -> sprintf "must be at least %d characters" len
     | MaxLength len -> sprintf "must be at most %d characters" len
 
 let testDecimal (decimal : decimal) = function
@@ -88,7 +88,7 @@ let name = function
     | DecimalFormField (DecimalField (name, _)) -> name
     | IntegerFormField (IntegerField (name, _)) -> name
 
-let parse = function
+let parseAndVerify = function
     | TextFormField f, value -> Choice1Of2 value >>. verifyText f |> Choice.map box
     | DecimalFormField f, value -> Parse.decimal value >>. verifyDecimal f |> Choice.map box
     | IntegerFormField f, value -> Parse.int32 value >>. verifyInteger f |> Choice.map box
@@ -113,7 +113,7 @@ let bindingForm form req =
         |> List.fold
             (fun map (field,value) ->
                 map |> Choice.bind (fun map ->
-                    parse (field, value) 
+                    parseAndVerify (field, value) 
                     |> Choice.map (fun x -> 
                         map |> Map.add (name field) x)))
             (Choice1Of2 Map.empty)

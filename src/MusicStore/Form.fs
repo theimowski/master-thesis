@@ -3,7 +3,7 @@
 open MusicStore.FormUtils
 
 module Logon = 
-    let Username = TextField("username", [ MinLength 5; MaxLength 20 ])
+    let Username = TextField("username", [ MaxLength 20 ])
     let Password = TextField("password", [])
     
     let form = {
@@ -32,9 +32,9 @@ let registerForm req = bindingForm Register.form req
 module Album =
     let ArtistId = IntegerField("artist", [])
     let GenreId = IntegerField("genre", [])
-    let Title = TextField("title", [ MinLength 1; MaxLength 100 ])
+    let Title = TextField("title", [ MaxLength 100 ])
     let Price = DecimalField("price", [ Minimum 0.01M; Maximum 100.0M; Step 0.01M ])
-    let ArtUrl = TextField("artUrl", [ MinLength 1; MaxLength 100 ])
+    let ArtUrl = TextField("artUrl", [ MaxLength 100 ])
 
     let form = 
         { Fields = 

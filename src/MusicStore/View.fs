@@ -38,6 +38,9 @@ let numberInput name value attrs =
     inputAttr (["name", name; "type", "number"; "value", v; "required", ""] @ attrs)
 let passwordInput name =
     inputAttr ["name", name; "type", "password"; "required", ""]
+let submitInput value =
+    inputAttr ["type", "submit"; "value", value]
+
 
 let em s = tag "em" [] (text s)
 let strong s = tag "strong" [] (text s)
@@ -126,6 +129,8 @@ let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: D
         | Some album -> Some album.Artist, Some album.Genre, Some album.Title, Some (formatDec album.Price)
         | None -> None, None, None, None
     
+    let optionalValue = Option.toList >> List.map (fun p -> "value", p)
+
     [ 
         h2 header
     
@@ -134,19 +139,19 @@ let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: D
                 legend "Album"
                 
                 div [ text "Genre" ]
-                div [ select "genre" [
+                div [ select Form.Album.GenreId.Name [
                         for g in genres -> option (string g.GenreId) g.Name (Some g.Name = genre) ] ]
                 div [ text "Artist" ]
-                div [ select "artist" [
+                div [ select Form.Album.ArtistId.Name [
                         for a in artists -> option (string a.ArtistId) a.Name (Some a.Name = artist) ] ]
                 div [ text "Title" ]
-                div [ textInput "title" title ["maxlength", "100"] ]
+                div [ FormHtml.textInput Form.Album.Title (optionalValue title) ]
                 div [ text "Price" ]
-                div [ FormHtml.decimalInput Form.Album.Price (price |> Option.toList |> List.map (fun p -> "value",p)) ]
+                div [ FormHtml.decimalInput Form.Album.Price (optionalValue price) ]
                 div [ text "Album Art Url" ]    
-                div [ textInput "artUrl" (Some "placeholder.gif") ["maxlength", "100"] ]
+                div [ FormHtml.textInput Form.Album.ArtUrl (optionalValue (Some "placeholder.gif")) ]
 
-                p [ inputAttr ["type", "submit"; "value", submit] ]  
+                p [ submitInput submit ]  
             ]
         ]
     
@@ -168,7 +173,7 @@ let viewDeleteAlbum (album : Db.AlbumDetails) = [
     ]
     
     form [
-        inputAttr ["type", "submit"; "value", "Delete"]
+        submitInput "Delete"
     ]
 
     div [
@@ -203,7 +208,7 @@ let viewLogon = [
             ]
 
             p [
-               inputAttr ["type", "submit"; "value", "Log On"]
+               submitInput "Log On"
             ]
         ]
     ]
@@ -244,7 +249,7 @@ let viewRegister = [
                 passwordInput "confirmpassword"
             ]
 
-            inputAttr ["type", "submit"; "value", "Register"]
+            submitInput "Register"
         ]
     ]
 ]
@@ -312,7 +317,7 @@ let viewCheckout = [
             ]
         ]
 
-        inputAttr ["type", "submit"; "value", "Submit Order"]
+        submitInput "Submit Order"
     ]
 ]
 
