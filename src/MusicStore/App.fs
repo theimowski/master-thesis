@@ -59,6 +59,9 @@ let overwriteCookiePathToRoot cookieName =
         setCookie cookie')
 
 
+let bindForm form handler =
+    Binding.bindReq (FormUtils.bindRequest form) handler BAD_REQUEST
+
 let clearUserState = 
     Writers.unsetUserData StateStoreType
 
@@ -170,7 +173,7 @@ module Handlers =
 
     let register = viewRegister |> HTML
 
-    let logonP (f : Logon2) =
+    let logonP (f : Logon) =
         let auth db =
             match Db.validateUser 
                     (f.Username, 
@@ -184,7 +187,7 @@ module Handlers =
 
         withDb auth
 
-    let registerP (f : Register2) =
+    let registerP (f : Register) =
         let set = (fun (user : User) ->
                 user.UserName <- f.Username
                 user.Email <- f.Email
@@ -238,7 +241,7 @@ module Handlers =
         let getF db = Db.getGenres db, Db.getArtists db
         withDb (getF >> viewCreateAlbum >> HTML >> admin)
     
-    let setAlbum (f : Album2) = (fun (album : Db.Album) -> 
+    let setAlbum (f : Album) = (fun (album : Db.Album) -> 
             album.ArtistId <- f.ArtistId
             album.GenreId <- f.GenreId
             album.Title <- f.Title
@@ -252,7 +255,7 @@ module Handlers =
 
     let editAlbum id = 
         let getF db =
-            match Db.getAlbumDetails id db with
+            match Db.getAlbum id db with
             | Some a -> Some (a, Db.getGenres db, Db.getArtists db)
             | None -> None 
         withDb (getF >> lift (viewEditAlbum >> HTML))
@@ -295,19 +298,15 @@ choose [
     ]
 
     POST >>= choose [
-        path "/account/logon" 
-            >>= (Binding.bindReq bindLogonForm2 logonP BAD_REQUEST)
-        path "/account/register" 
-            >>= (Binding.bindReq bindRegisterForm2 registerP BAD_REQUEST)
+        path "/account/logon" >>= bindForm Form.logon logonP
+        path "/account/register" >>= bindForm Form.register registerP
         
         pathScan "/cart/remove/%d" removeFromCart
-        path "/cart/checkout"
-            >>= (Binding.bindReq bindCheckoutForm2 checkoutP BAD_REQUEST)
+        path "/cart/checkout" >>= bindForm Form.checkout checkoutP
 
-        path "/store/manage/create"
-            >>= admin (Binding.bindReq bindAlbumForm2 createAlbumP BAD_REQUEST)
+        path "/store/manage/create" >>= bindForm Form.album createAlbumP
         pathScan "/store/manage/edit/%d" 
-            (fun id -> admin (Binding.bindReq bindAlbumForm2 (editAlbumP id) BAD_REQUEST))
+            (fun id -> admin (bindForm Form.album (editAlbumP id)))
         pathScan "/store/manage/delete/%d" 
             (fun id -> admin (deleteAlbumP id))
     ]

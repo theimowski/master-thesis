@@ -4,6 +4,9 @@ open System
 
 open Suave.Html
 
+open MusicStore.FormUtils
+open MusicStore.FormHtml
+
 let cssLink href = linkAttr [ "href", href; " rel", "stylesheet"; " type", "text/css" ]
 
 let h1 xml = tag "h1" [] xml
@@ -24,23 +27,8 @@ let divClass c = divAttr ["class", c]
 let form x = tag "form" ["method", "POST"] (flatten x)
 let fieldset x = tag "fieldset" [] (flatten x)
 let legend txt = tag "legend" [] (text txt)
-let select name x = tag "select" ["name", name] (flatten x)
-let option value txt selected =
-    if selected then
-        tag "option" ["value", value; "selected", "selected"] (text txt)
-    else
-        tag "option" ["value", value] (text txt)
-let textInput name value attrs = 
-    let v = match value with Some v -> v | _ -> ""
-    inputAttr (["name", name; "type", "text"; "value", v; "required", ""] @ attrs)
-let numberInput name value attrs = 
-    let v = match value with Some v -> v | _ -> ""
-    inputAttr (["name", name; "type", "number"; "value", v; "required", ""] @ attrs)
-let passwordInput name =
-    inputAttr ["name", name; "type", "password"; "required", ""]
 let submitInput value =
     inputAttr ["type", "submit"; "value", value]
-
 
 let em s = tag "em" [] (text s)
 let strong s = tag "strong" [] (text s)
@@ -55,10 +43,23 @@ let truncate k (s : string) =
 
 let formatDec (d : Decimal) = d.ToString(Globalization.CultureInfo.InvariantCulture)
 
+type Field = {
+    Label : string
+    Xml : Suave.Html.Xml
+}
 
+type Fieldset = {
+    Legend : string
+    Fields : Field list
+}
 
+type FormLayout<'a> = {
+    Fieldsets : Fieldset list
+    SubmitText : string
+    Form : Form<'a>
+}
 
-let renderForm (layout : Form.FormLayout<_>) =    
+let renderForm (layout : FormLayout<_>) =    
     
     form [
         for fset in layout.Fieldsets -> 
@@ -70,7 +71,7 @@ let renderForm (layout : Form.FormLayout<_>) =
                         text field.Label
                     ]
                     yield divClass "editor-field" [
-                        field.InputF []
+                        field.Xml
                     ]
             ]
 
@@ -146,37 +147,33 @@ let viewManageStore (albums : Db.AlbumDetails list) = [
     ]
 ]
 
-let createEditAlbum (current : Db.AlbumDetails option) header submit ((genres: Db.Genre list), (artists: Db.Artist list)) = 
+let createEditAlbum (current : Db.Album option) header submit ((genres: Db.Genre list), (artists: Db.Artist list)) = 
     let artist, genre, title, price = 
         match current with
-        | Some album -> Some album.Artist, Some album.Genre, Some album.Title, Some (formatDec album.Price)
+        | Some album -> Some album.ArtistId, Some album.GenreId, Some album.Title, Some (formatDec album.Price)
         | None -> None, None, None, None
     
     let optionalValue = Option.toList >> List.map (fun p -> "value", p)
 
     [ 
         h2 header
-    
-        form [
-            fieldset [
-                legend "Album"
-                
-                div [ text "Genre" ]
-                div [ select "GenreId" [
-                        for g in genres -> option (string g.GenreId) g.Name (Some g.Name = genre) ] ]
-                div [ text "Artist" ]
-                div [ select "ArtistId" [
-                        for a in artists -> option (string a.ArtistId) a.Name (Some a.Name = artist) ] ]
-                div [ text "Title" ]
-                div [ FormUtils2.textInput Form.albumForm2 (fun f -> <@ f.Title @>) (optionalValue title) ]
-                div [ text "Price" ]
-                div [ FormUtils2.decimalInput Form.albumForm2 (fun f -> <@ f.Price @>) (optionalValue price) ]
-                div [ text "Album Art Url" ]    
-                div [ FormUtils2.textInput Form.albumForm2 (fun f -> <@ f.ArtUrl @>) (optionalValue (Some "placeholder.gif")) ]
-
-                p [ submitInput submit ]  
-            ]
-        ]
+        
+        renderForm
+            { Fieldsets = 
+                  [ { Legend = "Album"
+                      Fields = 
+                          [ { Label = "Genre"
+                              Xml = selectInput Form.album (fun f -> <@ f.GenreId @>) (genres |> List.map (fun g -> g.GenreId, g.Name)) genre }
+                            { Label = "Artist"
+                              Xml = selectInput Form.album (fun f -> <@ f.ArtistId @>) (artists |> List.map (fun a -> a.ArtistId, a.Name)) artist }
+                            { Label = "Title"
+                              Xml = textInput Form.album (fun f -> <@ f.Title @>) (optionalValue title) }
+                            { Label = "Price"
+                              Xml = decimalInput Form.album (fun f -> <@ f.Price @>) (optionalValue price) }
+                            { Label = "Album Art Url"
+                              Xml = textInput Form.album (fun f -> <@ f.ArtUrl @>) (optionalValue (Some "placeholder.gif")) } ] } ]
+              SubmitText = submit
+              Form = Form.album }
     
         div [
             aHref "/store/manage" (text "Back to list")
@@ -212,7 +209,16 @@ let viewLogon = [
         text " if you don't have an account yet."
     ]
 
-    renderForm Form.logonLayout
+    renderForm
+        { Fieldsets = 
+              [ { Legend = "Account Information"
+                  Fields = 
+                      [ { Label = "User Name"
+                          Xml = textInput Form.logon (fun f -> <@ f.Username @>) [] }
+                        { Label = "Password"
+                          Xml = passwordInput Form.logon (fun f -> <@ f.Password @>) [] } ] } ]
+          SubmitText = "Log On"
+          Form = Form.logon }
 ]
 
 let viewRegister = [
@@ -221,7 +227,21 @@ let viewRegister = [
         text "Use the form below to create a new account."
     ]
 
-    renderForm Form.registerLayout
+    renderForm
+        { Fieldsets = 
+              [ { Legend = "Create a New Account"
+                  Fields = 
+                      [ { Label = "User name"
+                          Xml = textInput Form.register (fun f -> <@ f.Username @>) [] }
+                        { Label = "Email address"
+                          Xml = textInput Form.register (fun f -> <@ f.Email @>) [] }
+                        { Label = "Password"
+                          Xml = passwordInput Form.register (fun f -> <@ f.Password @>) [] }
+                        { Label = "Confirm password"
+                          Xml = passwordInput Form.register (fun f -> <@ f.ConfirmPassword @>) [] } ] } ]
+          SubmitText = "Register"
+          Form = Form.register }
+
 ]
 
 let viewCart (carts : Db.CartDetails list) = [
@@ -261,45 +281,23 @@ let viewCart (carts : Db.CartDetails list) = [
 
 let viewCheckout = [
     h2 "Address And Payment"
-    form [
-        fieldset [
-            legend "Shipping Information"
-
-            divClass "editor-label" [
-                text "First Name"
-            ]
-            divClass "editor-field" [
-                FormUtils2.textInput Form.checkoutForm2 (fun f -> <@ f.FirstName @>) []
-            ]
-            divClass "editor-label" [
-                text "Last Name"
-            ]
-            divClass "editor-field" [
-                FormUtils2.textInput Form.checkoutForm2 (fun f -> <@ f.LastName @>) []
-            ]
-            divClass "editor-label" [
-                text "Address"
-            ]
-            divClass "editor-field" [
-                FormUtils2.textInput Form.checkoutForm2 (fun f -> <@ f.Address @>) []
-            ]
-        ]
-
-        fieldset [
-            legend "Payment"
-            p [
-                text """We're running a promotion: all music is free with the promo code: "FREE" """
-            ]
-            divClass "editor-label" [
-                text "Promo Code"
-            ]
-            divClass "editor-field" [
-                FormUtils2.optionalTextInput Form.checkoutForm2 (fun f -> <@ f.PromoCode @>) []
-            ]
-        ]
-
-        submitInput "Submit Order"
-    ]
+    renderForm
+            { Fieldsets = 
+                  [ { Legend = "Shipping Information"
+                      Fields = 
+                          [ { Label = "First Name"
+                              Xml = textInput Form.checkout (fun f -> <@ f.FirstName @>) [] }
+                            { Label = "Last Name"
+                              Xml = textInput Form.checkout (fun f -> <@ f.LastName @>) [] }
+                            { Label = "Address"
+                              Xml = textInput Form.checkout (fun f -> <@ f.Address @>) [] } ] }
+                    
+                    { Legend = "Payment"
+                      Fields = 
+                          [ { Label = "Promo Code"
+                              Xml = optionalTextInput Form.checkout (fun f -> <@ f.PromoCode @>) [] } ] } ]
+              SubmitText = "Submit Order"
+              Form = Form.checkout }
 ]
 
 let viewCheckoutComplete orderId = [

@@ -1,36 +1,46 @@
 ﻿module MusicStore.FormHtml
 
 open System
+open Microsoft.FSharp.Quotations
 
 open Suave.Html
 
 open MusicStore.FormUtils
 
-let formatDec (d : Decimal) = d.ToString(Globalization.CultureInfo.InvariantCulture)
-
-let textAttr = function
-    | MaxLength max -> "maxlength", max.ToString()
-    
-let passwordAttr = function
-    | MaxPassLength max -> "maxlength", max.ToString()
-
-let decimalAttr = function
-    | Minimum min -> "min", formatDec min
-    | Maximum max -> "max", formatDec max
-    | Step step -> "step", formatDec step
-
-let textInput (TextField(name, props)) attrs =
-    inputAttr (["name", name; "type", "text"; "required", ""]
+let input<'a, 'b> (form : Form<'a>) (quotF : 'a -> Expr<'b>) typ required attrs =
+    let name = getName quotF
+    let props = getHtmlProps form quotF
+    let required = if required then ["required",""] else []
+    inputAttr (["name", name; "type", typ]
+                @ required
                 @ attrs
-                @ (props |> List.map textAttr))
+                @ (props))
 
-let passwordInput (PasswordField(name, props)) attrs = 
-    inputAttr (["name", name; "type", "password"; "required", ""]
-                @ attrs
-                @ (props |> List.map passwordAttr))
+let textInput<'a> form quotF = input<'a, string> form quotF "text" true
+let passwordInput<'a> form quotF = input<'a, string> form quotF "password" true
+let optionalTextInput<'a> form quotF = input<'a, string option> form quotF "text" false
+let decimalInput<'a> form quotF = input<'a, decimal> form quotF "number" true
+let integerInput<'a> form quotF attr = input<'a, int> form quotF "number" true (("step","1") :: attr)
 
-let decimalInput (DecimalField(name, props)) attrs = 
-    inputAttr (["name", name; "type", "number"; "required", ""] 
-                @ attrs
-                @ (props |> List.map decimalAttr))
+let option value txt selected =
+    if selected then
+        tag "option" ["value", value; "selected", "selected"] (text txt)
+    else
+        tag "option" ["value", value] (text txt)
 
+let format : (obj -> string) = function
+    | :? string as s -> s
+    | :? int as i -> string i
+    | :? decimal as d -> formatDec d
+    | t -> failwithf "unsupported type: %s" (t.GetType().FullName)
+
+let selectInput<'a, 'b when 'b : equality> 
+        (form : Form<'a>) 
+        (quotF : 'a -> Expr<'b>) 
+        (options : ('b * string) list)
+        (selected : 'b option) =
+    let x = 
+        options
+        |> List.map (fun (value,txt) -> option (format value) txt (selected = Some value))
+
+    tag "select" ["name", getName quotF] (flatten x)

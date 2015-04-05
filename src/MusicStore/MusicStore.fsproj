@@ -61,7 +61,6 @@
     </Content>
     <Compile Include="Db.fs" />
     <Compile Include="FormUtils.fs" />
-    <Compile Include="FormUtils2.fs" />
     <Compile Include="FormHtml.fs" />
     <Compile Include="Form.fs" />
     <Compile Include="View.fs" />
