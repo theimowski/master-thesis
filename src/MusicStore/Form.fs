@@ -2,6 +2,15 @@
 
 open MusicStore.FormUtils
 
+type X = string * FormField
+
+type XS = X list
+
+type FormLayout = {
+    Fieldsets : (string * XS) list
+    SubmitText : string
+}
+
 module Logon = 
     let Username = TextField("username", [ MaxLength 20 ])
     let Password = PasswordField("password", [])
