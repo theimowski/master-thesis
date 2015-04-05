@@ -55,6 +55,27 @@ let truncate k (s : string) =
 
 let formatDec (d : Decimal) = d.ToString(Globalization.CultureInfo.InvariantCulture)
 
+
+
+
+let renderForm (layout : Form.FormLayout<_>) =    
+    
+    form [
+        for fset in layout.Fieldsets -> 
+            fieldset [
+                yield legend fset.Legend
+
+                for field in fset.Fields do
+                    yield divClass "editor-label" [
+                        text field.Label
+                    ]
+                    yield divClass "editor-field" [
+                        field.InputF []
+                    ]
+            ]
+    ]
+
+
 let viewAlbumDetails (album : Db.AlbumDetails) = [
     h2 album.Title
     p [ imgSrc "/placeholder.gif" ]
@@ -189,29 +210,7 @@ let viewLogon = [
         text " if you don't have an account yet."
     ]
 
-    form [
-        fieldset [
-            legend "Account Information"
-            
-            div [ 
-                text "User name" 
-            ]
-            divClass "editor-field" [ 
-                FormHtml.textInput Form.Logon.Username []
-            ]
-
-            div [ 
-                text "Password" 
-            ]
-            divClass "editor-field" [ 
-                FormHtml.passwordInput Form.Logon.Password []
-            ]
-
-            p [
-               submitInput "Log On"
-            ]
-        ]
-    ]
+    renderForm Form.logonLayout
 ]
 
 let viewRegister = [
@@ -299,19 +298,19 @@ let viewCheckout = [
                 text "First Name"
             ]
             divClass "editor-field" [
-                FormHtml.textInput Form.Checkout.FirstName []
+                FormUtils2.textInput Form.checkoutForm2 (fun f -> <@ f.FirstName @>) []
             ]
             divClass "editor-label" [
                 text "Last Name"
             ]
             divClass "editor-field" [
-                FormHtml.textInput Form.Checkout.LastName []
+                FormUtils2.textInput Form.checkoutForm2 (fun f -> <@ f.LastName @>) []
             ]
             divClass "editor-label" [
                 text "Address"
             ]
             divClass "editor-field" [
-                FormHtml.textInput Form.Checkout.Address []
+                FormUtils2.textInput Form.checkoutForm2 (fun f -> <@ f.Address @>) []
             ]
         ]
 
@@ -324,7 +323,7 @@ let viewCheckout = [
                 text "Promo Code"
             ]
             divClass "editor-field" [
-                FormHtml.textInput Form.Checkout.PromoCode []
+                FormUtils2.optionalTextInput Form.checkoutForm2 (fun f -> <@ f.PromoCode @>) []
             ]
         ]
 

@@ -170,14 +170,14 @@ module Handlers =
 
     let register = viewRegister |> HTML
 
-    let logonP (result : FormResult) =
+    let logonP (f : Logon2) =
         let auth db =
             match Db.validateUser 
-                    (result.GetText Form.Logon.Username, 
-                     passHash (result.GetPassword Form.Logon.Password)) db with
+                    (f.Username, 
+                     passHash (f.Password)) db with
             | Some user ->
                     Auth.authenticated Cookie.CookieLife.Session false 
-                    >>= sessionLogOnUser (result.GetText Form.Logon.Username, user.Role)
+                    >>= sessionLogOnUser (f.Username, user.Role)
                     >>= returnPathOrRoot
             | _ ->
                 logon
@@ -224,7 +224,7 @@ module Handlers =
         | UserLoggedOn _ -> viewCheckout |> HTML)
         |> loggedOn 
         
-    let checkoutP result = 
+    let checkoutP f = 
         session (function
         | NoSession | CartIdOnly _ -> never
         | UserLoggedOn { Username = username } ->
@@ -296,13 +296,13 @@ choose [
 
     POST >>= choose [
         path "/account/logon" 
-            >>= (Binding.bindReq logonForm logonP BAD_REQUEST)
+            >>= (Binding.bindReq bindLogonForm2 logonP BAD_REQUEST)
         path "/account/register" 
             >>= (Binding.bindReq registerForm registerP BAD_REQUEST)
         
         pathScan "/cart/remove/%d" removeFromCart
         path "/cart/checkout"
-            >>= (Binding.bindReq checkoutForm checkoutP BAD_REQUEST)
+            >>= (Binding.bindReq bindCheckoutForm2 checkoutP BAD_REQUEST)
 
         path "/store/manage/create"
             >>= admin (Binding.bindReq albumForm createAlbumP BAD_REQUEST)

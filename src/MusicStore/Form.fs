@@ -1,15 +1,43 @@
 ﻿module MusicStore.Form
 
 open MusicStore.FormUtils
+open MusicStore.FormUtils2
 
-type X = string * FormField
 
-type XS = X list
-
-type FormLayout = {
-    Fieldsets : (string * XS) list
-    SubmitText : string
+type Field = {
+    Label : string
+    InputF : Suave.Html.Attribute list -> Suave.Html.Xml
 }
+
+type Fieldset = {
+    Legend : string
+    Fields : Field list
+}
+
+type FormLayout<'a> = {
+    Fieldsets : Fieldset list
+    SubmitText : string
+    Form : FormUtils2.Form<'a>
+}
+
+type Logon2 = {
+    Username : string
+    Password : string
+}
+
+let logonForm2 : Form<Logon2> = Form []
+let bindLogonForm2 = bindRequest logonForm2
+
+let logonLayout = 
+    { Fieldsets = 
+          [ { Legend = "Account Information"
+              Fields = 
+                  [ { Label = "User Name"
+                      InputF = FormUtils2.textInput logonForm2 (fun f -> <@ f.Username @>) }
+                    { Label = "Password"
+                      InputF = FormUtils2.passwordInput logonForm2 (fun f -> <@ f.Password @>) } ] } ]
+      SubmitText = "Log On"
+      Form = logonForm2 }
 
 module Logon = 
     let Username = TextField("username", [ MaxLength 20 ])
@@ -58,6 +86,16 @@ module Album =
           ServerSideValidations = [] }
 
 let albumForm req = bindingForm Album.form req
+
+type Checkout2 = {
+    FirstName : string
+    LastName : string
+    Address : string
+    PromoCode : string option
+}
+
+let checkoutForm2 : Form<Checkout2> = Form []
+let bindCheckoutForm2 = bindRequest checkoutForm2
 
 module Checkout =
     let FirstName = TextField("firstname", [])

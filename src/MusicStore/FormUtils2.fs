@@ -137,21 +137,19 @@ let bindRequest<'a> (form : Form<'a>) (req : HttpRequest) =
             (Choice1Of2 record)
     ))
 
-let input<'a, 'b> (form : Form<'a>) (quotF : 'a -> Expr<'b>) typ attrs =
+let input<'a, 'b> (form : Form<'a>) (quotF : 'a -> Expr<'b>) typ required attrs =
     let name = getName quotF
     let props = getHtmlProps form quotF
-    let required = 
-        match isOptional(typeof<'b>) with
-        | true -> []
-        | false -> ["required",""]
+    let required = if required then ["required",""] else []
     inputAttr (["name", name; "type", typ]
                 @ required
                 @ attrs
                 @ (props))
 
-let textInput<'a> form quotF = input<'a, string> form quotF "text"
-let decimalInput<'a> form quotF = input<'a, decimal> form quotF "number"
-let passwordInput<'a> form quotF = input<'a, string> form quotF "password"
+let textInput<'a> form quotF = input<'a, string> form quotF "text" true
+let optionalTextInput<'a> form quotF = input<'a, string option> form quotF "text" false
+let decimalInput<'a> form quotF = input<'a, decimal> form quotF "number" true
+let passwordInput<'a> form quotF = input<'a, string> form quotF "password" true
 
 
 type Logon = {
