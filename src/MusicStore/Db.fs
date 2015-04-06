@@ -130,3 +130,8 @@ let placeOrder (username : string) (ctx : DbContext) =
         |> Option.iter (fun cart -> cart.Delete())
     ctx.SubmitUpdates()
     order
+
+let upgradeCarts (cartId : string, username :string) (ctx : DbContext) =
+    for cart in getCarts cartId ctx do
+        cart.CartId <- username
+    ctx.SubmitUpdates()

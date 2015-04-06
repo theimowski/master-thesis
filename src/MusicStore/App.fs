@@ -28,22 +28,13 @@ let passHash (pass: string) =
 let requireLogon =
     context (fun x ->
         let path = x.request.url.AbsolutePath
-        Redirection.FOUND (sprintf "/account/logon?returnPath=%s" path))
+        Redirection.FOUND (Path.Account.logon |> Path.withParam ("returnPath", path)))
 
-let returnPathOrRoot = 
+let returnPathOrHome = 
     request (fun x -> 
         let path = defaultArg (x.queryParam "returnPath") Path.home
         Redirection.FOUND path)
 
-let loggedOn f_success =
-    context (fun x  -> 
-        let path = x.request.url.AbsolutePath
-        Auth.authenticate
-            Cookie.CookieLife.Session
-            false
-            (fun () -> Choice2Of2(requireLogon))
-            (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
-            f_success)
 
 
 let lift success = function
@@ -52,11 +43,11 @@ let lift success = function
 
 let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
 
-let overwriteCookiePathToRoot cookieName =
-    context (fun x ->
-        let cookie = x.response.cookies.[cookieName]
-        let cookie' = (snd HttpCookie.path_) (Some Path.home) cookie
-        setCookie cookie')
+//let overwriteCookiePathToRoot cookieName =
+//    context (fun x ->
+//        let cookie = x.response.cookies.[cookieName]
+//        let cookie' = (snd HttpCookie.path_) (Some Path.home) cookie
+//        setCookie cookie')
 
 
 let bindForm form handler =
@@ -81,8 +72,8 @@ type Session =
 let getSession (x: HttpContext) =
     match x |> HttpContext.state with
     | None -> NoSession
-    | Some store ->
-        match store.get "cartid", store.get "username", store.get "role" with
+    | Some state ->
+        match state.get "cartid", state.get "username", state.get "role" with
         | Some cartId, None, None -> CartIdOnly cartId
         | None, Some username, Some role -> UserLoggedOn {Username = username; Role = role}
         | _ -> NoSession
@@ -90,32 +81,55 @@ let getSession (x: HttpContext) =
 let session f = 
     context (fun x -> f (getSession x))
 
+let missingAuthCookie =
+    (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
+
+let loggedOn f_success =
+    Auth.authenticate
+        Cookie.CookieLife.Session
+        false
+        (fun () -> Choice2Of2(requireLogon))
+        missingAuthCookie
+        f_success
+
+let admin f_success = 
+    Auth.authenticate
+        Cookie.CookieLife.Session
+        false
+        (fun () -> Choice2Of2(UNAUTHORIZED "Not logged in"))
+        missingAuthCookie
+        (session (function
+            | UserLoggedOn { Role = "admin" } -> f_success
+            | UserLoggedOn _ -> FORBIDDEN "Only for admin"
+            | _ -> never ))
+
+let setSession setF = context (HttpContext.state >> lift setF)
+
 let sessionSetCartId =
     session (function
     | NoSession -> 
         statefulForSession
-        >>= context (HttpContext.state >> lift (fun store -> 
-            store.set "cartid" (Guid.NewGuid().ToString("N"))))
+        >>= setSession (fun state ->
+            state.set "cartid" (Guid.NewGuid().ToString("N")))
     | _ -> succeed)
 
 let sessionLogOnUser  (username,role) =
+    let save = 
+        setSession (fun state ->
+            state.set "username" username
+            >>= state.set "role" role)
+
     session (function
     | NoSession ->
         statefulForSession
-        >>= context (HttpContext.state >> lift (fun store ->
-            store.set "username" username
-            >>= store.set "role" role))
+        >>= save
     | CartIdOnly cartId ->
-        let upgradeCartId db = 
-            for cart in Db.getCarts cartId db do
-                cart.CartId <- username
-            db.SubmitUpdates()
+        let upgradeCartId db =
+            Db.upgradeCarts (cartId, username) db
             succeed
-        context (HttpContext.state >> lift (fun store -> 
-            clearUserState
-            >>= store.set "username" username
-            >>= store.set "role" role
-            >>= withDb upgradeCartId))
+        clearUserState
+        >>= save
+        >>= withDb upgradeCartId
     | UserLoggedOn _ -> never)
 
 let sessionLogOffUser = 
@@ -123,15 +137,6 @@ let sessionLogOffUser =
     | NoSession | CartIdOnly _ -> never
     | UserLoggedOn _ -> clearUserState)
 
-let role (r : string) f_success = 
-    session (function
-    | NoSession | CartIdOnly _ -> requireLogon
-    | UserLoggedOn { Role = role } ->
-        if role = r 
-        then f_success
-        else FORBIDDEN (sprintf "Only for %s role" r))
-    
-let admin = loggedOn >> role "admin"
 
 let HTML html = 
     context (fun x ->
@@ -172,7 +177,6 @@ module Handlers =
         >>= unsetPair Auth.SessionAuthCookie
         >>= unsetPair StateCookie
         >>= Redirection.FOUND Path.home
-        |> loggedOn
 
     let register = viewRegister |> HTML
 
@@ -184,7 +188,7 @@ module Handlers =
             | Some user ->
                     Auth.authenticated Cookie.CookieLife.Session false 
                     >>= sessionLogOnUser (f.Username, user.Role)
-                    >>= returnPathOrRoot
+                    >>= returnPathOrHome
             | _ ->
                 logon
 
@@ -228,7 +232,6 @@ module Handlers =
         session (function
         | NoSession | CartIdOnly _ -> never
         | UserLoggedOn _ -> viewCheckout |> HTML)
-        |> loggedOn 
         
     let checkoutP f = 
         session (function
@@ -236,13 +239,12 @@ module Handlers =
         | UserLoggedOn { Username = username } ->
             let order = Db.placeOrder username (sql.GetDataContext())
             viewCheckoutComplete order.OrderId |> HTML)
-        |> loggedOn
 
-    let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML >> admin)
+    let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML)
 
     let createAlbum = 
         let getF db = Db.getGenres db, Db.getArtists db
-        withDb (getF >> viewCreateAlbum >> HTML >> admin)
+        withDb (getF >> viewCreateAlbum >> HTML)
     
     let setAlbum (f : Album) = (fun (album : Db.Album) -> 
             album.ArtistId <- f.ArtistId
@@ -268,7 +270,7 @@ module Handlers =
         >>= Redirection.FOUND Path.Admin.manage
 
     let deleteAlbum id = 
-        withDb (Db.getAlbumDetails id >> lift (viewDeleteAlbum >> HTML >> admin))
+        withDb (Db.getAlbumDetails id >> lift (viewDeleteAlbum >> HTML))
     
     let deleteAlbumP id =
         sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> a.Delete(); db.SubmitUpdates(); succeed))
@@ -287,12 +289,13 @@ choose [
 
         path Path.Cart.overview >>= cart
         pathScan Path.Cart.addAlbum addToCart
-        path Path.Cart.checkout >>= checkout
+        
+        path Path.Cart.checkout >>= loggedOn checkout
 
-        path Path.Admin.manage >>= manage
-        path Path.Admin.createAlbum >>= createAlbum
-        pathScan Path.Admin.editAlbum editAlbum
-        pathScan Path.Admin.deleteAlbum deleteAlbum
+        path Path.Admin.manage >>= admin manage
+        path Path.Admin.createAlbum >>= admin createAlbum
+        pathScan Path.Admin.editAlbum (fun id -> admin (editAlbum id))
+        pathScan Path.Admin.deleteAlbum (fun id -> admin (deleteAlbum id))
 
         path "/jquery-1.11.2.js" >>= Files.browseFileHome "jquery-1.11.2.js"
         pathRegex "(.*?)\.(?!js|css|png|gif).*" >>= RequestErrors.FORBIDDEN "Access denied."
@@ -304,13 +307,12 @@ choose [
         path Path.Account.register >>= bindForm Form.register registerP
         
         pathScan Path.Cart.removeAlbum removeFromCart
-        path Path.Cart.checkout >>= bindForm Form.checkout checkoutP
-
-        path Path.Admin.createAlbum >>= bindForm Form.album createAlbumP
-        pathScan Path.Admin.editAlbum 
-            (fun id -> admin (bindForm Form.album (editAlbumP id)))
-        pathScan Path.Admin.deleteAlbum 
-            (fun id -> admin (deleteAlbumP id))
+        
+        path Path.Cart.checkout >>= loggedOn (bindForm Form.checkout checkoutP)
+        
+        path Path.Admin.createAlbum >>= admin (bindForm Form.album createAlbumP)
+        pathScan Path.Admin.editAlbum (fun id -> admin (bindForm Form.album (editAlbumP id)))
+        pathScan Path.Admin.deleteAlbum (fun id -> admin (deleteAlbumP id))
     ]
 
     NOT_FOUND "404"
