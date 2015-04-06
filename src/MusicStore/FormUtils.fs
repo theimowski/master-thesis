@@ -129,7 +129,7 @@ let validate' = function
     | DecimalProp p, v -> validate (p, v)
     | IntProp p, v -> validate (p, v)
 
-let bindRequest<'a> (form : Form<'a>) (req : HttpRequest) =
+let bindForm<'a> (form : Form<'a>) (req : HttpRequest) =
     let bindForm key = Model.Binding.form key Choice1Of2
     let t = form.GetType().GetGenericArguments().[0]
     let props = t.GetProperties() |> Array.toList

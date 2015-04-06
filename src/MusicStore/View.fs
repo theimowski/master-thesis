@@ -98,7 +98,7 @@ let viewStore (genres : Db.Genre list) = [
     h3 "Browse Genres"
     p [ text "Select from genres:" ]
     ulAnchors "genre-list" [
-        for g in genres -> sprintf "/store/browse?genre=%s" g.Name, text g.Name
+        for g in genres -> Path.Store.browse |> Path.withParam (Path.Store.browseKey, g.Name), text g.Name
     ]
 ]
 
@@ -342,7 +342,8 @@ let viewIndex (genres : Db.Genre list, cartItems : int, username : string option
             ]
 
             ulAnchors "categories" [
-                for genre in genres -> sprintf "/store/browse?genre=%s" genre.Name, text genre.Name
+                for genre in genres -> 
+                    Path.Store.browse |> Path.withParam (Path.Store.browseKey, genre.Name), text genre.Name
             ]
 
             divId "container" xml

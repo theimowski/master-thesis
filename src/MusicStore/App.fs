@@ -60,7 +60,10 @@ let overwriteCookiePathToRoot cookieName =
 
 
 let bindForm form handler =
-    Binding.bindReq (FormUtils.bindRequest form) handler BAD_REQUEST
+    Binding.bindReq (FormUtils.bindForm form) handler BAD_REQUEST
+
+let bindQuery key handler =
+    Binding.bindReq (Binding.query key Choice1Of2) handler BAD_REQUEST
 
 let clearUserState = 
     Writers.unsetUserData StateStoreType
@@ -275,8 +278,7 @@ choose [
     GET >>= choose [
         path Path.home >>= home
         path Path.Store.overview >>= store
-        path Path.Store.browse 
-            >>= Binding.bindReq (Binding.query "genre" Choice1Of2) albumsForGenre BAD_REQUEST
+        path Path.Store.browse >>= bindQuery Path.Store.browseKey albumsForGenre
         pathScan Path.Store.details albumDetails
 
         path Path.Account.logon >>= logon
