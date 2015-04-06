@@ -62,11 +62,11 @@ type FormLayout<'a> = {
 let renderForm (layout : FormLayout<_>) =    
     
     form [
-        for fset in layout.Fieldsets -> 
+        for set in layout.Fieldsets -> 
             fieldset [
-                yield legend fset.Legend
+                yield legend set.Legend
 
-                for field in fset.Fields do
+                for field in set.Fields do
                     yield divClass "editor-label" [
                         text field.Label
                     ]
@@ -81,7 +81,7 @@ let renderForm (layout : FormLayout<_>) =
 
 let viewAlbumDetails (album : Db.AlbumDetails) = [
     h2 album.Title
-    p [ imgSrc "/placeholder.gif" ]
+    p [ imgSrc album.AlbumArtUrl ]
     divId "album-details" [
         for (caption,t) in ["Genre:",album.Genre;"Artist:",album.Artist;"Price:",formatDec album.Price] ->
             p [
@@ -312,7 +312,7 @@ let viewCheckoutComplete orderId = [
     ]
 ]
 
-let viewIndex (genres : Db.Genre list, cartItems : int, username : string option) xml = 
+let viewIndex (genres : Db.Genre list, cartItems : int, user : (string * string) option) xml = 
     html [ 
         head [
             title "F# Suave Music Store"
@@ -323,16 +323,19 @@ let viewIndex (genres : Db.Genre list, cartItems : int, username : string option
             divId "header" [
                 h1 (aHref Path.home (text "F# Suave Music Store"))
                 ulAnchors "navlist" [ 
-                    Path.home, text "Home"
-                    Path.Store.overview, text "Store"
-                    Path.Cart.overview, text (sprintf "Cart (%d)" cartItems)
-                    Path.Admin.manage, text "Admin"
+                    yield Path.home, text "Home"
+                    yield Path.Store.overview, text "Store"
+                    yield Path.Cart.overview, text (sprintf "Cart (%d)" cartItems)
+                    match user with
+                    | Some (_, "admin") ->
+                        yield Path.Admin.manage, text "Admin"
+                    | _ -> ()
                 ]
                 spanAttr 
                     ["style", "'float:right'"] 
                     (flatten [
-                        match username with
-                        | Some name -> 
+                        match user with
+                        | Some (name, _) -> 
                             yield text (sprintf "Hello, %s" name)
                             yield aHref Path.Account.logoff (text "Log off")
                         | None ->

@@ -45,10 +45,11 @@ let getAlbumDetails id (ctx : DbContext) : AlbumDetails option =
             select album
     } |> firstOrNone
 
-let getAlbumsForGenre genreId (ctx : DbContext) : Album list = 
+let getAlbumsForGenre genreName (ctx : DbContext) : Album list = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
-            where (album.GenreId = genreId)
+            join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
+            where (genre.Name = genreName)
             select album
     }
     |> Seq.toList
@@ -87,14 +88,6 @@ let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
             select cart
     } |> Seq.toList
 
-let newOrder total username (ctx : DbContext) : Order =
-    let order = ctx.``[dbo].[Orders]``.Create(DateTime.UtcNow, total)
-    order.Username <- username
-    order
-
-let newOrderDetails (albumId, orderId, quantity, unitPrice) (ctx : DbContext) : OrderDetails =
-    ctx.``[dbo].[OrderDetails]``.Create(albumId, orderId, quantity, unitPrice)
-
 let newUser set (ctx : DbContext) =
     ctx.``[dbo].[Users]``.Create() |> set
     ctx.SubmitUpdates()
@@ -122,10 +115,11 @@ let removeFromCart (cart : Cart) albumId (ctx : DbContext) =
 let placeOrder (username : string) (ctx : DbContext) =
     let carts = getCartsDetails username ctx
     let total = carts |> List.sumBy (fun c -> (decimal) c.Count * c.Price)
-    let order = newOrder total username ctx
+    let order = ctx.``[dbo].[Orders]``.Create(DateTime.UtcNow, total)
+    order.Username <- username
     ctx.SubmitUpdates()
     for cart in carts do
-        let orderDetails = newOrderDetails (cart.AlbumId, order.OrderId, cart.Count, cart.Price) ctx
+        let orderDetails = ctx.``[dbo].[OrderDetails]``.Create(cart.AlbumId, order.OrderId, cart.Count, cart.Price)
         getCart cart.CartId cart.AlbumId ctx
         |> Option.iter (fun cart -> cart.Delete())
     ctx.SubmitUpdates()

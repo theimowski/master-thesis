@@ -35,8 +35,6 @@ let returnPathOrHome =
         let path = defaultArg (x.queryParam "returnPath") Path.home
         Redirection.FOUND path)
 
-
-
 let lift success = function
     | Some x -> success x
     | None -> never
@@ -81,15 +79,17 @@ let getSession (x: HttpContext) =
 let session f = 
     context (fun x -> f (getSession x))
 
-let missingAuthCookie =
-    (sprintf "%A" >> RequestErrors.BAD_REQUEST >> Choice2Of2)
+let reset =
+    unsetPair Auth.SessionAuthCookie
+    >>= unsetPair StateCookie
+    >>= Redirection.FOUND Path.home
 
 let loggedOn f_success =
     Auth.authenticate
         Cookie.CookieLife.Session
         false
         (fun () -> Choice2Of2(requireLogon))
-        missingAuthCookie
+        (fun _ -> Choice2Of2 reset)
         f_success
 
 let admin f_success = 
@@ -97,7 +97,7 @@ let admin f_success =
         Cookie.CookieLife.Session
         false
         (fun () -> Choice2Of2(UNAUTHORIZED "Not logged in"))
-        missingAuthCookie
+        (fun _ -> Choice2Of2 reset)
         (session (function
             | UserLoggedOn { Role = "admin" } -> f_success
             | UserLoggedOn _ -> FORBIDDEN "Only for admin"
@@ -142,15 +142,15 @@ let HTML html =
     context (fun x ->
         let db = sql.GetDataContext()
         let genres = Db.getGenres db
-        let cartItems, username = 
+        let cartItems, user = 
             match getSession x with
             | NoSession -> 0, None
             | CartIdOnly cartId ->
                 Db.getCartsDetails cartId db |> List.sumBy (fun c -> c.Count), None
-            | UserLoggedOn {Username = username} ->
-                Db.getCartsDetails username db |> List.sumBy (fun c -> c.Count), Some username
+            | UserLoggedOn {Username = username; Role = role} ->
+                Db.getCartsDetails username db |> List.sumBy (fun c -> c.Count), Some (username, role)
 
-        let content = viewIndex (genres, cartItems, username) html |> Html.xmlToString
+        let content = viewIndex (genres, cartItems, user) html |> Html.xmlToString
 
         OK content >>= Writers.setMimeType "text/html; charset=utf-8")
 
@@ -164,35 +164,24 @@ module Handlers =
 
     let albumDetails id = withDb (Db.getAlbumDetails id >> lift (viewAlbumDetails >> HTML))
 
-    let albumsForGenre name = 
-        let getF db =
-            Db.getGenre name db 
-            |> Option.map (fun genre -> Db.getAlbumsForGenre genre.GenreId db)
-        withDb (getF >> lift (viewAlbumsForGenre name >> HTML))
+    let albumsForGenre name = withDb (Db.getAlbumsForGenre name >> viewAlbumsForGenre name >> HTML)
 
     let logon = viewLogon |> HTML
 
     let logoff =
         sessionLogOffUser
-        >>= unsetPair Auth.SessionAuthCookie
-        >>= unsetPair StateCookie
-        >>= Redirection.FOUND Path.home
+        >>= reset
 
     let register = viewRegister |> HTML
 
     let logonP (f : Logon) =
-        let auth db =
-            match Db.validateUser 
-                    (f.Username, 
-                     passHash (f.Password)) db with
-            | Some user ->
-                    Auth.authenticated Cookie.CookieLife.Session false 
-                    >>= sessionLogOnUser (f.Username, user.Role)
-                    >>= returnPathOrHome
-            | _ ->
-                logon
-
-        withDb auth
+        match Db.validateUser(f.Username, passHash (f.Password)) (sql.GetDataContext()) with
+        | Some user ->
+                Auth.authenticated Cookie.CookieLife.Session false 
+                >>= sessionLogOnUser (f.Username, user.Role)
+                >>= returnPathOrHome
+        | _ ->
+            logon
 
     let registerP (f : Register) =
         let set = (fun (user : User) ->
