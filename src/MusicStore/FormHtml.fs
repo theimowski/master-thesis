@@ -18,9 +18,12 @@ let input<'a, 'b> (form : Form<'a>) (quotF : 'a -> Expr<'b>) typ required attrs 
 
 let textInput<'a> form quotF = input<'a, string> form quotF "text" true
 let passwordInput<'a> form quotF = input<'a, string> form quotF "password" true
-let optionalTextInput<'a> form quotF = input<'a, string option> form quotF "text" false
+let emailInput<'a> form quotF = input<'a, Email> form quotF "email" true
 let decimalInput<'a> form quotF = input<'a, decimal> form quotF "number" true
 let integerInput<'a> form quotF attr = input<'a, int> form quotF "number" true (("step","1") :: attr)
+
+let optionalTextInput<'a> form quotF = input<'a, string option> form quotF "text" false
+let optionalEmailInput<'a> form quotF = input<'a, Email option> form quotF "email" false
 
 let option value txt selected =
     if selected then

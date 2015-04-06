@@ -11,14 +11,21 @@ let logon : Form<Logon> = Form ([],[])
 
 type Register = {
     Username : string
-    Email : string
+    Email : Email option
     Password : string
     ConfirmPassword : string
 }
 
+let pattern = @"(\w){6,20}"
+
 let passwordsMatch f = 
     f.Password = f.ConfirmPassword, "Passwords must match"
-let register : Form<Register> = Form ([],[ passwordsMatch ])
+
+let register : Form<Register> = 
+    Form ([ StringProp ((fun f -> <@ f.Username @>), [ maxLength 30 ] )
+            StringProp ((fun f -> <@ f.Password @>), [ matches pattern ] )
+            StringProp ((fun f -> <@ f.ConfirmPassword @>), [ matches pattern ] )
+            ],[ passwordsMatch ])
 
 type Album = {
     ArtistId : int

@@ -1,6 +1,7 @@
 ﻿module MusicStore.FormUtils
 
 open System
+open System.Text.RegularExpressions
 open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
@@ -9,6 +10,16 @@ open Suave
 open Suave.Html
 open Suave.Utils
 open Suave.Types
+
+[<Literal>]
+let emailPattern = @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z"
+
+type Email = Email of string with 
+    static member Create s = 
+        if Regex.IsMatch(s, emailPattern, RegexOptions.IgnoreCase) then
+            Choice1Of2 (Email s)
+        else
+            Choice2Of2 (sprintf "%s is not a valid email" s)
 
 type ServerSideMsg = string
 type HtmlAttribute = string * string
@@ -30,6 +41,11 @@ let maxLength max : Validation<string> =
     (fun s -> s.Length <= max), 
     (sprintf "must be at most %d characters" max), 
     ("maxlength", max.ToString())
+
+let matches pattern : Validation<string> =
+    (fun p -> Regex(pattern).IsMatch(p)),
+    (sprintf "doesn't match pattern %s" pattern),
+    ("pattern", pattern)
 
 let minimum min : Validation<decimal> =
     (fun d -> d >= min),
@@ -59,11 +75,13 @@ let parse = function
     | t, value when t = typeof<String> -> Choice1Of2 value |> Choice.map (Some >> box)
     | t, value when t = typeof<Decimal> -> Suave.Model.Parse.decimal value |> Choice.map (Some >> box)
     | t, value when t = typeof<Int32> -> Suave.Model.Parse.int32 value |> Choice.map (Some >> box)
+    | t, value when t = typeof<Email> -> Email.Create value |> Choice.map (Some >> box)
     | t, _ -> failwithf "not supported type: %s" t.FullName
 
 | t, value when t = typeof<String> -> Choice1Of2 value |> Choice.map box
 | t, value when t = typeof<Decimal> -> Suave.Model.Parse.decimal value |> Choice.map box
 | t, value when t = typeof<Int32> -> Suave.Model.Parse.int32 value |> Choice.map box
+| t, value when t = typeof<Email> -> Email.Create value |> Choice.map box
 | t, _ -> failwithf "not supported type: %s" t.FullName
 
 

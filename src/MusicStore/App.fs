@@ -190,7 +190,7 @@ module Handlers =
     let registerP (f : Register) =
         let set = (fun (user : User) ->
                 user.UserName <- f.Username
-                user.Email <- f.Email
+                user.Email <- match f.Email with | Some (Email e) -> e | None -> ""
                 user.Password <- passHash f.Password
                 user.Role <- "user"
             )   
