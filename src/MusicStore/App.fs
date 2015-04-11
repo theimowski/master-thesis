@@ -265,9 +265,7 @@ choose [
         pathScan Path.Admin.editAlbum (fun id -> admin (editAlbum id))
         pathScan Path.Admin.deleteAlbum (fun id -> admin (deleteAlbum id))
 
-        path "/jquery-1.11.2.js" >>= Files.browseFileHome "jquery-1.11.2.js"
-        pathRegex "(.*?)\.(?!js|css|png|gif).*" >>= RequestErrors.FORBIDDEN "Access denied."
-        Files.browseHome
+        pathRegex "(.*)\.(js|css|png|gif)" >>= Files.browseHome
     ]
 
     POST >>= choose [
