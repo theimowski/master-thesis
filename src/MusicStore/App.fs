@@ -77,7 +77,8 @@ let getSession (x: HttpContext) =
         | _ -> NoSession
 
 let session f = 
-    context (fun x -> f (getSession x))
+    statefulForSession 
+    >>= context (fun x -> f (getSession x))
 
 let reset =
     unsetPair Auth.SessionAuthCookie
@@ -108,8 +109,7 @@ let setSession setF = context (HttpContext.state >> lift setF)
 let sessionSetCartId =
     session (function
     | NoSession -> 
-        statefulForSession
-        >>= setSession (fun state ->
+        setSession (fun state ->
             state.set "cartid" (Guid.NewGuid().ToString("N")))
     | _ -> succeed)
 
@@ -121,8 +121,7 @@ let sessionLogOnUser  (username,role) =
 
     session (function
     | NoSession ->
-        statefulForSession
-        >>= save
+        save
     | CartIdOnly cartId ->
         let upgradeCartId db =
             Db.upgradeCarts (cartId, username) db
@@ -138,21 +137,24 @@ let sessionLogOffUser =
     | UserLoggedOn _ -> clearUserState)
 
 
-let HTML html = 
+let HTML container = 
     context (fun x ->
         let db = sql.GetDataContext()
-        let genres = Db.getGenres db
-        let cartItems, user = 
-            match getSession x with
-            | NoSession -> 0, None
-            | CartIdOnly cartId ->
-                Db.getCartsDetails cartId db |> List.sumBy (fun c -> c.Count), None
-            | UserLoggedOn {Username = username; Role = role} ->
-                Db.getCartsDetails username db |> List.sumBy (fun c -> c.Count), Some (username, role)
+        let result (itemsNumber, user) =
+            let partUser = partUser (user |> Option.map fst)
+            let partCategories = partCategories (Db.getGenres db)
+            let partNav = partNav (user |> Option.map snd) (itemsNumber)
+            let content = viewIndex partUser partCategories partNav container |> Html.xmlToString
+            OK content >>= Writers.setMimeType "text/html; charset=utf-8"    
 
-        let content = viewIndex (genres, cartItems, user) html |> Html.xmlToString
-
-        OK content >>= Writers.setMimeType "text/html; charset=utf-8")
+        session(function
+        | NoSession ->
+            result (0, None)
+        | CartIdOnly cartId ->
+            result (Db.getCartsDetails cartId db |> List.sumBy (fun c -> c.Count), None)
+        | UserLoggedOn {Username = username; Role = role} ->
+            result (Db.getCartsDetails username db |> List.sumBy (fun c -> c.Count), Some (username, role)))
+        )
 
 [<AutoOpen>]
 module Handlers =

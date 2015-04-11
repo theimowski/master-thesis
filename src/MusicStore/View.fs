@@ -312,7 +312,34 @@ let viewCheckoutComplete orderId = [
     ]
 ]
 
-let viewIndex (genres : Db.Genre list, cartItems : int, user : (string * string) option) xml = 
+let partCategories (genres : Db.Genre list) =
+    ulAnchors "categories" [
+                for genre in genres -> 
+                    Path.Store.browse |> Path.withParam (Path.Store.browseKey, genre.Name), text genre.Name
+            ]
+
+let partUser (user : string option) = 
+    spanAttr 
+        ["style", "'float:right'"] 
+        (flatten [
+            match user with
+            | Some user -> 
+                yield text (sprintf "Logged on as %s, " user)
+                yield aHref Path.Account.logoff (text "Log off")
+            | None ->
+                yield aHref Path.Account.logon (text "Log on")
+        ])
+
+let partNav userRole itemsNumber = 
+    ulAnchors "navlist" [ 
+                    yield Path.home, text "Home"
+                    yield Path.Store.overview, text "Store"
+                    yield Path.Cart.overview, text (sprintf "Cart (%d)" itemsNumber)
+                    if userRole = Some "admin" then
+                        yield Path.Admin.manage, text "Admin"
+                ]
+
+let viewIndex partUser partCategories partNav container = 
     html [ 
         head [
             title "F# Suave Music Store"
@@ -322,34 +349,13 @@ let viewIndex (genres : Db.Genre list, cartItems : int, user : (string * string)
         body [
             divId "header" [
                 h1 (aHref Path.home (text "F# Suave Music Store"))
-                ulAnchors "navlist" [ 
-                    yield Path.home, text "Home"
-                    yield Path.Store.overview, text "Store"
-                    yield Path.Cart.overview, text (sprintf "Cart (%d)" cartItems)
-                    match user with
-                    | Some (_, "admin") ->
-                        yield Path.Admin.manage, text "Admin"
-                    | _ -> ()
-                ]
-                spanAttr 
-                    ["style", "'float:right'"] 
-                    (flatten [
-                        match user with
-                        | Some (name, _) -> 
-                            yield text (sprintf "Hello, %s" name)
-                            yield aHref Path.Account.logoff (text "Log off")
-                        | None ->
-                            yield text ("Hello, Guest")
-                            yield aHref Path.Account.logon (text "Log on")
-                    ])
+                partNav
+                partUser
             ]
 
-            ulAnchors "categories" [
-                for genre in genres -> 
-                    Path.Store.browse |> Path.withParam (Path.Store.browseKey, genre.Name), text genre.Name
-            ]
+            partCategories
 
-            divId "container" xml
+            divId "container" container
             
             divId "footer" [
                 text "built with "
