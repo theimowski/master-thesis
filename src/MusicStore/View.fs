@@ -201,12 +201,16 @@ let viewDeleteAlbum (album : Db.AlbumDetails) = [
     ]
 ]
 
-let viewLogon = [
+let viewLogon msg = [
     h2 "Log On"
     p [
         text "Please enter your user name and password."
         aHref Path.Account.register (text "Register")
         text " if you don't have an account yet."
+    ]
+
+    divId "logon-message" [
+        text (defaultArg msg " ")
     ]
 
     renderForm

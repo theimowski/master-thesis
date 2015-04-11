@@ -43,6 +43,15 @@ let app =
                                 | Some name -> sprintf "Hello %s" name |> OK
                                 | None -> BAD_REQUEST "no name in store"
                             | None -> BAD_REQUEST "no state"))
+        path "/state"
+            >>= statefulForSession
+            >>= context (fun x ->
+                match x |> HttpContext.state with
+                | Some store -> 
+                    match store.get "name" with
+                    | Some name -> OK ("State: " + name)
+                    | None -> BAD_REQUEST "no name in store"
+                | None -> BAD_REQUEST "no state")
     ]
 
 startWebServer defaultConfig app

@@ -53,10 +53,7 @@ let bindForm form handler =
 
 let bindQuery key handler =
     Binding.bindReq (Binding.query key Choice1Of2) handler BAD_REQUEST
-
-let clearUserState = 
-    Writers.unsetUserData StateStoreType
-
+    
 type UserLoggedOnSession = {
     Username : string
     Role : string
@@ -67,18 +64,16 @@ type Session =
     | CartIdOnly of string
     | UserLoggedOn of UserLoggedOnSession
 
-let getSession (x: HttpContext) =
-    match x |> HttpContext.state with
-    | None -> NoSession
-    | Some state ->
-        match state.get "cartid", state.get "username", state.get "role" with
-        | Some cartId, None, None -> CartIdOnly cartId
-        | None, Some username, Some role -> UserLoggedOn {Username = username; Role = role}
-        | _ -> NoSession
-
 let session f = 
-    statefulForSession 
-    >>= context (fun x -> f (getSession x))
+    statefulForSession
+    >>= context (fun x -> 
+        match x |> HttpContext.state with
+        | None -> f NoSession
+        | Some state ->
+            match state.get "cartid", state.get "username", state.get "role" with
+            | Some cartId, None, None -> f (CartIdOnly cartId)
+            | _, Some username, Some role -> f (UserLoggedOn {Username = username; Role = role})
+            | _ -> f NoSession)
 
 let reset =
     unsetPair Auth.SessionAuthCookie
@@ -97,12 +92,12 @@ let admin f_success =
     Auth.authenticate
         Cookie.CookieLife.Session
         false
-        (fun () -> Choice2Of2(UNAUTHORIZED "Not logged in"))
+        (fun () -> Choice2Of2(UNAUTHORIZED "Not logged on"))
         (fun _ -> Choice2Of2 reset)
         (session (function
             | UserLoggedOn { Role = "admin" } -> f_success
             | UserLoggedOn _ -> FORBIDDEN "Only for admin"
-            | _ -> never ))
+            | _ -> UNAUTHORIZED "Not logged on" ))
 
 let setSession setF = context (HttpContext.state >> lift setF)
 
@@ -113,29 +108,16 @@ let sessionSetCartId =
             state.set "cartid" (Guid.NewGuid().ToString("N")))
     | _ -> succeed)
 
-let sessionLogOnUser  (username,role) =
-    let save = 
-        setSession (fun state ->
-            state.set "username" username
-            >>= state.set "role" role)
-
+let sessionSetLogOn (username, role) =
     session (function
-    | NoSession ->
-        save
     | CartIdOnly cartId ->
-        let upgradeCartId db =
-            Db.upgradeCarts (cartId, username) db
-            succeed
-        clearUserState
-        >>= save
-        >>= withDb upgradeCartId
-    | UserLoggedOn _ -> never)
-
-let sessionLogOffUser = 
-    session (function
-    | NoSession | CartIdOnly _ -> never
-    | UserLoggedOn _ -> clearUserState)
-
+        let db = sql.GetDataContext()
+        Db.upgradeCarts (cartId, username) db
+        setSession (fun store -> store.set "cartid" "")
+    | _ -> succeed)
+    >>= setSession (fun store ->
+        store.set "username" username
+        >>= store.set "role" role)
 
 let HTML container = 
     context (fun x ->
@@ -168,22 +150,21 @@ module Handlers =
 
     let albumsForGenre name = withDb (Db.getAlbumsForGenre name >> viewAlbumsForGenre name >> HTML)
 
-    let logon = viewLogon |> HTML
+    let logon = viewLogon >> HTML
 
-    let logoff =
-        sessionLogOffUser
-        >>= reset
+    let logoff = reset
 
     let register = viewRegister |> HTML
 
     let logonP (f : Logon) =
-        match Db.validateUser(f.Username, passHash (f.Password)) (sql.GetDataContext()) with
+        let db = sql.GetDataContext()
+        match Db.validateUser(f.Username, passHash (f.Password)) db with
         | Some user ->
                 Auth.authenticated Cookie.CookieLife.Session false 
-                >>= sessionLogOnUser (f.Username, user.Role)
+                >>= sessionSetLogOn (user.UserName, user.Role)
                 >>= returnPathOrHome
         | _ ->
-            logon
+            logon (Some "Username or password is invalid")
 
     let registerP (f : Register) =
         let set = (fun (user : User) ->
@@ -274,7 +255,7 @@ choose [
         path Path.Store.browse >>= bindQuery Path.Store.browseKey albumsForGenre
         pathScan Path.Store.details albumDetails
 
-        path Path.Account.logon >>= logon
+        path Path.Account.logon >>= logon None
         path Path.Account.logoff >>= logoff
         path Path.Account.register >>= register
 

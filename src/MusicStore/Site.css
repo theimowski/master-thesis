@@ -269,6 +269,10 @@ input[type=text], input[type=password], input[type=number], input[type=email], s
 	width: 300px;
 }
 
+#logon-message {
+    color: #ff0000;
+}
+
 /* Styles for validation helpers */
 .field-validation-error {
     color: #ff0000;
