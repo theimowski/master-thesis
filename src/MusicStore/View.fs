@@ -248,7 +248,14 @@ let viewRegister = [
 
 ]
 
-let viewCart (carts : Db.CartDetails list) = [
+let viewEmptyCart = [
+    h3 "Your cart is empty"
+    text "Find some great music in our "
+    aHref Path.home (text "store")
+    text "!"
+]
+
+let viewNonEmptyCart (carts : Db.CartDetails list) = [
     h3 "Review your cart:"
     pAttr ["class", "button"] [
             aHref Path.Cart.checkout (text "Checkout >>")
@@ -282,6 +289,10 @@ let viewCart (carts : Db.CartDetails list) = [
     scriptAttr [ "type", "text/javascript"; " src", "/jquery-1.11.2.js" ] [ text ";" ]
     scriptAttr [ "type", "text/javascript"; " src", "/script.js" ] [ text ";" ]
 ]
+
+let viewCart = function
+    | [] -> viewEmptyCart
+    | list -> viewNonEmptyCart list
 
 let viewCheckout = [
     h2 "Address And Payment"

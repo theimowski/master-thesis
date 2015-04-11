@@ -185,10 +185,17 @@ module Handlers =
     let addToCart albumId = 
         sessionSetCartId
         >>= session (function
-            | NoSession -> never
+            | NoSession -> 
+                setSession (fun state ->
+                    let db = sql.GetDataContext()
+                    let cartId = Guid.NewGuid().ToString("N")
+                    Db.addToCart cartId albumId db
+                    state.set "cartid" cartId)
             | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
-                Db.addToCart cartId albumId (sql.GetDataContext())
-                Redirection.FOUND Path.Cart.overview)
+                let db = sql.GetDataContext()
+                Db.addToCart cartId albumId db
+                succeed)
+        >>= Redirection.FOUND Path.Cart.overview
 
     let removeFromCart albumId =
         session (function
