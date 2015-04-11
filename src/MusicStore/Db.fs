@@ -79,7 +79,11 @@ let getCart cartId albumId (ctx : DbContext) : Cart option =
     } |> firstOrNone
 
 let getCarts cartId (ctx : DbContext) : Cart list =
-    ctx.``[dbo].[Carts]`` |> Seq.toList
+    query {
+        for cart in ctx.``[dbo].[Carts]`` do
+            where (cart.CartId = cartId)
+            select cart
+    } |> Seq.toList
 
 let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
     query {
@@ -127,5 +131,10 @@ let placeOrder (username : string) (ctx : DbContext) =
 
 let upgradeCarts (cartId : string, username :string) (ctx : DbContext) =
     for cart in getCarts cartId ctx do
-        cart.CartId <- username
+        match getCart username cart.AlbumId ctx with
+        | Some existing ->
+            existing.Count <- existing.Count +  cart.Count
+            cart.Delete()
+        | None ->
+            cart.CartId <- username
     ctx.SubmitUpdates()

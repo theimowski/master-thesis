@@ -334,16 +334,14 @@ let partCategories (genres : Db.Genre list) =
             ]
 
 let partUser (user : string option) = 
-    spanAttr 
-        ["style", "'float:right'"] 
-        (flatten [
-            match user with
-            | Some user -> 
-                yield text (sprintf "Logged on as %s, " user)
-                yield aHref Path.Account.logoff (text "Log off")
-            | None ->
-                yield aHref Path.Account.logon (text "Log on")
-        ])
+    divId "part-user" [
+        match user with
+        | Some user -> 
+            yield text (sprintf "Logged on as %s, " user)
+            yield aHref Path.Account.logoff (text "Log off")
+        | None ->
+            yield aHref Path.Account.logon (text "Log on")
+    ] 
 
 let partNav userRole itemsNumber = 
     ulAnchors "navlist" [ 

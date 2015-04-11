@@ -273,6 +273,11 @@ input[type=text], input[type=password], input[type=number], input[type=email], s
     color: #ff0000;
 }
 
+#part-user {
+    float: right;
+    padding-top: 20px;
+}
+
 /* Styles for validation helpers */
 .field-validation-error {
     color: #ff0000;
