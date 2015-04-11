@@ -101,24 +101,6 @@ let admin f_success =
 
 let setSession setF = context (HttpContext.state >> lift setF)
 
-let sessionSetCartId =
-    session (function
-    | NoSession -> 
-        setSession (fun state ->
-            state.set "cartid" (Guid.NewGuid().ToString("N")))
-    | _ -> succeed)
-
-let sessionSetLogOn (username, role) =
-    session (function
-    | CartIdOnly cartId ->
-        let db = sql.GetDataContext()
-        Db.upgradeCarts (cartId, username) db
-        setSession (fun store -> store.set "cartid" "")
-    | _ -> succeed)
-    >>= setSession (fun store ->
-        store.set "username" username
-        >>= store.set "role" role)
-
 let HTML container = 
     context (fun x ->
         let db = sql.GetDataContext()
@@ -161,7 +143,15 @@ module Handlers =
         match Db.validateUser(f.Username, passHash (f.Password)) db with
         | Some user ->
                 Auth.authenticated Cookie.CookieLife.Session false 
-                >>= sessionSetLogOn (user.UserName, user.Role)
+                >>= session (function
+                    | CartIdOnly cartId ->
+                        let db = sql.GetDataContext()
+                        Db.upgradeCarts (cartId, user.UserName) db
+                        setSession (fun store -> store.set "cartid" "")
+                    | _ -> succeed)
+                    >>= setSession (fun store ->
+                        store.set "username" user.UserName
+                        >>= store.set "role" user.Role)
                 >>= returnPathOrHome
         | _ ->
             logon (Some "Username or password is invalid")
@@ -183,8 +173,7 @@ module Handlers =
                 withDb (Db.getCartsDetails cartId >> viewCart >> HTML))
 
     let addToCart albumId = 
-        sessionSetCartId
-        >>= session (function
+        session (function
             | NoSession -> 
                 setSession (fun state ->
                     let db = sql.GetDataContext()
