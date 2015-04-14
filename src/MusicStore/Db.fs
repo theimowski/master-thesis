@@ -8,7 +8,7 @@ open FSharp.Data.Sql
 
 type sql = 
     SqlDataProvider< 
-        "Server=(LocalDb)\\v11.0;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true", 
+        "Server=localhost;Database=MvcMusicStore;Trusted_Connection=True;MultipleActiveResultSets=true", 
         DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >
 
 type DbContext = sql.dataContext
@@ -91,6 +91,13 @@ let getCartsDetails cartId (ctx : DbContext) : CartDetails list =
             where (cart.CartId = cartId)
             select cart
     } |> Seq.toList
+
+let getUser username (ctx : DbContext) : User option = 
+    query {
+        for user in ctx.``[dbo].[Users]`` do
+        where (user.UserName = username)
+        select user
+    } |> firstOrNone
 
 let newUser set (ctx : DbContext) =
     ctx.``[dbo].[Users]``.Create() |> set

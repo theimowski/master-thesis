@@ -269,7 +269,7 @@ input[type=text], input[type=password], input[type=number], input[type=email], s
 	width: 300px;
 }
 
-#logon-message {
+#logon-message, #register-message {
     color: #ff0000;
 }
 

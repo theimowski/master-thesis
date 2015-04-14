@@ -205,7 +205,7 @@ let viewLogon msg = [
     h2 "Log On"
     p [
         text "Please enter your user name and password."
-        aHref Path.Account.register (text "Register")
+        aHref Path.Account.register (text " Register")
         text " if you don't have an account yet."
     ]
 
@@ -225,10 +225,14 @@ let viewLogon msg = [
           Form = Form.logon }
 ]
 
-let viewRegister = [
+let viewRegister msg = [
     h2 "Create a New Account"
     p [
         text "Use the form below to create a new account."
+    ]
+    
+    divId "register-message" [
+        text (defaultArg msg " ")
     ]
 
     renderForm
@@ -238,7 +242,7 @@ let viewRegister = [
                       [ { Label = "User name"
                           Xml = textInput Form.register (fun f -> <@ f.Username @>) [] }
                         { Label = "Email address (optional)"
-                          Xml = optionalEmailInput Form.register (fun f -> <@ f.Email @>) [] }
+                          Xml = emailInput Form.register (fun f -> <@ f.Email @>) [] }
                         { Label = "Password (between 6 and 20 characters)"
                           Xml = passwordInput Form.register (fun f -> <@ f.Password @>) [] }
                         { Label = "Confirm password"

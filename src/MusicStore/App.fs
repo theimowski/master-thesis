@@ -136,7 +136,7 @@ module Handlers =
 
     let logoff = reset
 
-    let register = viewRegister |> HTML
+    let register = viewRegister >> HTML
 
     let logonP (f : Logon) =
         let db = sql.GetDataContext()
@@ -149,22 +149,27 @@ module Handlers =
                         Db.upgradeCarts (cartId, user.UserName) db
                         setSession (fun store -> store.set "cartid" "")
                     | _ -> succeed)
-                    >>= setSession (fun store ->
-                        store.set "username" user.UserName
-                        >>= store.set "role" user.Role)
+                >>= setSession (fun store ->
+                    store.set "username" user.UserName
+                    >>= store.set "role" user.Role)
                 >>= returnPathOrHome
         | _ ->
-            logon (Some "Username or password is invalid")
+            logon (Some "Username or password is invalid.")
 
     let registerP (f : Register) =
         let set = (fun (user : User) ->
                 user.UserName <- f.Username
-                user.Email <- match f.Email with | Some (Email e) -> e | None -> ""
+                user.Email <- (let (Email email) = f.Email in email)
                 user.Password <- passHash f.Password
                 user.Role <- "user"
             )   
-        Db.newUser set (sql.GetDataContext())
-        Redirection.FOUND Path.Account.logon
+        let db = sql.GetDataContext()
+        match Db.getUser f.Username db with
+        | Some existing -> 
+            register (Some "Sorry this username is already taken. Try another.")
+        | None ->
+            Db.newUser set (sql.GetDataContext())
+            logon (Some "Account registered succesfully. Log on to continue.")
     
     let cart = 
         session (function
@@ -253,7 +258,7 @@ choose [
 
         path Path.Account.logon >>= logon None
         path Path.Account.logoff >>= logoff
-        path Path.Account.register >>= register
+        path Path.Account.register >>= register None
 
         path Path.Cart.overview >>= cart
         pathScan Path.Cart.addAlbum addToCart

@@ -11,7 +11,7 @@ let logon : Form<Logon> = Form ([],[])
 
 type Register = {
     Username : string
-    Email : Email option
+    Email : Email
     Password : string
     ConfirmPassword : string
 }
