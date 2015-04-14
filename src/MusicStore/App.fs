@@ -228,7 +228,7 @@ module Handlers =
         )
 
     let createAlbumP result = 
-        sql.GetDataContext() |> Db.newAlbum (setAlbum result)
+        Db.newAlbum (setAlbum result) (sql.GetDataContext())
         Redirection.FOUND Path.Admin.manage
 
     let editAlbum id = 
@@ -238,15 +238,27 @@ module Handlers =
             | None -> None 
         withDb (getF >> lift (viewEditAlbum >> HTML))
     
-    let editAlbumP id result = 
-        sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> (setAlbum result) a; db.SubmitUpdates(); succeed))
+    let editAlbumP id form = 
+        let db = sql.GetDataContext()
+        Db.getAlbum id db
+        |> lift (fun album ->
+            setAlbum form album
+            db.SubmitUpdates()
+            succeed
+        )
         >>= Redirection.FOUND Path.Admin.manage
 
     let deleteAlbum id = 
         withDb (Db.getAlbumDetails id >> lift (viewDeleteAlbum >> HTML))
     
     let deleteAlbumP id =
-        sql.GetDataContext() |> (fun db -> Db.getAlbum id db |> lift (fun a -> a.Delete(); db.SubmitUpdates(); succeed))
+        let db = sql.GetDataContext()
+        Db.getAlbum id db
+        |> lift (fun album ->
+            album.Delete()
+            db.SubmitUpdates()
+            succeed
+        )
         >>= Redirection.FOUND Path.Admin.manage
 
 choose [
