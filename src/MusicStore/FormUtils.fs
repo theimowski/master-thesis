@@ -10,6 +10,7 @@ open Suave
 open Suave.Html
 open Suave.Utils
 open Suave.Types
+open Suave.Model
 
 [<Literal>]
 let emailPattern = @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z"
@@ -146,44 +147,29 @@ let bindForm<'a> (form : Form<'a>) (req : HttpRequest) =
         | Optional(_) -> defaultArg (req.formData prop.Name) "" |> Choice1Of2
         | _ -> req |> bindForm prop.Name
 
-    let values =
-        props 
-        |> List.fold
-            (fun list prop ->
-                list |> Choice.bind (fun xs ->
-                    getValue prop
-                    |> Choice.map (fun x -> x :: xs)))
-            (Choice1Of2 [])
-        |> Choice.map List.rev
+    let bindFold s f = List.fold (fun x next -> x |> Choice.bind (f next)) (Choice1Of2 s)
+    let bindMap f = bindFold [] (fun x xs -> f x |> Choice.map (fun x -> x :: xs)) >> Choice.map List.rev
 
-    values 
-    |> Choice.bind (fun values -> 
-    (types, values)
-    ||> List.zip
-    |> List.fold
-        (fun list (typ,value) ->
-            list |> Choice.bind (fun xs -> 
-                parse (typ,value)
-                |> Choice.map (fun x -> x :: xs)))
-        (Choice1Of2 [])
-    |> Choice.map (List.rev >> List.toArray >> (fun objs -> FSharpValue.MakeRecord(t, objs) :?> 'a))
-    |> Choice.bind (fun record ->
+    binding {
+        let! values = props |> bindMap getValue
+        let! recordFields = 
+            (types, values) 
+            ||> List.zip
+            |> bindMap parse
+
+        let record = FSharpValue.MakeRecord(t, Array.ofList recordFields) :?> 'a
         let (Form (props,validations)) = form
-        props
-        |> List.fold 
-            (fun record prop ->
-                record |> Choice.bind (fun record ->
-                    validate' (prop, record)))
-            (Choice1Of2 record)
-        |> Choice.bind (fun record ->
+        let! record =
+            props
+            |> bindFold record (fun prop record -> validate' (prop, record))
+        let! record =
             validations
-            |> List.fold
-                (fun record (validation, msg) ->
-                    record |> Choice.bind (fun record ->
-                        if validation record then
-                            Choice1Of2 record
-                        else
-                            Choice2Of2 msg))
-                (Choice1Of2 record)
-        )
-    ))
+            |> bindFold 
+                record 
+                (fun (validation, msg) record -> 
+                    if validation record 
+                    then Choice1Of2 record 
+                    else Choice2Of2 msg)
+
+        return record
+    }
