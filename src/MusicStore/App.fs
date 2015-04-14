@@ -41,11 +41,11 @@ let lift success = function
 
 let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
 
-//let overwriteCookiePathToRoot cookieName =
-//    context (fun x ->
-//        let cookie = x.response.cookies.[cookieName]
-//        let cookie' = (snd HttpCookie.path_) (Some Path.home) cookie
-//        setCookie cookie')
+let overwriteCookiePathToRoot cookieName =
+    context (fun x ->
+        let cookie = x.response.cookies.[cookieName]
+        let cookie' = (snd HttpCookie.path_) (Some Path.home) cookie
+        setCookie cookie')
 
 
 let bindForm form handler =
@@ -66,6 +66,7 @@ type Session =
 
 let session f = 
     statefulForSession
+    >>= overwriteCookiePathToRoot State.CookieStateStore.StateCookie
     >>= context (fun x -> 
         match x |> HttpContext.state with
         | None -> f NoSession
@@ -143,6 +144,7 @@ module Handlers =
         match Db.validateUser(f.Username, passHash p) db with
         | Some user ->
                 Auth.authenticated Cookie.CookieLife.Session false 
+                >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
                 >>= session (function
                     | CartIdOnly cartId ->
                         let db = sql.GetDataContext()
