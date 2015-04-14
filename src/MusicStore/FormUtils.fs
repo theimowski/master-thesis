@@ -21,17 +21,19 @@ type Email = Email of string with
         else
             Choice2Of2 (sprintf "%s is not a valid email" s)
 
+type Password = Password of string
+
 type ServerSideMsg = string
 type HtmlAttribute = string * string
 type Validation<'a> = ('a -> bool) * ServerSideMsg * HtmlAttribute
-type ServerSideValidation<'a> = 'a -> bool * ServerSideMsg
+type ServerSideValidation<'a> = ('a -> bool) * ServerSideMsg
 
 type Property<'a, 'b> = ('a -> Expr<'b>) * Validation<'b> list
 
 type FormProp<'a> =
-    | StringProp of Property<'a, string>
+    | TextProp of Property<'a, string>
+    | PasswordProp of Property<'a, Password>
     | DecimalProp of Property<'a, decimal>
-    | IntProp of Property<'a, int>
 
 type Form<'a> = Form of FormProp<'a> list * ServerSideValidation<'a> list
 
@@ -47,12 +49,17 @@ let matches pattern : Validation<string> =
     (sprintf "doesn't match pattern %s" pattern),
     ("pattern", pattern)
 
-let minimum min : Validation<decimal> =
+let passwordRegex pattern : Validation<Password> =
+    (fun (Password p) -> Regex(pattern).IsMatch(p)),
+    (sprintf "doesn't match pattern %s" pattern),
+    ("pattern", pattern)
+
+let min min : Validation<decimal> =
     (fun d -> d >= min),
     (sprintf "must be at least %M" min),
     ("min", formatDec min)
 
-let maximum max : Validation<decimal> =
+let max max : Validation<decimal> =
     (fun d -> d <= max),
     (sprintf "must be at most %M" max),
     ("min", formatDec max)
@@ -62,28 +69,27 @@ let step step : Validation<decimal> =
     (sprintf "must be a multiply of %M" step), 
     ("step", formatDec step)
 
-
-let isOptional (typ : Type) =
-        typ.IsGenericType && 
-        typ.GetGenericTypeDefinition() = typedefof<option<_>>
-
+let (|Optional|_|) (typ : Type) = 
+    if typ.IsGenericType 
+       && typ.GetGenericTypeDefinition() = typedefof<option<_>> then 
+        Some(typ.GetGenericArguments().[0])
+    else None
+    
 let parse = function
-| t, "" when isOptional t -> Choice1Of2 None |> Choice.map box
-| t, value when isOptional t -> 
-    let genT = t.GetGenericArguments().[0]
+| Optional(t), "" -> Choice1Of2 None |> Choice.map box
+| Optional(genT), value -> 
     match genT, value with
     | t, value when t = typeof<String> -> Choice1Of2 value |> Choice.map (Some >> box)
+    | t, value when t = typeof<Password> -> Password value |> Choice1Of2 |> Choice.map (Some >> box)
     | t, value when t = typeof<Decimal> -> Suave.Model.Parse.decimal value |> Choice.map (Some >> box)
-    | t, value when t = typeof<Int32> -> Suave.Model.Parse.int32 value |> Choice.map (Some >> box)
     | t, value when t = typeof<Email> -> Email.Create value |> Choice.map (Some >> box)
     | t, _ -> failwithf "not supported type: %s" t.FullName
 
 | t, value when t = typeof<String> -> Choice1Of2 value |> Choice.map box
+| t, value when t = typeof<Password> -> Password value |> Choice1Of2 |> Choice.map box
 | t, value when t = typeof<Decimal> -> Suave.Model.Parse.decimal value |> Choice.map box
-| t, value when t = typeof<Int32> -> Suave.Model.Parse.int32 value |> Choice.map box
 | t, value when t = typeof<Email> -> Email.Create value |> Choice.map box
 | t, _ -> failwithf "not supported type: %s" t.FullName
-
 
 let validateSingle ((quotF, ((test, msg, _) : Validation<'b>)), value : 'a) =
     match quotF value with
@@ -108,16 +114,16 @@ let validate ((quotF, validations), value : 'a) =
         (Choice1Of2 value)    
 
 let getQuotName = function 
-    | StringProp (q, _) -> getName q
+    | TextProp (q, _) -> getName q
+    | PasswordProp (q, _) -> getName q
     | DecimalProp (q, _) -> getName q
-    | IntProp (q, _) -> getName q
 
 let thrd (_,_,x) = x
 
 let getHtmlAttrs = function
-    | StringProp (_,xs) -> xs |> List.map thrd
+    | TextProp (_,xs) -> xs |> List.map thrd
+    | PasswordProp (_, xs) -> xs |> List.map thrd
     | DecimalProp (_,xs) -> xs |> List.map thrd
-    | IntProp (_,xs) -> xs |> List.map thrd
 
 let getHtmlProps (Form (props,_)) (quotF : 'a -> Expr<'b>) : (string * string) list =
     props
@@ -125,9 +131,9 @@ let getHtmlProps (Form (props,_)) (quotF : 'a -> Expr<'b>) : (string * string) l
     |> List.collect (fun p -> p |> getHtmlAttrs)
 
 let validate' = function
-    | StringProp p, v -> validate (p, v)
+    | TextProp p, v -> validate (p, v)
+    | PasswordProp p, v -> validate (p, v)
     | DecimalProp p, v -> validate (p, v)
-    | IntProp p, v -> validate (p, v)
 
 let bindForm<'a> (form : Form<'a>) (req : HttpRequest) =
     let bindForm key = Model.Binding.form key Choice1Of2
@@ -136,10 +142,9 @@ let bindForm<'a> (form : Form<'a>) (req : HttpRequest) =
     let types = props |> List.map (fun p -> p.PropertyType)
 
     let getValue (prop : Reflection.PropertyInfo) =
-        if isOptional (prop.PropertyType) then
-            defaultArg (req.formData prop.Name) "" |> Choice1Of2
-        else 
-            req |> bindForm prop.Name
+        match prop.PropertyType with
+        | Optional(_) -> defaultArg (req.formData prop.Name) "" |> Choice1Of2
+        | _ -> req |> bindForm prop.Name
 
     let values =
         props 
@@ -173,11 +178,12 @@ let bindForm<'a> (form : Form<'a>) (req : HttpRequest) =
         |> Choice.bind (fun record ->
             validations
             |> List.fold
-                (fun record validation ->
+                (fun record (validation, msg) ->
                     record |> Choice.bind (fun record ->
-                        match validation record with
-                        | true, _ -> Choice1Of2 record
-                        | false, reason -> Choice2Of2 reason))
+                        if validation record then
+                            Choice1Of2 record
+                        else
+                            Choice2Of2 msg))
                 (Choice1Of2 record)
         )
     ))

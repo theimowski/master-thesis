@@ -4,7 +4,7 @@ open MusicStore.FormUtils
 
 type Logon = {
     Username : string
-    Password : string
+    Password : Password
 }
 
 let logon : Form<Logon> = Form ([],[])
@@ -12,33 +12,33 @@ let logon : Form<Logon> = Form ([],[])
 type Register = {
     Username : string
     Email : Email
-    Password : string
-    ConfirmPassword : string
+    Password : Password
+    ConfirmPassword : Password
 }
 
 let pattern = @"(\w){6,20}"
 
-let passwordsMatch f = 
-    f.Password = f.ConfirmPassword, "Passwords must match"
+let passwordsMatch = 
+    (fun f -> f.Password = f.ConfirmPassword), "Passwords must match"
 
 let register : Form<Register> = 
-    Form ([ StringProp ((fun f -> <@ f.Username @>), [ maxLength 30 ] )
-            StringProp ((fun f -> <@ f.Password @>), [ matches pattern ] )
-            StringProp ((fun f -> <@ f.ConfirmPassword @>), [ matches pattern ] )
+    Form ([ TextProp ((fun f -> <@ f.Username @>), [ maxLength 30 ] )
+            PasswordProp ((fun f -> <@ f.Password @>), [ passwordRegex pattern ] )
+            PasswordProp ((fun f -> <@ f.ConfirmPassword @>), [ passwordRegex pattern ] )
             ],[ passwordsMatch ])
 
 type Album = {
-    ArtistId : int
-    GenreId : int
+    ArtistId : decimal
+    GenreId : decimal
     Title : string
     Price : decimal
     ArtUrl : string
 }
 
 let album : Form<Album> = 
-    Form ([ StringProp ((fun f -> <@ f.Title @>), [ maxLength 100 ])
-            StringProp ((fun f -> <@ f.ArtUrl @>), [ maxLength 100 ])
-            DecimalProp ((fun f -> <@ f.Price @>), [ minimum 0.01M; maximum 100.0M; step 0.01M ])
+    Form ([ TextProp ((fun f -> <@ f.Title @>), [ maxLength 100 ])
+            TextProp ((fun f -> <@ f.ArtUrl @>), [ maxLength 100 ])
+            DecimalProp ((fun f -> <@ f.Price @>), [ min 0.01M; max 100.0M; step 0.01M ])
             ],
           [])
 

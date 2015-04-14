@@ -138,9 +138,9 @@ module Handlers =
 
     let register = viewRegister >> HTML
 
-    let logonP (f : Logon) =
+    let logonP ({ Password = Password p } as f : Logon) =
         let db = sql.GetDataContext()
-        match Db.validateUser(f.Username, passHash (f.Password)) db with
+        match Db.validateUser(f.Username, passHash p) db with
         | Some user ->
                 Auth.authenticated Cookie.CookieLife.Session false 
                 >>= session (function
@@ -160,7 +160,7 @@ module Handlers =
         let set = (fun (user : User) ->
                 user.UserName <- f.Username
                 user.Email <- (let (Email email) = f.Email in email)
-                user.Password <- passHash f.Password
+                user.Password <- (let (Password password) = f.Password in passHash password)
                 user.Role <- "user"
             )   
         let db = sql.GetDataContext()
@@ -169,7 +169,7 @@ module Handlers =
             register (Some "Sorry this username is already taken. Try another.")
         | None ->
             Db.newUser set (sql.GetDataContext())
-            logon (Some "Account registered succesfully. Log on to continue.")
+            Redirection.redirect Path.Account.logon
     
     let cart = 
         session (function
@@ -220,8 +220,8 @@ module Handlers =
         withDb (getF >> viewCreateAlbum >> HTML)
     
     let setAlbum (f : Album) = (fun (album : Db.Album) -> 
-            album.ArtistId <- f.ArtistId
-            album.GenreId <- f.GenreId
+            album.ArtistId <- int f.ArtistId
+            album.GenreId <- int f.GenreId
             album.Title <- f.Title
             album.Price <- f.Price
             album.AlbumArtUrl <- f.ArtUrl
