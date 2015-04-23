@@ -103,7 +103,7 @@ let viewStore (genres : Db.Genre list) = [
 ]
 
 let viewHome (bestSellers : Db.BestSeller list) = [
-    divId "promotion" [text " "]
+    imgSrc "/home-showcase.png"
     h3 "Fresh off the grill"
     ulAnchors "album-list" [
         for album in bestSellers -> 
@@ -362,6 +362,17 @@ let partNav userRole itemsNumber =
                     if userRole = Some "admin" then
                         yield Path.Admin.manage, text "Admin"
                 ]
+
+let pageNotFound = [
+    h2 "Page not found"
+    p [
+        text "Could not find the requested resource"
+    ]
+    p [
+        text "Back to "
+        aHref Path.home (text "Home")
+    ]
+]
 
 let viewIndex partUser partCategories partNav container = 
     html [ 

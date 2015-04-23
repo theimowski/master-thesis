@@ -294,7 +294,7 @@ choose [
         pathScan Path.Admin.deleteAlbum (fun id -> admin (deleteAlbumP id))
     ]
 
-    NOT_FOUND "404"
+    HTML pageNotFound
 ]
 |> startWebServer 
     { defaultConfig with 
