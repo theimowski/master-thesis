@@ -25,10 +25,10 @@ let passHash (pass: string) =
     |> Array.map (fun b -> b.ToString("x2"))
     |> String.concat ""
 
-let requireLogon =
-    context (fun x ->
-        let path = x.request.url.AbsolutePath
-        Redirection.FOUND (Path.Account.logon |> Path.withParam ("returnPath", path)))
+let redirectWithReturnPath redirection =
+    request (fun x ->
+        let path = x.url.AbsolutePath
+        Redirection.FOUND (redirection |> Path.withParam ("returnPath", path)))
 
 let returnPathOrHome = 
     request (fun x -> 
@@ -46,7 +46,6 @@ let overwriteCookiePathToRoot cookieName =
         let cookie = x.response.cookies.[cookieName]
         let cookie' = (snd HttpCookie.path_) (Some Path.home) cookie
         setCookie cookie')
-
 
 let bindForm form handler =
     Binding.bindReq (FormUtils.bindForm form) handler BAD_REQUEST
@@ -85,7 +84,7 @@ let loggedOn f_success =
     Auth.authenticate
         Cookie.CookieLife.Session
         false
-        (fun () -> Choice2Of2(requireLogon))
+        (fun () -> Choice2Of2(redirectWithReturnPath Path.Account.logon))
         (fun _ -> Choice2Of2 reset)
         f_success
 
@@ -106,9 +105,9 @@ let HTML container =
     context (fun x ->
         let db = sql.GetDataContext()
         let result (itemsNumber, user) =
-            let partUser = partUser (user |> Option.map fst)
+            let partUser = partUser (user |> Option.map (fun u -> u.Username))
             let partCategories = partCategories (Db.getGenres db)
-            let partNav = partNav (user |> Option.map snd) (itemsNumber)
+            let partNav = partNav (user |> Option.map (fun u -> u.Role)) itemsNumber
             let content = viewIndex partUser partCategories partNav container |> Html.xmlToString
             OK content >>= Writers.setMimeType "text/html; charset=utf-8"    
 
@@ -117,8 +116,8 @@ let HTML container =
             result (0, None)
         | CartIdOnly cartId ->
             result (Db.getCartsDetails cartId db |> List.sumBy (fun c -> c.Count), None)
-        | UserLoggedOn {Username = username; Role = role} ->
-            result (Db.getCartsDetails username db |> List.sumBy (fun c -> c.Count), Some (username, role)))
+        | UserLoggedOn user ->
+            result (Db.getCartsDetails user.Username db |> List.sumBy (fun c -> c.Count), Some user))
         )
 
 [<AutoOpen>]
@@ -139,9 +138,10 @@ module Handlers =
 
     let register = viewRegister >> HTML
 
-    let logonP ({ Password = Password p } as f : Logon) =
+    let logonP (form : Logon) =
         let db = sql.GetDataContext()
-        match Db.validateUser(f.Username, passHash p) db with
+        let (Password password) = form.Password
+        match Db.validateUser(form.Username, passHash password) db with
         | Some user ->
                 Auth.authenticated Cookie.CookieLife.Session false 
                 >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
@@ -158,34 +158,30 @@ module Handlers =
         | _ ->
             logon (Some "Username or password is invalid.")
 
-    let registerP (f : Register) =
-        let set = (fun (user : User) ->
-                user.UserName <- f.Username
-                user.Email <- (let (Email email) = f.Email in email)
-                user.Password <- (let (Password password) = f.Password in passHash password)
-                user.Role <- "user"
-            )   
+    let registerP (form : Register) =
         let db = sql.GetDataContext()
-        match Db.getUser f.Username db with
+        match Db.getUser form.Username db with
         | Some existing -> 
-            register (Some "Sorry this username is already taken. Try another.")
+            register (Some "Sorry this username is already taken. Try another one.")
         | None ->
-            Db.newUser set (sql.GetDataContext())
-            Redirection.redirect Path.Account.logon
+            let (Password password) = form.Password
+            let (Email email) = form.Email
+            Db.newUser (form.Username, passHash password, email) (sql.GetDataContext())
+            logonP {Username = form.Username; Password = form.Password}
     
     let cart = 
         session (function
-            | NoSession -> viewCart [] |> HTML
+            | NoSession -> viewEmptyCart |> HTML
             | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
                 withDb (Db.getCartsDetails cartId >> viewCart >> HTML))
 
     let addToCart albumId = 
         session (function
             | NoSession -> 
+                let db = sql.GetDataContext()
+                let cartId = Guid.NewGuid().ToString("N")
+                Db.addToCart cartId albumId db
                 setSession (fun state ->
-                    let db = sql.GetDataContext()
-                    let cartId = Guid.NewGuid().ToString("N")
-                    Db.addToCart cartId albumId db
                     state.set "cartid" cartId)
             | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
                 let db = sql.GetDataContext()
@@ -208,12 +204,12 @@ module Handlers =
         | NoSession | CartIdOnly _ -> never
         | UserLoggedOn _ -> viewCheckout |> HTML)
         
-    let checkoutP f = 
+    let checkoutP form = 
         session (function
         | NoSession | CartIdOnly _ -> never
         | UserLoggedOn { Username = username } ->
-            let order = Db.placeOrder username (sql.GetDataContext())
-            viewCheckoutComplete order.OrderId |> HTML)
+            Db.placeOrder username (sql.GetDataContext())
+            viewCheckoutComplete |> HTML)
 
     let manage = withDb (Db.getAlbumsDetails >> viewManageStore >> HTML)
 
@@ -229,8 +225,8 @@ module Handlers =
             album.AlbumArtUrl <- f.ArtUrl
         )
 
-    let createAlbumP result = 
-        Db.newAlbum (setAlbum result) (sql.GetDataContext())
+    let createAlbumP (form : Album) = 
+        Db.newAlbum (int form.ArtistId, int form.GenreId, form.Price, form.Title) (sql.GetDataContext())
         Redirection.FOUND Path.Admin.manage
 
     let editAlbum id = 
@@ -244,8 +240,7 @@ module Handlers =
         let db = sql.GetDataContext()
         Db.getAlbum id db
         |> lift (fun album ->
-            setAlbum form album
-            db.SubmitUpdates()
+            Db.updateAlbum album (int form.ArtistId, int form.GenreId, form.Price, form.Title) db
             succeed
         )
         >>= Redirection.FOUND Path.Admin.manage
@@ -257,8 +252,7 @@ module Handlers =
         let db = sql.GetDataContext()
         Db.getAlbum id db
         |> lift (fun album ->
-            album.Delete()
-            db.SubmitUpdates()
+            Db.deleteAlbum album db
             succeed
         )
         >>= Redirection.FOUND Path.Admin.manage

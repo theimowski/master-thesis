@@ -25,6 +25,7 @@ type BestSeller = DbContext.``[dbo].[BestSellers]Entity``
 
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
+
 let getAlbum id (ctx : DbContext) : Album option = 
     query { 
         for album in ctx.``[dbo].[Albums]`` do
@@ -67,10 +68,6 @@ let getGenres (ctx : DbContext) : Genre list =
 let getArtists (ctx : DbContext) : Artist list = 
     ctx.``[dbo].[Artists]`` |> Seq.toList
 
-let newAlbum set (ctx : DbContext) =
-    ctx.``[dbo].[Albums]``.Create() |> set
-    ctx.SubmitUpdates()
-
 let getCart cartId albumId (ctx : DbContext) : Cart option =
     query {
         for cart in ctx.``[dbo].[Carts]`` do
@@ -98,17 +95,33 @@ let getUser username (ctx : DbContext) : User option =
         where (user.UserName = username)
         select user
     } |> firstOrNone
-
-let newUser set (ctx : DbContext) =
-    ctx.``[dbo].[Users]``.Create() |> set
-    ctx.SubmitUpdates()
-
+    
 let validateUser (username, password) (ctx : DbContext) : User option =
     query {
         for user in ctx.``[dbo].[Users]`` do
             where (user.UserName = username && user.Password = password)
             select user
     } |> firstOrNone
+
+
+let newAlbum (artistId, genreId, price, title) (ctx : DbContext) =
+    ctx.``[dbo].[Albums]``.Create(artistId, genreId, price, title) |> ignore
+    ctx.SubmitUpdates()
+
+let updateAlbum (album : Album) (artistId, genreId, price, title) (ctx : DbContext) =
+    album.ArtistId <- artistId
+    album.GenreId <- genreId
+    album.Price <- price
+    album.Title <- title
+    ctx.SubmitUpdates()
+
+let deleteAlbum (album : Album) (ctx : DbContext) = 
+    album.Delete()
+    ctx.SubmitUpdates()
+
+let newUser (username, password, email) (ctx : DbContext) =
+    ctx.``[dbo].[Users]``.Create(email, password, "user", username) |> ignore
+    ctx.SubmitUpdates()
 
 let addToCart cartId albumId (ctx : DbContext)  =
     match getCart cartId albumId ctx with
@@ -134,7 +147,6 @@ let placeOrder (username : string) (ctx : DbContext) =
         getCart cart.CartId cart.AlbumId ctx
         |> Option.iter (fun cart -> cart.Delete())
     ctx.SubmitUpdates()
-    order
 
 let upgradeCarts (cartId : string, username :string) (ctx : DbContext) =
     for cart in getCarts cartId ctx do

@@ -249,7 +249,7 @@ let viewRegister msg = [
                   Fields = 
                       [ { Label = "User name"
                           Xml = input (fun f -> <@ f.Username @>) [] }
-                        { Label = "Email address (optional)"
+                        { Label = "Email address"
                           Xml = input (fun f -> <@ f.Email @>) [] }
                         { Label = "Password (between 6 and 20 characters)"
                           Xml = input (fun f -> <@ f.Password @>) [] }
@@ -326,10 +326,10 @@ let viewCheckout = [
              }
 ]
 
-let viewCheckoutComplete orderId = [
+let viewCheckoutComplete = [
     h2 "Checkout Complete"
     p [
-        text (sprintf "Thanks for your order! Your order number is: %d" orderId)
+        text "Thanks for your order!"
     ]
     p [
         text "How about shopping for some more music in our "
