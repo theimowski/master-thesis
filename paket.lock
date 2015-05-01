@@ -11,12 +11,12 @@ NUGET
       FSharp.Compiler.Service (>= 0.0.81)
     FsPickler (1.0.15)
     SQLProvider (0.0.9-alpha)
-    Suave (0.26.0)
+    Suave (0.26.2)
       FSharp.Core (>= 3.1.2.1)
       FsPickler (>= 1.0.7)
-    Suave.Experimental (0.26.0)
+    Suave.Experimental (0.26.2)
       FSharp.Core (>= 3.1.2.1)
-      Suave (>= 0.26.0)
+      Suave (>= 0.26.2)
 HTTP
   remote: http://code.jquery.com
   specs:

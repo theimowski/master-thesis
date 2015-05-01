@@ -1,6 +1,8 @@
 ﻿module MusicStore.Form
 
-open MusicStore.FormUtils
+open System.Net.Mail
+
+open Suave.Form
 
 type Logon = {
     Username : string
@@ -11,7 +13,7 @@ let logon : Form<Logon> = Form ([],[])
 
 type Register = {
     Username : string
-    Email : Email
+    Email : MailAddress
     Password : Password
     ConfirmPassword : Password
 }

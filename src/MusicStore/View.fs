@@ -2,10 +2,8 @@
 
 open System
 
+open Suave.Form
 open Suave.Html
-
-open MusicStore.FormUtils
-open MusicStore.FormHtml
 
 let cssLink href = linkAttr [ "href", href; " rel", "stylesheet"; " type", "text/css" ]
 
@@ -42,6 +40,8 @@ let truncate k (s : string) =
     else s
 
 let formatDec (d : Decimal) = d.ToString(Globalization.CultureInfo.InvariantCulture)
+
+let input = Suave.Form.input
 
 type Field<'a> = {
     Label : string

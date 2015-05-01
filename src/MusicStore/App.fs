@@ -5,12 +5,12 @@ open System
 open Suave
 open Suave.Http.Successful
 open Suave.Web
+open Suave.Form
 open Suave.Http
 open Suave.Http.Applicatives
 open Suave.Http.RequestErrors
 open Suave.Types
 open Suave.Model
-open Suave.Utils
 open Suave.Cookie
 open Suave.State.CookieStateStore
 
@@ -41,14 +41,8 @@ let lift success = function
 
 let withDb f = warbler (fun _ -> f (sql.GetDataContext()))
 
-let overwriteCookiePathToRoot cookieName =
-    context (fun x ->
-        let cookie = x.response.cookies.[cookieName]
-        let cookie' = (snd HttpCookie.path_) (Some Path.home) cookie
-        setCookie cookie')
-
 let bindForm form handler =
-    Binding.bindReq (FormUtils.bindForm form) handler BAD_REQUEST
+    Binding.bindReq (bindForm form) handler BAD_REQUEST
 
 let bindQuery key handler =
     Binding.bindReq (Binding.query key Choice1Of2) handler BAD_REQUEST
@@ -65,7 +59,6 @@ type Session =
 
 let session f = 
     statefulForSession
-    >>= overwriteCookiePathToRoot State.CookieStateStore.StateCookie
     >>= context (fun x -> 
         match x |> HttpContext.state with
         | None -> f NoSession
@@ -102,27 +95,24 @@ let admin f_success =
 let setSession setF = context (HttpContext.state >> lift setF)
 
 let HTML container = 
-    context (fun x ->
-        let db = sql.GetDataContext()
-        let result (itemsNumber, user) =
-            let partUser = partUser (user |> Option.map (fun u -> u.Username))
-            let partCategories = partCategories (Db.getGenres db)
-            let partNav = partNav (user |> Option.map (fun u -> u.Role)) itemsNumber
-            let content = viewIndex partUser partCategories partNav container |> Html.xmlToString
-            OK content >>= Writers.setMimeType "text/html; charset=utf-8"    
+    let db = sql.GetDataContext()
+    let result (itemsNumber, user) =
+        let partUser = partUser (user |> Option.map (fun u -> u.Username))
+        let partCategories = partCategories (Db.getGenres db)
+        let partNav = partNav (user |> Option.map (fun u -> u.Role)) itemsNumber
+        let content = viewIndex partUser partCategories partNav container |> Html.xmlToString
+        OK content >>= Writers.setMimeType "text/html; charset=utf-8"    
 
-        session(function
-        | NoSession ->
-            result (0, None)
-        | CartIdOnly cartId ->
-            result (Db.getCartsDetails cartId db |> List.sumBy (fun c -> c.Count), None)
-        | UserLoggedOn user ->
-            result (Db.getCartsDetails user.Username db |> List.sumBy (fun c -> c.Count), Some user))
-        )
+    session(function
+    | NoSession ->
+        result (0, None)
+    | CartIdOnly cartId ->
+        result (Db.getCartsDetails cartId db |> List.sumBy (fun c -> c.Count), None)
+    | UserLoggedOn user ->
+        result (Db.getCartsDetails user.Username db |> List.sumBy (fun c -> c.Count), Some user))
 
 [<AutoOpen>]
 module Handlers =
-    open FormUtils
 
     let home = withDb (Db.getBestSellers >> viewHome >> HTML)
     
@@ -144,7 +134,6 @@ module Handlers =
         match Db.validateUser(form.Username, passHash password) db with
         | Some user ->
                 Auth.authenticated Cookie.CookieLife.Session false 
-                >>= overwriteCookiePathToRoot Auth.SessionAuthCookie
                 >>= session (function
                     | CartIdOnly cartId ->
                         let db = sql.GetDataContext()
@@ -165,7 +154,7 @@ module Handlers =
             register (Some "Sorry this username is already taken. Try another one.")
         | None ->
             let (Password password) = form.Password
-            let (Email email) = form.Email
+            let email = form.Email.Address
             Db.newUser (form.Username, passHash password, email) (sql.GetDataContext())
             logonP {Username = form.Username; Password = form.Password}
     
@@ -299,4 +288,4 @@ choose [
 |> startWebServer 
     { defaultConfig with 
         bindings = [ HttpBinding.mk' HTTP "127.0.0.1" 8028 ]
-        logger = Logging.Loggers.ConsoleWindowLogger(Logging.Debug) }
+        logger = Logging.Loggers.ConsoleWindowLogger(Logging.LogLevel.Debug) }
