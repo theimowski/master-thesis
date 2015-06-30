@@ -1,9 +1,11 @@
-SUCCESSFUL APPLICATIONS OF FUNCTIONAL PROGRAMMING
-====================
+APPLICATIONS OF FUNCTIONAL PROGRAMMING
+======================================
 
-Bla bla bla **bla**
+Popular languages
+-----------------
 
-This is a subsection
---------------------
+Profitable areas
+----------------
 
-###And this is a subsubsubsection
+Successful examples
+-------------------

@@ -1,9 +1,14 @@
 PROGRAMING PARADIGMS
 ====================
 
-Bla bla bla **bla**
+Paradigm types
+---------------
 
-This is a subsection
---------------------
+Object-Oriented
+---------------
 
-###And this is a subsubsubsection
+Functional
+----------
+
+Impact of paradigm choice
+-------------------------
