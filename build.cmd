@@ -2,7 +2,7 @@
 cls
 
 if not exist packages\FAKE\tools\Fake.exe (
-    paket restore
+    .paket\paket.exe restore
 )
 
 pushd "docs"
