@@ -23,7 +23,22 @@ Functional Web
 --------------
 
 Even though Web Development is usually associated with using imperative techniques, it's not completely uncommon to follow functional principles while creating Internet applications.
+Majority of web applications are built on top of the HTTP protocol.
+From a software engineer point of view, the HTTP protocol boils down to requests and responses.
+One could even think of a Web application as a general function of type `HTTPRequest -> HTTPResponse`.
 
+When dealing with Internet applications in practice, it turns out that aspect of asynchrony plays a crucial role.
+Operations that require reading / writing from the input / output are extremely ineffective if performed synchronously.
+Synchronous execution of tasks that require input / output communication results in blocking threads.
+In return, when a thread is blocked, next incoming request will have to engage more threads.
+As a result, having a significant number of blocked threads results in high memory consumption and ineffective usage of resources.
+
+Writing software in asynchronous fashion is possible, but does not come for free.
+Callback-passing style is one of the most popular techniques of dealing with asynchronous code.
+It is a sufficient solution for small problems, however when applied to large and complex systems, code may very easily get hard to maintain.
+...
+Abstractions like future (also known as promise or asynchronous workflow), services and filters combine to present a powerful programming model for building safe, modular, and efficient server software {{{ServerFunction}}}.
+Such abstractions originate from the functional approach and that is why utilizing functions can feel natural when developing client-server architecture.
 
 Music Store Tutorial
 --------------------
