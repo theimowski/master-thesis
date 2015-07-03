@@ -33,15 +33,33 @@ Synchronous execution of tasks that require input / output communication results
 In return, when a thread is blocked, next incoming request will have to engage more threads.
 As a result, having a significant number of blocked threads results in high memory consumption and ineffective usage of resources.
 
-Writing software in asynchronous fashion is possible, but does not come for free.
-Callback-passing style is one of the most popular techniques of dealing with asynchronous code.
-It is a sufficient solution for small problems, however when applied to large and complex systems, code may very easily get hard to maintain.
-...
-Abstractions like future (also known as promise or asynchronous workflow), services and filters combine to present a powerful programming model for building safe, modular, and efficient server software {{{ServerFunction}}}.
-Such abstractions originate from the functional approach and that is why utilizing functions can feel natural when developing client-server architecture.
+Writing software in asynchronous fashion does not come for free.
+Callback-passing style is one of the most popular techniques for writing asynchronous code.
+While the technique may be a sufficient solution for smaller problems, when applied to large and complex systems, code very easily gets hard to maintain.
+
+Among various approaches to asynchronous programming, there is one that abstracts away the concept of asynchrony from the actual flow of program.
+It is called **future**, also known as **promise** or **asynchronous workflow** in different programming languages.
+This approach bypasses callbacks in a clever way, resulting in code that is easier to read and reason about.
+Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software {{{ServerFunction}}}.
+All those concepts originate from the functional paradigm and that is why utilizing functions can be helpful for developing client-server architecture.
 
 Music Store Tutorial
 --------------------
+
+The example application has been written in F# language.
+It is built on top of the Suave.IO {{{suave}}} framework, which allows to write functional server software in a composable fashion.
+Here, composable means that very granular functions / components can be easily joined to create more robust functions.
+The resulting functions can be then again glued together.
+Following the pattern, one can get eventually a fully working software, which in practice turns out to be a function.
+
+### WebPart
+
+The most important building block in Suave.IO is **WebPart**.
+It is a basic unit of composition in the framework - when combining smaller WebParts together, a bigger WebPart gets created.
+WebPart is a type alias for the following: 
+
+```fsharp
+HttpContext -> Async<HttpContext option>```
 
 Conclusions
 -----------
