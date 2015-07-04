@@ -5,6 +5,7 @@ Previous section described how Functional Programming managed to be successfully
 In this section focus will be laid on creating software that uses functional techniques.
 For that purpose, process of developing such application will be shown.
 In the course of this section, multiple comparisons will be made between Object-Oriented and Functional approaches.
+All examples will be shown in F# programming language.
 
 Domain choice
 -------------
@@ -27,6 +28,8 @@ Majority of web applications are built on top of the HTTP protocol.
 From a software engineer point of view, the HTTP protocol boils down to requests and responses.
 One could even think of a Web application as a general function of type `HTTPRequest -> HTTPResponse`.
 
+### Async
+
 When dealing with Internet applications in practice, it turns out that aspect of asynchrony plays a crucial role.
 Operations that require reading / writing from the input / output are extremely ineffective if performed synchronously.
 Synchronous execution of tasks that require input / output communication results in blocking threads.
@@ -42,12 +45,23 @@ It is called **future**, also known as **promise** or **asynchronous workflow** 
 This approach bypasses callbacks in a clever way, resulting in code that is easier to read and reason about.
 Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software {{{ServerFunction}}}.
 All those concepts originate from the functional paradigm and that is why utilizing functions can be helpful for developing client-server architecture.
+In F# there is a type called `Async`, which represents **asynchronous workflow**.
+
+### Parametric polymorphism
+
+It is worth noting that `Async` in F# is a generic type.
+This means that any arbitrary type can be applied to `Async`.
+The concept is also known as parametric polymorphism and is very important in functional programming.
+First description of parametric polymorphism was made by Strachey {{{strachey2000fundamental}}}:
+
+Let `f` be a function of type `a -> b` and `l` be a list of type `a list` (`l` has only elements of type `a`).
+A function `map` can be constructed that applies `f` on each element of `l` returning a `b list`.
+We can say that `map` function is polymorphic of parametric type `(a -> b, a list) -> b list`.
 
 Music Store Tutorial
 --------------------
 
-The example application has been written in F# language.
-It is built on top of the Suave.IO {{{suave}}} framework, which allows to write functional server software in a composable fashion.
+The example application is built on top of the Suave.IO {{{suave}}} framework, which allows to write functional server software in a composable fashion.
 Here, composable means that very granular functions / components can be easily joined to create more robust functions.
 The resulting functions can be then again glued together.
 Following the pattern, one can get eventually a fully working software, which in practice turns out to be a function.
@@ -55,11 +69,17 @@ Following the pattern, one can get eventually a fully working software, which in
 ### WebPart
 
 The most important building block in Suave.IO is **WebPart**.
-It is a basic unit of composition in the framework - when combining smaller WebParts together, a bigger WebPart gets created.
-WebPart is a type alias for the following: 
+It is a basic unit of composition in this framework - when combining two smaller WebParts together, a composite WebPart gets created.
+WebPart is a **type alias** for the following: 
 
 ```fsharp
 HttpContext -> Async<HttpContext option>```
+
+The above notation describes a function from `HttpContext` to `Async<HttpContext option>`.
+`HttpContext` is a type that contains all relevant information regarding HTTP request, HTTP response, server environment and user state.
+Type parameter for `Async` is `HttpContext option` in that case.
+
+### Option
 
 Conclusions
 -----------
