@@ -5,7 +5,7 @@ Previous section described how Functional Programming managed to be successfully
 In this section focus will be laid on creating software that uses functional techniques.
 For that purpose, process of developing such application will be shown.
 In the course of this section, multiple comparisons will be made between Object-Oriented and Functional approaches.
-All examples will be shown in F# programming language.
+F# programming language will be used for implementing the application.
 
 Domain choice
 -------------
@@ -137,7 +137,7 @@ From the above snippets it is evident that Suave.IO allows to build Web applicat
 
 Routing is a basic concept of Web Development.
 It allows to delegate request handling to a specific component based on the request URL path.
-Below is a snippet which shows how routing for the Music Store can be defined in Suave:
+Below is a snippet which shows how routing for the Music Store can be implemented in Suave:
 
 ```fsharp
 let browse =
@@ -156,26 +156,71 @@ let webPart =
 
 Lines 8-13 show how 4 different WebParts are composed together with `choose` function.
 `choose` is of type `WebPart list -> WebPart`.
-It tries to apply in order each WebPart from the list until it finds one that returns `Some`.
-If none element returns `Some`, the `choose` function itself returns `None`.
+It tries to apply each WebPart from the list in order until it finds one that returns `Some`.
+If none element returns `Some`, the `choose` function itself will also return `None`.
 
 To detect if the incoming request URL path matches specific route, `path` function can be used.
-Type of `path` is `string -> WebPart` and the function returns `Some` if URL path matches the `string` parameter.
+Type of `path` function is `string -> WebPart`.
+The function returns `Some` if URL path matches the `string` parameter.
 
-In lines 9-11 `>>=` operator (commonly known as "bind" operator in functional jargon) applies the right-hand side operand only if the left-hand side operand evaluates to `Some`.
+In lines 9-11, there is a `>>=` operator (commonly known as "bind" operator in functional jargon).
+It applies the right-hand side operand only if the left-hand side operand evaluates to `Some`.
+This means, that for example `(OK "Home")` will be applied if `path "/"` returns `Some`.
 
 Query parameters in URL are often used to pass arguments to an HTTP call.
-Defined in lines 1-5, `browse` WebPart enables to extract name of a genre from URL like this: `/store/browse?genre=Disco`.
-Under the hood it uses `request` function of type `HttpRequest -> WebPart` to reach the query string.
+Defined in lines 1-5, `browse` WebPart enables to extract name of a genre from URL.
+For `/store/browse?genre=Disco` URL `browse` will recognize "Disco" value for "genre" argument.
+Under the hood, to reach the query string, `request` function (of type `HttpRequest -> WebPart`) is used.
 If the query string contains "genre" key (line 4), `OK` response is returned with the genre name in response body.
 If the query string does not contain "genre" key (line 5), `BAD_REQUEST` response (HTTP status code 400) is returned, together with adequate message.
+The patterns used to determine if "genre" key is present, `Choice1Of2` and `Choice2Of2`, are the only two possible values of type `Choice<'T1,'T2>`. 
+The `Choice` type is generic with two type parameters.
+It is often used to model computations that may succeed or fail.
+In this example, the `Choice` drags along the genre name in case of success, and a failure message otherwise.
 
 Another popular way of passing arguments to an HTTP call is encoding them into the URL itself.
-To handle this scenario, Suave comes with a great feature called "Typed Routes".
+To handle this scenario, Suave comes with a powerful feature called **Typed Routes**.
+Typed Routes provide a type-safe solution to parsing URL arguments.
+Example of using Typed Routes is shown in line 12.
+The `pathScan` function takes a raw string as its first argument, however the compiler treats this value in a special way.
+Because the string contains a literal `%d`, compiler expects an integer value in place of that literal.
+As a result, the second argument to the `pathScan` function, must be of type `int -> WebPart`.
+Thanks to such behavior, accidental type mismatch can be prevented.
+That is yet another example of the power of strong static typing in F#.
 
-TODO: typed routes + sprintf
-TODO: Pattern matching
-TODO: How Routing would be handled in MVC C#
+It is worth noting, that `sprintf` function (lines 4 and 12) makes use of the same compiler feature.
+In line 4, the `genre` value is of type `string`, so the string literal for `sprintf` contains `%s`.
+On the other hand, in line 12, the `id` value is of type `int` - here the string literal contains `%d`.
+
+#### Pattern matching
+
+Lines 3-5 present construct which is called pattern matching.
+The construct is part of syntax of several programming languages, both imperative and declarative.
+For developers familiar with C# language, pattern matching could be explained as a switch statement in conjunction with an assignment to a symbol in each branch.
+However, there is more than that to pattern matching.
+In F# pattern matching issues a warning in compile-time, if not all possible branches of execution are defined.
+As an example, if line 5 from the above snippet was missing, the compiler would warn about possible unmatched case (`Choice2Of2`).
+
+#### Routing in ASP.NET MVC
+
+Routing in ASP.NET MVC framework is handled with what is known as "Convention over Configuration".
+The term here means, that instead of declaring handlers in code, some convention is adopted.
+ASP.NET MVC convention for routing works by prefixing type name of a Controller with the corresponding name of the route.
+As an example, `HomeController` will match requests to "/Home" resource.
+
+Passing arguments to Controllers in ASP.NET MVC is based on the "Model Binding" concept.
+The concept usually relies on attribute annotations or reflection, however it does not deliver such type-safety as Suave does.
+
+While debate continues on whether "Convention over Configuration" is convenient to use, WebPart composition in Suave together with benefits of statically typed arguments seem to be a competitive alternative to ASP.NET MVC with regards to the Routing concept.
+
+### HTML rendering
+
+When developing Web applications that aim to be consumed by browsers, rendering HTML views is an important aspect to consider.
+Nowadays Internet applications happen to be rich on the client side.
+HTML markup and attached Cascade StyleSheets and JavaScripts are becoming more and more complex.
+Non-trivial logic and rules for displaying HTML pages lead to formation of multiple template engines, both those which render on client and server side.
+The problem of HTML rendering itself is complicated, and can be approached with various different solution.
+Therefore, the thesis will only touch upon how it is possible to solve HTML rendering aspect in Suave framework, and will not go into much details or try to compare with different available possibilities.
 
 Conclusions
 -----------
