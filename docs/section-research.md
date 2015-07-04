@@ -56,7 +56,7 @@ First description of parametric polymorphism was made by Strachey {{{strachey200
 
 Let `f` be a function of type `a -> b` and `l` be a list of type `a list` (`l` has only elements of type `a`).
 A function `map` can be constructed that applies `f` on each element of `l` returning a `b list`.
-We can say that `map` function is polymorphic of parametric type `(a -> b, a list) -> b list`.
+It can be said that `map` function is polymorphic of parametric type `(a -> b, a list) -> b list`.
 
 Music Store Tutorial
 --------------------
@@ -69,7 +69,7 @@ Following the pattern, one can get eventually a fully working software, which in
 ### WebPart
 
 The most important building block in Suave.IO is **WebPart**.
-It is a basic unit of composition in this framework - when combining two smaller WebParts together, a composite WebPart gets created.
+It is a basic unit of composition in this framework - when combining two smaller WebParts together, another WebPart gets created.
 WebPart is a **type alias** for the following: 
 
 ```fsharp
@@ -77,9 +77,34 @@ HttpContext -> Async<HttpContext option>```
 
 The above notation describes a function from `HttpContext` to `Async<HttpContext option>`.
 `HttpContext` is a type that contains all relevant information regarding HTTP request, HTTP response, server environment and user state.
-Type parameter for `Async` is `HttpContext option` in that case.
+The return type for WebPart function is `Async` with type parameter of `HttpContext option`.
+`Option` is another generic type - here the type parameter is `HttpContext`.
+F# syntactic sugar has been used for `Option` in type declaration: `HttpContext option` is equivalent to `Option<HttpContext>`.
 
-### Option
+The `Option` type (also known as `Maybe` in different functional languages) is a better alternative to the infamous `null` concept, which is ubiquitous in Object-Oriented world.
+In C# for example, every reference type can have a legal value of `null`.
+This is the cause of what is known as "The Billion Dollar Mistake" - Null References.
+Null References are exceptions thrown at runtime because of referencing a symbol which was not assigned any real value (was `null`).
+In F#, one cannot explicitly bind `null` to any symbol or pass `null` to a function invocation.
+The compiler prevents from doing that by issuing a compile-time error.
+Thanks to that, it is hardly possible to get a Null Reference exception in F# code (when no interoperability or reflection is used).
+
+`Option` type is commonly in F# used to model a property that may or may not have a value.
+If a property has value, then it is `Some`:
+
+```fsharp
+let x: int option = Some 28 (* there is value 28 *)```
+
+Otherwise, it is `None`:
+
+```fsharp
+let x: int option = None (* there is no value *)```
+
+In context of WebPart, `Option` determines whether a result should be applied.
+Usually if a WebPart can return `None`, this WebPart is composed with another which always returns `Some`.
+
+To summarize the WebPart type, it can be defined as a function that for a given `HttpContext` may or may not apply a specific, updated `HttpContext`.
+In addition to that, the return value is surrounded with asynchronous computation (`Async`) making the WebPart function asynchronous-friendly.
 
 Conclusions
 -----------
