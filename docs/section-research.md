@@ -18,7 +18,17 @@ In order to verify whether Functional Programming could potentially be applied t
 Another reason why Web Development domain has been chosen was a will to contribute to the F# community.
 As the F# language is getting more and more interest, the language community is doing its best to encourage developers to give F# a try.
 On one of mailing groups there appeared a suggestion to prepare a tutorial on how to create Web applications with F#.
-This turned out to be a great candidate for research part of this thesis.
+The tutorial would guide step by step on how to build an E-commerce website called "Music Store".
+In the "Music Store" user could browse music albums by genres, add his favorite to cart and buy.
+Apart from that, the application would show a plenty of other common aspects of Web Development, such as:
+
+* Data access
+* Create, Update, Delete operations 
+* Authorization
+* Managing user's state in cookies
+* HTML rendering
+
+Implementing such application and preparing tutorial turned out to be a great candidate for research part of this thesis.
 
 Functional Web
 --------------
@@ -105,6 +115,67 @@ Usually if a WebPart can return `None`, this WebPart is composed with another wh
 
 To summarize the WebPart type, it can be defined as a function that for a given `HttpContext` may or may not apply a specific, updated `HttpContext`.
 In addition to that, the return value is surrounded with asynchronous computation (`Async`) making the WebPart function asynchronous-friendly.
+
+The simplest possible WebPart can be defined following:
+
+```fsharp
+let webPart = OK "Hello World!"```
+
+The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response:
+
+* 200 OK status code
+* "Hello World!" response body content
+
+Such WebPart can now be used to start an HTTP server using default configuration:
+
+```fsharp
+startWebServer defaultConfig webPart```
+
+From the above snippets it is evident that Suave.IO allows to build Web applications in a very succinct way and does not require too much ceremony.
+
+### Routing
+
+Routing is a basic concept of Web Development.
+It allows to delegate request handling to a specific component based on the request URL path.
+Below is a snippet which shows how routing for the Music Store can be defined in Suave:
+
+```fsharp
+let browse =
+    request (fun r ->
+        match r.queryParam "genre" with
+        | Choice1Of2 genre -> OK (sprintf "Genre: %s" genre)
+        | Choice2Of2 msg -> BAD_REQUEST msg)
+
+let webPart = 
+    choose [
+        path "/" >>= (OK "Home")
+        path "/store" >>= (OK "Store")
+        path "/store/browse" >>= browse
+        pathScan "/store/details/%d" (fun id -> OK (sprintf "Details: %d" id))
+    ]```
+
+Lines 8-13 show how 4 different WebParts are composed together with `choose` function.
+`choose` is of type `WebPart list -> WebPart`.
+It tries to apply in order each WebPart from the list until it finds one that returns `Some`.
+If none element returns `Some`, the `choose` function itself returns `None`.
+
+To detect if the incoming request URL path matches specific route, `path` function can be used.
+Type of `path` is `string -> WebPart` and the function returns `Some` if URL path matches the `string` parameter.
+
+In lines 9-11 `>>=` operator (commonly known as "bind" operator in functional jargon) applies the right-hand side operand only if the left-hand side operand evaluates to `Some`.
+
+Query parameters in URL are often used to pass arguments to an HTTP call.
+Defined in lines 1-5, `browse` WebPart enables to extract name of a genre from URL like this: `/store/browse?genre=Disco`.
+Under the hood it uses `request` function of type `HttpRequest -> WebPart` to reach the query string.
+If the query string contains "genre" key (line 4), `OK` response is returned with the genre name in response body.
+If the query string does not contain "genre" key (line 5), `BAD_REQUEST` response (HTTP status code 400) is returned, together with adequate message.
+
+Another popular way of passing arguments to an HTTP call is encoding them into the URL itself.
+To handle this scenario, Suave comes with a great feature called "Typed Routes".
+
+TODO: typed routes + sprintf
+TODO: Pattern matching
+TODO: How Routing would be handled in MVC C#
 
 Conclusions
 -----------
