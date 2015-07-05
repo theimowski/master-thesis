@@ -321,5 +321,55 @@ Two great benefits from using such a DSL for rendering HTML can be enlisted:
 * Type system can prevent common bugs in compile-time
 * Every language syntax construct can be used in the DSL, making it easier to express complex logic
 
+### Data Access
+
+Data Access is yet another important aspect of software development in any domain, including Web.
+There is a wide variety of options, when it comes to choose how to persist data.
+Common classification of the options consists of two main classes: 
+
+* Relational databases
+* No-SQL databases: graph databases, key-value stores, document databases, etc.
+
+There is even one approach that can be associated with functional programming, which is **Event Sourcing**.
+It relies on persisting **immutable** events in a store.
+Immutability is one of the major concept of functional programming itself, that is why Event Sourcing feels like a good fit for functional paradigm.
+In order to obtain certain state in Event Sourcing, **fold** operation is performed on the stored events.
+Folding comes also from the functional background.
+In fact, every functional programming has `fold` function in its suite:
+
+```fsharp
+List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
+
+`List.fold` calculates `'State` from the initial `'State` and list of `'T` elements.
+It takes 3 arguments (enlisted in reverse order):
+
+* `'T list` - a list of `'T` elements
+* `'State` - initial state
+* `('State -> 'T -> 'State)` - "folder" function which is applied on each `'T` element of the list, and based on the value of the element and the `'State` it produces new `'State.
+
+While the Event Sourcing would be a good candidate for persistence mechanism in application written in functional language, it was not used for the Music Store.
+That's because despite recent peak in interest in the No-SQL movement, a relational database still seems to be most popular for most of the software engineers.
+For that reason MS SQL Server has been chosen as a persistence mechanism for Music Store application.
+
+#### F# Type Providers
+
+During the computer era, a number of data serialization formats have evolved, some of which became standard in the industry.
+XML, Json, CSV are just the beginning of the long list.
+Majority of software, no matter the domain, processes some kind of data from different sources.
+It is therefore a very common task in a development process to parse structured input into an in-memory object model.
+This task requires proper type hierarchy and parsing logic to be implemented.
+In addition to the fact that such task is time consuming, it may also be error-prone when the format changes.
+
+To meet the challenge, F# comes with another powerful feature, called **Type Providers**.
+Type Providers automatically generate (provide) a set of types and parsing logic for a given schema.
+For example, given a literal XML string, F# type provider will generate in compile-time a separate type for each corresponding element from the XML.
+With the types in place, another literal XML string that fulfills the schema, can be loaded and parsed into the object model with one line of code.
+
+Libraries for the most popular standards are ready to use.
+In addition to that, the mechanism is extensible which means that Type Providers can be created for arbitrary data source.
+
+The feature is quite unique - apart from Idris, no other programming language has Type Providers
+(In fact, Type Providers in Idris are even more rich in functionality than those in F# {{{christiansen2013dependent}}}).
+
 Conclusions
 -----------
