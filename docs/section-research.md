@@ -90,7 +90,8 @@ The above notation describes a function from `HttpContext` to `Async<HttpContext
 `HttpContext` is a type that contains all relevant information regarding HTTP request, HTTP response, server environment and user state.
 The return type for WebPart function is `Async` with type parameter of `HttpContext option`.
 `Option` is another generic type - here the type parameter is `HttpContext`.
-F# syntactic sugar has been used for `Option` in type declaration: `HttpContext option` is equivalent to `Option<HttpContext>`.
+F# syntactic sugar has been used for `Option` in type declaration: `HttpContext option` is equivalent to `Option<HttpContext>`. 
+The same syntactic sugar can also be used for sequences (`'a seq`) or lists (`'a list`).
 
 The `Option` type (also known as `Maybe` in different functional languages) is a better alternative to the infamous `null` concept, which is ubiquitous in Object-Oriented world.
 In C# for example, every reference type can have a legal value of `null`.
@@ -365,11 +366,95 @@ Type Providers automatically generate (provide) a set of types and parsing logic
 For example, given a literal XML string, F# type provider will generate in compile-time a separate type for each corresponding element from the XML.
 With the types in place, another literal XML string that fulfills the schema, can be loaded and parsed into the object model with one line of code.
 
-Libraries for the most popular standards are ready to use.
+Type Provider libraries for the most popular standards are ready to use.
 In addition to that, the mechanism is extensible which means that Type Providers can be created for arbitrary data source.
 
 The feature is quite unique - apart from Idris, no other programming language has Type Providers
 (In fact, Type Providers in Idris are even more rich in functionality than those in F# {{{christiansen2013dependent}}}).
+
+#### SQL Provider
+
+Among various Type Provider libraries there is one called **SQL Provider**. 
+As the name suggests, it provides types for a relational database schema.
+This means that no Object-Relational Mapping libraries or hand-rolled models are needed to implement Data Access Layer.
+To use SQL Provider in Music Store, it is only necessary to lead a SQL connection string for the Type Provider:
+
+```fsharp
+type Sql = 
+    SqlDataProvider< 
+        "Server=(LocalDb)\\v11.0;Database=SuaveMusicStore;Trusted_Connection=True", 
+        DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >```
+
+This code executes proper queries against the given connection and generates corresponding in the background.
+In Music Store, types for both database tables and views will be used.
+Following is a snippet for defining type aliases for the generated (provided) types:
+
+```fsharp
+// database context
+type DbContext      = Sql.dataContext
+
+// database tables
+type Album          = DbContext.``[dbo].[Albums]Entity``
+type Artist         = DbContext.``[dbo].[Artists]Entity``
+type Genre          = DbContext.``[dbo].[Genres]Entity``
+type User           = DbContext.``[dbo].[Users]Entity``
+type Cart           = DbContext.``[dbo].[Carts]Entity``
+
+// database views
+type AlbumDetails   = DbContext.``[dbo].[AlbumDetails]Entity``
+type CartDetails    = DbContext.``[dbo].[CartDetails]Entity``
+type BestSeller     = DbContext.``[dbo].[BestSellers]Entity```
+
+Type aliases such as `Album`, `Artist`, `Genre` are defined for corresponding database tables (lines 5-9).
+The last 3 type aliases (lines 12-14) represent database views which will be used in Music Store.
+
+Following is a snippet demonstrating how certain queries can be constructed with SQL Provider:
+
+```fsharp
+let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
+
+let getGenres (ctx : DbContext) : Genre list = 
+    ctx.``[dbo].[Genres]`` |> Seq.toList
+
+let getAlbumsForGenre genreName (ctx : DbContext) : Album list = 
+    query { 
+        for album in ctx.``[dbo].[Albums]`` do
+            join genre in ctx.``[dbo].[Genres]`` on (album.GenreId = genre.GenreId)
+            where (genre.Name = genreName)
+            select album
+    }
+    |> Seq.toList
+
+let getAlbumDetails id (ctx : DbContext) : AlbumDetails option = 
+    query { 
+        for album in ctx.``[dbo].[AlbumDetails]`` do
+            where (album.AlbumId = id)
+            select album
+    } 
+    |> firstOrNone```
+
+Function defined in line 1 `firstOrNone` is of type `'t seq -> 't option`.
+It returns `Some` with the value of first element if any in the given sequence.
+If the sequence is empty, `firstOrNone` returns `None`.
+
+`getGenres` (line 3) is a simple query that fetches all `Genre`s from the database and returns them as a `Genre list` type.
+
+Lines 7-12 and 16-20 show usage of `query` expression.
+The concept is known as LINQ (Language Integrated Query).
+The (approximate) intended semantics of the LINQ-SQL libraries is that the execution of the meta-programs should be the same as if the programs were converted to equivalent programs over in-memory lists, where the database table is treated as an in-memory enumerable data structure {{{syme2006leveraging}}}.
+Indeed, the semantics of above snippet looks very similar to a standard SQL query.
+
+`getAlbumsForGenre` function returns a list of all `Album`s that are associated with the given `Genre`.
+The `Genre` is identified here by its name (`string` type).
+The last function, `getAlbumDetails` tries to find an `Album` with given `id` in context of the `AlbumDetails` view - the database view performs a join with two other tables to obtain the details for the album.
+There may be no album with a given `id`, hence the function's return type is `AlbumDetails option`
+
+#### Summary
+
+Data Access Layer implementation is easily achievable in F#.
+As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the Object-Oriented or imperative world.
+Type Providers in F#, together with its type-safe nature allow for convenient data access logic.
+In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is blazingly fast and little error-prone.
 
 Conclusions
 -----------
