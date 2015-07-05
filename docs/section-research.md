@@ -29,6 +29,7 @@ Apart from that, the application would show a plenty of other common aspects of 
 * HTML rendering
 
 Implementing such application and preparing tutorial turned out to be a great candidate for research part of this thesis.
+The detailed tutorial has been published and is available on-line {{{suavemusicstoretutorial}}}.
 
 Functional Web
 --------------
@@ -217,10 +218,108 @@ While debate continues on whether "Convention over Configuration" is convenient 
 
 When developing Web applications that aim to be consumed by browsers, rendering HTML views is an important aspect to consider.
 Nowadays Internet applications happen to be rich on the client side.
-HTML markup and attached Cascade StyleSheets and JavaScripts are becoming more and more complex.
+HTML markup with attached Cascade StyleSheets and JavaScripts are becoming more and more complex.
 Non-trivial logic and rules for displaying HTML pages lead to formation of multiple template engines, both those which render on client and server side.
-The problem of HTML rendering itself is complicated, and can be approached with various different solution.
-Therefore, the thesis will only touch upon how it is possible to solve HTML rendering aspect in Suave framework, and will not go into much details or try to compare with different available possibilities.
+The problem of HTML rendering is complicated, and can be approached with various different solution.
+The thesis will only touch upon how it is possible to solve HTML rendering aspect in Suave framework.
+It will not however go into much details of HTML rendering or try to compare to different available possibilities.
+
+#### Suave HTML DSL
+
+For the Music Store rendering engine, a simple to use and built into Suave **DSL** has been chosen. Domain Specific Language has plenty of definitions, one of which is following {{{van2000domain}}}:
+
+>> A domain-specific language (DSL) is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
+
+Based on the above definition, HTML DSL available in Suave could be categorized as a set of functions focused on building HTML markup. 
+HTML markup can be a valid XML markup, under the condition that all element tags are closed.
+In fact, the HTML DSL in Suave relies on creating XML tree and formatting it to plain text.
+
+XML tree rules are simple (set of XML node types has been reduced to the most common): 
+
+* Element node can have 0 or more children
+* Attribute node contains key and value but cannot have children
+* Text node contains only value and cannot have children
+
+Below follows a code snippet that shows how a basic HTML page for Music Store has been defined:
+
+```fsharp
+let index = 
+    html [
+        head [
+            title "Suave Music Store"
+        ]
+
+        body [
+            divId "header" [
+                h1 (aHref "/" (text "F# Suave Music Store"))
+            ]
+
+            divId "footer" [
+                text "built with "
+                aHref "http://fsharp.org" (text "F#")
+                text " and "
+                aHref "http://suave.io" (text "Suave.IO")
+            ]
+        ]
+    ]```
+
+Result of the above snippet is the following HTML markup:
+
+```html
+<html>
+    <head>
+        <title>Suave Music Store</title>
+    </head>
+    <body>
+        <div id="header">
+            <h1>
+                <a href="/">F# Suave Music Store</a>
+            </h1>
+        </div>
+        <div id="footer">built with <a href="http://fsharp.org">F#</a> and <a href="http://suave.io">Suave.IO</a></div>
+    </body>
+</html>```
+
+The DSL usage looks similar to how the actual markup is defined.
+Thanks to that it should be relatively easy, for an HTML developer who is not familiar with F#, to get started with designing views in such fashion.
+
+As the example showed static content, no real benefits were gained from using a DSL instead of plain HTML.
+Such benefits arise when there is some kind of data model to be displayed in a view.
+In Music Store, this can be demonstrated by rendering page for list of genres:
+
+```fsharp
+let store genres = [
+    h2 "Browse Genres"
+    p [
+        text (sprintf "Select from %d genres:" (List.length genres))
+    ]
+    ul [
+        for g in genres -> 
+            li (aHref (Path.Store.browse 
+                       |> Path.withParam (Path.Store.browseKey, g)) (text g))
+    ]
+]```
+
+The `store` function in snippet returns a list of nodes, which can then be passed as an argument to the `index` function defined earlier and displayed in a container between header and footer.
+First node (line 2) is a standalone `h2` element with "Browse Genres" sign.
+
+The second node (lines 3-5) is a paragraph that displays number of all genres in the Store.
+F# core library function, `List.length` has been used to count the number of elements in `genres`.
+Thanks to the usage of this function, F# compiler is capable of inferring the type of `genres` value to be `'a list` (it does not specify the type parameter for the `list` though).
+
+The last node returned (lines 6-10) is `ul` which stands for "unordered list".
+Unordered list contains `li` "list items" elements, each of which has a hyper-link to the corresponding genre.
+Line 7 demonstrates "list comprehension" syntax, which binds each element of the `genres` list to `g` value and uses it to yield list items.
+With help of `Path` module, lines 8-9 generate a hyper-link with URL argument, similar to the one presented in Routing section (`/store/browse?genre=Disco`). 
+
+Because `text` function, which is invoked at the end of line 9 expect a `string` as its argument, `g` value is inferred to be of type `string`.
+Powerful type-inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
+Thanks to the type-inference, no explicit type annotations are required, and the code is more concise.
+
+Two great benefits from using such a DSL for rendering HTML can be enlisted:
+
+* Type system can prevent common bugs in compile-time
+* Every language syntax construct can be used in the DSL, making it easier to express complex logic
 
 Conclusions
 -----------
