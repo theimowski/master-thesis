@@ -5,7 +5,7 @@ Previous section described how Functional Programming managed to be successfully
 In this section focus will be laid on creating software that uses functional techniques.
 For that purpose, process of developing such application will be shown.
 In the course of this section, multiple comparisons will be made between Object-Oriented and Functional approaches.
-F# programming language will be used for implementing the application.
+F# programming language will be used for implementing the sample application.
 
 Domain choice
 -------------
@@ -56,14 +56,14 @@ It is called **future**, also known as **promise** or **asynchronous workflow** 
 This approach bypasses callbacks in a clever way, resulting in code that is easier to read and reason about.
 Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software {{{eriksen2013your}}}.
 All those concepts originate from the functional paradigm and that is why utilizing functions can be helpful for developing client-server architecture.
-In F# there is a type called `Async`, which represents **asynchronous workflow**.
+In F# language there is a type called `Async`, which represents **asynchronous workflow**.
 
 ### Parametric polymorphism
 
 It is worth noting that `Async` in F# is a generic type.
 This means that any arbitrary type can be applied to `Async`.
 The concept is also known as parametric polymorphism and is very important in functional programming.
-First description of parametric polymorphism was made by Strachey {{{strachey2000fundamental}}}:
+First description of parametric polymorphism was made by Strachey by following example {{{strachey2000fundamental}}}:
 
 Let `f` be a function of type `a -> b` and `l` be a list of type `a list` (`l` has only elements of type `a`).
 A function `map` can be constructed that applies `f` on each element of `l` returning a `b list`.
@@ -72,26 +72,28 @@ It can be said that `map` function is polymorphic of parametric type `(a -> b, a
 Music Store Tutorial
 --------------------
 
-The example application is built on top of the Suave.IO {{{suave}}} framework, which allows to write functional server software in a composable fashion.
+The example application is built on top of the Suave.IO (Suave) {{{suave}}} framework, which allows to write functional server software in a composable fashion.
 Here, composable means that very granular functions / components can be easily joined to create more robust functions.
 The resulting functions can be then again glued together.
-Following the pattern, one can get eventually a fully working software, which in practice turns out to be a function.
+Following this pattern, one can get eventually end up with a complex function (built from composing smaller ones) which can serve as a complete software.
 
 ### WebPart
 
-The most important building block in Suave.IO is **WebPart**.
-It is a basic unit of composition in this framework - when combining two smaller WebParts together, another WebPart gets created.
+The most important building block in Suave is **WebPart**.
+It is a basic unit of composition in the framework - when combining two smaller WebParts together, another WebPart gets created.
 WebPart is a **type alias** for the following: 
 
 ```fsharp
 HttpContext -> Async<HttpContext option>```
 
 The above notation describes a function from `HttpContext` to `Async<HttpContext option>`.
-`HttpContext` is a type that contains all relevant information regarding HTTP request, HTTP response, server environment and user state.
-The return type for WebPart function is `Async` with type parameter of `HttpContext option`.
-`Option` is another generic type - here the type parameter is `HttpContext`.
+The `HttpContext` is a type that contains all relevant information regarding HTTP request, HTTP response, server environment and user state.
+The return type is `Async` with type parameter of `HttpContext option`.
+`Option` is also a generic type - here the type parameter for `Option` is `HttpContext`.
 F# syntactic sugar has been used for `Option` in type declaration: `HttpContext option` is equivalent to `Option<HttpContext>`. 
 The same syntactic sugar can also be used for sequences (`'a seq`) or lists (`'a list`).
+
+#### Option
 
 The `Option` type (also known as `Maybe` in different functional languages) is a better alternative to the infamous `null` concept, which is ubiquitous in Object-Oriented world.
 In C# for example, every reference type can have a legal value of `null`.
@@ -118,6 +120,8 @@ Usually if a WebPart can return `None`, this WebPart is composed with another wh
 To summarize the WebPart type, it can be defined as a function that for a given `HttpContext` may or may not apply a specific, updated `HttpContext`.
 In addition to that, the return value is surrounded with asynchronous computation (`Async`) making the WebPart function asynchronous-friendly.
 
+#### Example
+
 The simplest possible WebPart can be defined following:
 
 ```fsharp
@@ -133,7 +137,7 @@ Such WebPart can now be used to start an HTTP server using default configuration
 ```fsharp
 startWebServer defaultConfig webPart```
 
-From the above snippets it is evident that Suave.IO allows to build Web applications in a very succinct way and does not require too much ceremony.
+From the above snippets it is evident that Suave allows to build Web applications in a very succinct way and does not require too much ceremony.
 
 ### Routing
 
@@ -169,6 +173,8 @@ In lines 9-11, there is a `>>=` operator (commonly known as "bind" operator in f
 It applies the right-hand side operand only if the left-hand side operand evaluates to `Some`.
 This means, that for example `(OK "Home")` will be applied if `path "/"` returns `Some`.
 
+#### Query parameters
+
 Query parameters in URL are often used to pass arguments to an HTTP call.
 Defined in lines 1-5, `browse` WebPart enables to extract name of a genre from URL.
 For `/store/browse?genre=Disco` URL `browse` will recognize "Disco" value for "genre" argument.
@@ -179,6 +185,8 @@ The patterns used to determine if "genre" key is present, `Choice1Of2` and `Choi
 The `Choice` type is generic with two type parameters.
 It is often used to model computations that may succeed or fail.
 In this example, the `Choice` drags along the genre name in case of success, and a failure message otherwise.
+
+#### URL parameters
 
 Another popular way of passing arguments to an HTTP call is encoding them into the URL itself.
 To handle this scenario, Suave comes with a powerful feature called **Typed Routes**.
@@ -211,9 +219,12 @@ ASP.NET MVC convention for routing works by prefixing type name of a Controller 
 As an example, `HomeController` will match requests to "/Home" resource.
 
 Passing arguments to Controllers in ASP.NET MVC is based on the "Model Binding" concept.
-The concept usually relies on attribute annotations or reflection, however it does not deliver such type-safety as Suave does.
+The concept usually relies on attribute annotations or reflection.
+It does does not deliver such type-safety as Suave does, which means that variety of type mismatch errors could be thrown at runtime.
 
-While debate continues on whether "Convention over Configuration" is convenient to use, WebPart composition in Suave together with benefits of statically typed arguments seem to be a competitive alternative to ASP.NET MVC with regards to the Routing concept.
+#### Summary
+
+While debate continues on whether "Convention over Configuration" is convenient to use, WebPart composition in Suave together with benefits of Typed Routes seem to be a competitive alternative to ASP.NET MVC with regards to the Routing concept.
 
 ### HTML rendering
 
@@ -233,13 +244,7 @@ For the Music Store rendering engine, a simple to use and built into Suave **DSL
 
 Based on the above definition, HTML DSL available in Suave could be categorized as a set of functions focused on building HTML markup. 
 HTML markup can be a valid XML markup, under the condition that all element tags are closed.
-In fact, the HTML DSL in Suave relies on creating XML tree and formatting it to plain text.
-
-XML tree rules are simple (set of XML node types has been reduced to the most common): 
-
-* Element node can have 0 or more children
-* Attribute node contains key and value but cannot have children
-* Text node contains only value and cannot have children
+Indeed the HTML DSL in Suave relies on creating XML tree and formatting it to plain text.
 
 Below follows a code snippet that shows how a basic HTML page for Music Store has been defined:
 
@@ -282,10 +287,10 @@ Result of the above snippet is the following HTML markup:
 </html>```
 
 The DSL usage looks similar to how the actual markup is defined.
-Thanks to that it should be relatively easy, for an HTML developer who is not familiar with F#, to get started with designing views in such fashion.
+Thanks to that it should be relatively easy for an HTML developer who is not familiar with F# syntax, to get started with designing views with the DSL.
 
 As the example showed static content, no real benefits were gained from using a DSL instead of plain HTML.
-Such benefits arise when there is some kind of data model to be displayed in a view.
+Such benefits arise when there is need to display some kind of data model in a view.
 In Music Store, this can be demonstrated by rendering page for list of genres:
 
 ```fsharp
@@ -317,6 +322,8 @@ Because `text` function, which is invoked at the end of line 9 expect a `string`
 Powerful type-inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
 Thanks to the type-inference, no explicit type annotations are required, and the code is more concise.
 
+#### Summary
+
 Two great benefits from using such a DSL for rendering HTML can be enlisted:
 
 * Type system can prevent common bugs in compile-time
@@ -324,31 +331,32 @@ Two great benefits from using such a DSL for rendering HTML can be enlisted:
 
 ### Data Access
 
-Data Access is yet another important aspect of software development in any domain, including Web.
+Data Access is yet another important aspect of software development in any domain, including Web Development.
 There is a wide variety of options, when it comes to choose how to persist data.
 Common classification of the options consists of two main classes: 
 
 * Relational databases
 * No-SQL databases: graph databases, key-value stores, document databases, etc.
 
-There is even one approach that can be associated with functional programming, which is **Event Sourcing**.
-It relies on persisting **immutable** events in a store.
+Among plethora of No-SQL solutions, there is one approach that can be especially associated with functional programming named **Event Sourcing**.
+It relies on persisting **immutable** events (records) in a store.
 Immutability is one of the major concept of functional programming itself, that is why Event Sourcing feels like a good fit for functional paradigm.
 In order to obtain certain state in Event Sourcing, **fold** operation is performed on the stored events.
 Folding comes also from the functional background.
-In fact, every functional programming has `fold` function in its suite:
+In fact, every functional programming defines `fold` in its core library function suite.
+Type signature for the one in F# is following:
 
 ```fsharp
 List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
 
-`List.fold` calculates `'State` from the initial `'State` and list of `'T` elements.
+`List.fold` calculates result `'State` from the initial `'State` and list of `'T` elements.
 It takes 3 arguments (enlisted in reverse order):
 
 * `'T list` - a list of `'T` elements
 * `'State` - initial state
-* `('State -> 'T -> 'State)` - "folder" function which is applied on each `'T` element of the list, and based on the value of the element and the `'State` it produces new `'State.
+* `('State -> 'T -> 'State)` - "folder" function which is applied on each `'T` element of the list, and based on the value of the element and the intermediate `'State` it produces new `'State.
 
-While the Event Sourcing would be a good candidate for persistence mechanism in application written in functional language, it was not used for the Music Store.
+While the Event Sourcing could be a good candidate for persistence mechanism in application written in functional language, it was not used for the Music Store.
 That's because despite recent peak in interest in the No-SQL movement, a relational database still seems to be most popular for most of the software engineers.
 For that reason MS SQL Server has been chosen as a persistence mechanism for Music Store application.
 
@@ -359,15 +367,15 @@ XML, Json, CSV are just the beginning of the long list.
 Majority of software, no matter the domain, processes some kind of data from different sources.
 It is therefore a very common task in a development process to parse structured input into an in-memory object model.
 This task requires proper type hierarchy and parsing logic to be implemented.
-In addition to the fact that such task is time consuming, it may also be error-prone when the format changes.
+In addition to the fact that such task can be time consuming, it may also be error-prone when the format changes.
 
 To meet the challenge, F# comes with another powerful feature, called **Type Providers**.
 Type Providers automatically generate (provide) a set of types and parsing logic for a given schema.
 For example, given a literal XML string, F# type provider will generate in compile-time a separate type for each corresponding element from the XML.
-With the types in place, another literal XML string that fulfills the schema, can be loaded and parsed into the object model with one line of code.
+With the types in place, another literal XML string that fulfills the schema, can be loaded and parsed into the object model within one line of code.
 
 Type Provider libraries for the most popular standards are ready to use.
-In addition to that, the mechanism is extensible which means that Type Providers can be created for arbitrary data source.
+The mechanism is extensible which means that Type Providers can be created for arbitrary data source.
 
 The feature is quite unique - apart from Idris, no other programming language has Type Providers
 (In fact, Type Providers in Idris are even more rich in functionality than those in F# {{{christiansen2013dependent}}}).
@@ -377,7 +385,7 @@ The feature is quite unique - apart from Idris, no other programming language ha
 Among various Type Provider libraries there is one called **SQL Provider**. 
 As the name suggests, it provides types for a relational database schema.
 This means that no Object-Relational Mapping libraries or hand-rolled models are needed to implement Data Access Layer.
-To use SQL Provider in Music Store, it is only necessary to lead a SQL connection string for the Type Provider:
+To use SQL Provider in Music Store, it is only necessary to deliver a SQL connection string to the Type Provider:
 
 ```fsharp
 type Sql = 
@@ -385,8 +393,9 @@ type Sql =
         "Server=(LocalDb)\\v11.0;Database=SuaveMusicStore;Trusted_Connection=True", 
         DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >```
 
-This code executes proper queries against the given connection and generates corresponding in the background.
+This code executes proper queries against the given connection and generates necessary types in the background.
 In Music Store, types for both database tables and views will be used.
+
 Following is a snippet for defining type aliases for the generated (provided) types:
 
 ```fsharp
@@ -408,7 +417,9 @@ type BestSeller     = DbContext.``[dbo].[BestSellers]Entity```
 Type aliases such as `Album`, `Artist`, `Genre` are defined for corresponding database tables (lines 5-9).
 The last 3 type aliases (lines 12-14) represent database views which will be used in Music Store.
 
-Following is a snippet demonstrating how certain queries can be constructed with SQL Provider:
+#### Database queries
+
+Queries can be constructed with SQL Provider like following:
 
 ```fsharp
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
@@ -455,6 +466,16 @@ Data Access Layer implementation is easily achievable in F#.
 As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the Object-Oriented or imperative world.
 Type Providers in F#, together with its type-safe nature allow for convenient data access logic.
 In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is blazingly fast and little error-prone.
+
+### CRUD
+
+### Forms?
+
+### Authentication
+
+### Session
+
+### Rest of features
 
 Conclusions
 -----------

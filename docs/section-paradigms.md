@@ -1,8 +1,8 @@
 PROGRAMING PARADIGMS
 ====================
 
-Paradigm types
----------------
+Paradigms survey
+----------------
 
 Object-Oriented
 ---------------
