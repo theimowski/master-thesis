@@ -1,7 +1,7 @@
 TEST SECTION
 ============
 
-Aba {{{Reference2, Reference1, Reference3}}}
+Aba {{{eriksen2013your, strachey2000fundamental}}}
 
 This is a subsection
 --------------------

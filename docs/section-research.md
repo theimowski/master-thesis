@@ -54,7 +54,7 @@ While the technique may be a sufficient solution for smaller problems, when appl
 Among various approaches to asynchronous programming, there is one that abstracts away the concept of asynchrony from the actual flow of program.
 It is called **future**, also known as **promise** or **asynchronous workflow** in different programming languages.
 This approach bypasses callbacks in a clever way, resulting in code that is easier to read and reason about.
-Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software {{{ServerFunction}}}.
+Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software {{{eriksen2013your}}}.
 All those concepts originate from the functional paradigm and that is why utilizing functions can be helpful for developing client-server architecture.
 In F# there is a type called `Async`, which represents **asynchronous workflow**.
 
