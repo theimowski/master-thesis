@@ -35,7 +35,7 @@ Functional Web
 --------------
 
 Even though Web Development is usually associated with using imperative techniques, it's not completely uncommon to follow functional principles while creating Internet applications.
-Majority of web applications are built on top of the HTTP protocol.
+Majority of web applications are built on top of the Hypertext Transformation Protocol (HTTP) protocol.
 From a software engineer point of view, the HTTP protocol boils down to requests and responses.
 One could even think of a Web application as a general function of type `HTTPRequest -> HTTPResponse`.
 
@@ -467,7 +467,57 @@ As far as the persistence mechanism remains the same, details of the implementat
 Type Providers in F#, together with its type-safe nature allow for convenient data access logic.
 In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is blazingly fast and little error-prone.
 
-### CRUD
+### Create, Update and Delete operations
+
+Features in software products, from an engineer's point of view, consists of **queries** and **commands**.
+Such generalization refers to concept known as Command and Query Separation.
+Queries do not change state, but only fetch certain portion of data from a system, while commands have side effects by modifying the internal state of the system {{{meyer1988object}}}.
+Previous section showed how queries can be implemented in a functional programming language.
+In this section implementation of commands is shown.
+
+#### Management module
+
+As a part of administration management module, following features were implemented in Music Store application:
+
+* Creating a new album from scratch by assigning a title, price, artist and genre (the last two being restricted to discrete subset of possible values)
+* Editing an existing album by modifying any of the properties 
+* Deleting an album from the Music Store, making it impossible for users to buy
+
+#### Creating album
+
+For the sake of new album feature, `createAlbum` WebPart was created:
+
+```fsharp
+let createAlbum =
+    let ctx = Db.getContext()
+    choose [
+        GET >>= warbler (fun _ -> 
+            let genres = 
+                Db.getGenres ctx 
+                |> List.map (fun g -> decimal g.GenreId, g.Name)
+            let artists = 
+                Db.getArtists ctx
+                |> List.map (fun g -> decimal g.ArtistId, g.Name)
+            html (View.createAlbum genres artists))
+
+        POST >>= bindToForm Form.album (fun form ->
+            Db.createAlbum (int form.ArtistId, int form.GenreId, form.Price, form.Title) ctx
+            Redirection.FOUND Path.Admin.manage)
+    ]```
+
+The `createAlbum`, together with its own route was composed into the main WebPart of the Music Store application.
+Two HTTP methods were defined as acceptable within `createAlbum`: GET and POST (lines 4 and 13).
+The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI and POST is used to request that the origin server accept the entity enclosed in the request {{{fielding1999hypertext}}}.
+In context of `createAlbum` WebPart, GET method was used to retrieve HTML form for creating new album.
+POST method was used to send the album in request body to the origin server for the purpose of persisting it in the database.
+
+TODO: impl details
+
+#### Editing album
+
+#### Deleting album
+
+#### Summary
 
 ### Forms?
 
