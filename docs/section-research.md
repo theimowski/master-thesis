@@ -509,11 +509,69 @@ The `createAlbum`, together with its own route was composed into the main WebPar
 Two HTTP methods were defined as acceptable within `createAlbum`: GET and POST (lines 4 and 13).
 The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI and POST is used to request that the origin server accept the entity enclosed in the request {{{fielding1999hypertext}}}.
 In context of `createAlbum` WebPart, GET method was used to retrieve HTML form for creating new album.
-POST method was used to send the album in request body to the origin server for the purpose of persisting it in the database.
+POST method was used to send the album in request body to the origin server for the purpose of persisting in the database.
 
-TODO: impl details
+Because the right-hand side of `>>=` operator is evaluated eagerly, it was wrapped with a `warbler` function in line 4.
+This was done to delay the logic execution inside WebPart (in that case fetching list of `genres` and `albums` from the database) until the request method is recognized as GET.
+The `warbler` turned out to be mandatory in this case, otherwise unnecessary calls would be performed against the database if the request method had been POST.
+
+In the body of WebPart applied in the `warbler`, two queries were made to the database to fetch all `genres` and `albums` in the Music Store.
+With the help of `|>` (pipe operator) those two lists were then mapped to lists of a pair (tuple) of `decimal` and `string` (`decimal * string`).
+The resulting lists of tuples became arguments for the `View.createAlbum` function to populate the drop-down inputs in produced HTML form.
+
+For the POST case, after the `>>=` operator, `bindToForm` function was used.
+`bindToForm` tries to parse the request body into a given model, in this case `Form.album`.
+If the parsing failed (the request could be malformed), `bindToForm` took care of responding with 400 Bad Request status code, describing why it was unable to parse the entity.
+On the other hand, if the entity could be parsed as `Form.album`, the anonymous function (second argument of `bindToForm`) was applied.
+The anonymous function takes the form model as its parameter, invokes `Db.createAlbum` action with proper arguments, and finally redirects to the main administration management page.
+Redirection was achieved by calling the `Redirection.FOUND` function, which writes 302 Found status code to the response and "Location" header with an URL.
+Browsers treat 302 status code as a signal to issue another request to the URL defined by the "Location" header of the response.
 
 #### Editing album
+
+Next feature implemented in the administration management module was editing an existing album.
+WebPart for this functionality was placed in following snippet: 
+
+```fsharp
+let editAlbum id =
+    let ctx = Db.getContext()
+    match Db.getAlbum id ctx with
+    | Some album ->
+        choose [
+            GET >>= warbler (fun _ ->
+                let genres = 
+                    Db.getGenres ctx 
+                    |> List.map (fun g -> decimal g.GenreId, g.Name)
+                let artists = 
+                    Db.getArtists ctx
+                    |> List.map (fun g -> decimal g.ArtistId, g.Name)
+                html (View.editAlbum album genres artists))
+
+            POST >>= bindToForm Form.album (fun form ->
+                Db.updateAlbum album (int form.ArtistId, int form.GenreId, form.Price, form.Title) ctx
+                Redirection.FOUND Path.Admin.manage)
+        ]
+    | None -> 
+        never```
+
+Similar set of steps as in the previously described `createAlbum` WebPart were followed in `editAlbum`:
+
+* instantiation the database context
+* distinction between two allowed HTTP methods: GET and POST
+* in case of GET, creation of edit album form
+* in case of POST, update action performed on the database and redirection to main management page 
+
+In addition to that, `editAlbum` took a parameter `id` of type `int` to identify a proper album.
+It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easy and gracefully with a typed route WebPart:
+
+```fsharp
+pathScan "/admin/edit/%d" editAlbum```
+
+Because there is no guarantee that an album with a given `id` exists, `Db.getAlbum` (line 3) had to be invoked, and two cases handled.
+The `Db.getAlbum` was designed to return `Album option`, that's why a pattern matching could be employed in the example.
+In case the `id` was correct and album was found (`Some album`), `choose` WebPart (line 5) would apply
+Otherwise, if `Db.getAlbum` turned out to return `None` (album was not found) then `never` (line 20) WebPart would have been used.
+WebPart `never` always "fails" (returns `None`), causing the composed typed route to return `None` as well and mark the WebPart as not applicable for such request.
 
 #### Deleting album
 
