@@ -562,7 +562,7 @@ Similar set of steps as in the previously described `createAlbum` WebPart were f
 * in case of POST, update action performed on the database and redirection to main management page 
 
 In addition to that, `editAlbum` took a parameter `id` of type `int` to identify a proper album.
-It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easy and gracefully with a typed route WebPart:
+It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easily and gracefully with a typed route WebPart:
 
 ```fsharp
 pathScan "/admin/edit/%d" editAlbum```
@@ -575,7 +575,46 @@ WebPart `never` always "fails" (returns `None`), causing the composed typed rout
 
 #### Deleting album
 
+Last functionality added to the administration management module was deleting an album.
+After an album is deleted, it is no longer available in the Music Store for users to buy.
+Implementation of this action required following code:
+
+```fsharp
+let deleteAlbum id =
+    let ctx = Db.getContext()
+    match Db.getAlbum id ctx with
+    | Some album ->
+        choose [ 
+            GET >>= warbler (fun _ -> 
+                html (View.deleteAlbum album.Title))
+            POST >>= warbler (fun _ -> 
+                Db.deleteAlbum album ctx
+                Redirection.FOUND Path.Admin.manage)
+        ]
+    | None ->
+        never```
+
+The `deleteAlbum` function consisted of similar steps as `editAlbum`.
+First, verification happened that checked whether an album with given `id` existed.
+Secondly, pattern matching was applied to the result of invocation of `Db.getAlbum` function.
+In case the album did not exist, `never` implied discarding this WebPart.
+If however the album was found, then depending on the HTTP method (GET or POST) corresponding result would apply.
+For GET requests, the application returned an HTML page with a confirmation screen whether to delete the album.
+Sending a POST request confirmed the deletion.
+The user could also navigate away from the confirmation page, or move back in browsing history, which would not affect the album in question.
+Logic for POST WebPart invoked proper action on `Db` module, and returned redirection WebPart afterwards (the same as in `editAlbum`).
+Both POST and GET WebParts had to be surrounded with `warbler`s, because eager evaluation would cause unwanted effects.
+Again, as was the case with editing album, the `deleteAlbum` composed nicely with the typed route:
+
+```fsharp
+pathScan "/admin/delete/%d" deleteAlbum```
+
 #### Summary
+
+The 3 actions described in this section are sometimes associated with "CRUD" acronym (Create - Update - Delete).
+With their uniform logic, they tend to be used for the purpose of demonstrating a library or tool capabilities.
+Snippets above proved that one can cope with this common programming challenge in functional-first language such as F#.
+Typed routes feature from Suave confirmed to be highly composable, and thus the WebParts that were built could be matched together in a transparent manner.
 
 ### Forms?
 
