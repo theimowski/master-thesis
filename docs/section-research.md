@@ -649,7 +649,7 @@ let returnPathOrHome =
 
 let logon =
     choose [
-        GET >>= (View.logon |> html)
+        GET >>= (View.logon "" |> html)
         POST >>= bindToForm Form.logon (fun form ->
             let ctx = Db.getContext()
             let (Password password) = form.Password
@@ -658,14 +658,40 @@ let logon =
                     Auth.authenticated Cookie.CookieLife.Session false 
                     >>= returnPathOrHome
             | _ ->
-                never
+                View.logon "Username or password is invalid." |> html
         )
     ]```
 
-Suave framework is shipped with helper functions, one of which is `Auth.authenticated` (line 17), that made working with authentication more convenient.
-Because it relies on cookies, `Auth.authenticated` first argument describe lifetime of the cookie.
+The main handler for authentication `logon` (line 9) benefited from `choose` to distinguish between GET and POST methods.
+For GET requests (line 11), `logon` did respond with an HTML page with form to log in to the Music Store.
+What is interesting, is that `warbler` function was not crucial in this case.
+That is because the `View.logon` invoked like that was treated as a fixed HTML markup - it always took empty string as parameter (there is also another invocation in line 20, more on that later).
+Once this WebPart was evaluated, it did not need to be computed anymore.
+
+POST requests to `logon` were treated as an authentication trial.
+As was the case with creating and editing albums, `bindToForm` took care (by returning Bad Request status code) of possible malformed requests that did not originate from the login page.
+When the data sent with POST matched `Form.logon` model, a database query (line 15) would be triggered to validate passed credentials.
+Written in-line, `passHash` was defined as a helper function that returned a hash from the password with help of 32-bit-word Secure Hash Algorithm (SHA-256).
+
+In case, the given credentials did not match (either such user's name did not exist or the password was incorrect), `View.logon` page would be displayed again this time with a validation error in red color to indicate the failure (line 20). 
+If however both user's name and password were correct, process of authentication would be started.
+
+Suave framework ships with helper functions such as `Auth.authenticated` (line 17) that made working with authentication more convenient.
+Because it relies on cookies, first argument of `Auth.authenticated` describes lifetime of the cookie.
 Here `CookieLife.Session` was chosen, which means that the cookie is valid until browser session is open.
-Second argument of `boolean` type determines whether the cookie should be marked as secure - as SSL was not employed in the application, `false` value of was passed.
+Second argument of `boolean` type determines whether the cookie should be marked as secure - as SSL was not employed in the application, `false` value was passed. 
+In result of applying the `Auth.authenticated` WebPart, the framework wrote `Set-Cookie` header with properly encrypted authentication cookie to the HTTP response. 
+Upon receiving response with `Set-Cookie` header present, a browser saves the cookie value for visited URL in order to issue each following request with this cookie.
+
+In line 18, another WebPart composition occurred.
+Having set the cookie, program flow was bound to `returnPathOrHome`.
+WebPart `returnPathOrHome` (line 1) had a look inside the incoming request to find out whether parameter called "returnPath" existed in URL query.
+If that was the case (line 5), then value of this parameter would determine to what location redirection should happen.
+Otherwise (line 6), the redirection would be made to the main page, `Path.home`.
+
+#### Authorization
+
+#### Summary
 
 ### Forms?
 
