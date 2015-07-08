@@ -616,9 +616,58 @@ With their uniform logic, they tend to be used for the purpose of demonstrating 
 Snippets above proved that one can cope with this common programming challenge in functional-first language such as F#.
 Typed routes feature from Suave confirmed to be highly composable, and thus the WebParts that were built could be matched together in a transparent manner.
 
-### Forms?
+### Authentication and Authorization
 
-### Authentication
+Access to some contents of a WebSite is not always public these days anymore.
+Companies that make money on selling information across the web have certain limitations with regards to who and when can browse specific part of their site.
+Web applications that use concept of accounts to tie data with users, must know the identity of a person that is performing certain actions.
+There are also web sites that tend to make profit on persisting in database and selling details about a significant amount of users and their emails.
+Such needs as in above examples led to forming the concepts of Authentication and Authorization.
+
+#### Authentication
+
+Authentication is a process, in which a user of a system (be it a human or machine program) presents his credentials to the requested authority.
+In web browsing scenario it is often preceded by the web site (playing authority role) blocking access to a desired resource (for user).
+The HTTP protocol defines a specific status code for that purpose.
+401 Unauthorized status code in HTTP response means that request requires user authentication {{{fielding1999hypertext}}}.
+It is a bit unfortunate that the HTTP standard defines the status code with "Unauthorized" keyword, which relates to authorization and is a different concept.
+
+In Music Store, form authentication approach was applied.
+Form authentication relies on passing users credentials in request body, encoded with `application/x-www-form-urlencoded` Content-Type header (or `multipart/form-data` in some cases).
+This mechanism should always be accompanied with SSL encryption, meaning that HTTPS scheme should be used, because form authentication does not provide ad hoc encryption and the request body is often sent in plain text.
+For the sake of simplicity, SSL encryption is not covered in Music Store application.
+Snippet below shows how basic form authentication was implemented in Music Store:
+
+```fsharp
+let returnPathOrHome = 
+    request (fun x -> 
+        let path = 
+            match (x.queryParam "returnPath") with
+            | Choice1Of2 path -> path
+            | _ -> Path.home
+        Redirection.FOUND path)
+
+let logon =
+    choose [
+        GET >>= (View.logon |> html)
+        POST >>= bindToForm Form.logon (fun form ->
+            let ctx = Db.getContext()
+            let (Password password) = form.Password
+            match Db.validateUser(form.Username, passHash password) ctx with
+            | Some user ->
+                    Auth.authenticated Cookie.CookieLife.Session false 
+                    >>= returnPathOrHome
+            | _ ->
+                never
+        )
+    ]```
+
+Suave framework is shipped with helper functions, one of which is `Auth.authenticated` (line 17), that made working with authentication more convenient.
+Because it relies on cookies, `Auth.authenticated` first argument describe lifetime of the cookie.
+Here `CookieLife.Session` was chosen, which means that the cookie is valid until browser session is open.
+Second argument of `boolean` type determines whether the cookie should be marked as secure - as SSL was not employed in the application, `false` value of was passed.
+
+### Forms?
 
 ### Session
 
