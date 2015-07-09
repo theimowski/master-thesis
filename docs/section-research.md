@@ -689,13 +689,74 @@ WebPart `returnPathOrHome` (line 1) had a look inside the incoming request to fi
 If that was the case (line 5), then value of this parameter would determine to what location redirection should happen.
 Otherwise (line 6), the redirection would be made to the main page, `Path.home`.
 
-#### Authorization
+Below functions were necessary to verify if incoming request is authenticated:
+
+```fsharp
+let redirectWithReturnPath redirection =
+    request (fun x ->
+        let path = x.url.AbsolutePath
+        Redirection.FOUND (redirection |> Path.withParam ("returnPath", path)))
+
+let loggedOn f_success =
+    Auth.authenticate
+        Cookie.CookieLife.Session
+        false
+        (fun () -> Choice2Of2(redirectWithReturnPath "/account/logon"))
+        (fun _ -> Choice2Of2 reset)
+        f_success```
+
+The first one, `redirectWithReturnPath` (line 1) did set the "returnPath" URL query parameter, used by `returnPathOrHome` WebPart which was defined earlier.
+It basically took a `redirection` URL as its argument, appended current absolute path as query parameter to `redirection`, and issued a redirection to the result URL.
+WebPart `loggedOn`, which was defined in line 6 can be thought of like a "guard" of the `f_success` WebPart.
+`loggedOn` challenged the request with another built into Suave helper `Auth.authenticate`.
+The `Auth.authenticate` took 5 arguments:
+
+* `CookieLife.Session` life expiry - the same as was used for setting authentication cookie
+* `false` which reflected that secure protocol was not employed
+* function which determined what should happen in case authentication cookie was missing
+* another function which would be invoked if the cookie was present, but decryption of the cookie value failed
+* finally the `f_success` WebPart that was applied when request came with valid authentication cookie
+
+One of the actions that required being logged on to the Music Store was checking out the cart with albums.
+To apply `loggedOn` validation on a WebPart (`checkout` in this case), those two could be composed like following:
+
+```fsharp
+path "/cart/checkout" >>= loggedOn checkout```
+
+#### Authorization 
+
+Unlike authentication, authorization does not rely on providing credentials, but rather validating them against some kind of a "challenge".
+
+Most popular challenge these days seems to be the concept of roles.
+A role describes the category of a user.
+As an example, in Music Store there were defined 2 simple roles:
+
+* "user" - a standard user, someone who can browse trough and buy music albums
+* "admin" - privileged user of the system, that is allowed to manage albums
+
+New users that would register to the Music Store, got automatically the "user" role.
+There was only one predefined user with "admin" role and the same name.
+
+Following WebPart was implemented to allow only authorized users to a specific handler:
+
+```fsharp
+let admin f_success =
+    loggedOn (session (function
+        | UserLoggedOn { Role = "admin" } -> f_success
+        | UserLoggedOn _ -> FORBIDDEN "Only for admin"
+        | _ -> UNAUTHORIZED "Not logged in"
+    ))```
+
+// TODO : describe above
+
+Once again, the HTTP status code names for 401 and 403 may be confusing in context of this section.
+**401 Unauthorized** code in practice means that request is not **authenticated**, while **403 Forbidden** stands for **unauthorized** to selected resource.
 
 #### Summary
 
 ### Forms?
 
-### Session
+### Session - move it before auth?
 
 ### Rest of features
 
