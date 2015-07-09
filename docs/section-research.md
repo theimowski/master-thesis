@@ -801,7 +801,15 @@ To do that, they have to attach specific meta-data in request and responses such
 In addition to that, those application have to persist the state on the server side for later retrieval.
 One could argue, that authentication and authorization is a special case of session, however those concepts seem to be separated in Suave framework hence the first two were described in a separate section.
 
-TODO: describe the below
+In Music Store, session was used to track state of cart identifier and details of logged on user (if present).
+The application allowed anonymous users to add albums to their cart (without authentication).
+For that purpose, a unique identifier was assigned in a cookie and corresponding database table row.
+Thanks to that, users could add albums to cart without being logged on to the Store.
+Authentication was however required, when the user wanted to checkout with his albums in cart.
+If user was authenticated, session consisted of the user's name as well as role.
+The first proved helpful for displaying a greeting at the very top of the page, and the second was used for authorization.
+
+In order to model possible session states, following types were declared:
 
 ```fsharp
 type UserLoggedOnSession = {
@@ -813,6 +821,28 @@ type Session =
     | NoSession
     | CartIdOnly of string
     | UserLoggedOn of UserLoggedOnSession```
+
+An F# Record structure was declared in first line.
+Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
+
+* immutability by default 
+* structural equality by default
+* pattern matching
+* copy and update expressions
+
+The `UserLoggedOnSession` record type has two properties: `Username` and `Role`, both of `string type.
+This type was part of the discriminated union case (line 9).
+
+Discriminated union in F# is a .... /// TODO write about discriminated union.
+
+`Session` type (line 6) was declared as a discriminated union.
+It consisted of three possible cases:
+
+* `NoSession` (line 7) - indicated that no session is attached to context request
+* `CartIdOnly` (line 8) - reflected that user is adding albums to his cart without being authenticated
+* `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type)
+
+#### Summary
 
 ### Forms?
 
