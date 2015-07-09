@@ -702,7 +702,7 @@ let loggedOn f_success =
         Cookie.CookieLife.Session
         false
         (fun () -> Choice2Of2(redirectWithReturnPath "/account/logon"))
-        (fun _ -> Choice2Of2 reset)
+        (fun _ -> Choice2Of2 (BAD_REQUEST "Descryption error!"))
         f_success```
 
 The first one, `redirectWithReturnPath` (line 1) did set the "returnPath" URL query parameter, used by `returnPathOrHome` WebPart which was defined earlier.
@@ -717,6 +717,10 @@ The `Auth.authenticate` took 5 arguments:
 * another function which would be invoked if the cookie was present, but decryption of the cookie value failed
 * finally the `f_success` WebPart that was applied when request came with valid authentication cookie
 
+In line 10, `redirectWithReturnPath` was applied in case of missing cookie.
+This meant that when someone tried to get to a resource without being authenticated, he would be redirected to the login page.
+Line 11, on the other hand, was used when the cookie could not be decrypted with secrete server key.
+That could potentially mean a malicious request, that is why 400 Bad Request status code was chosen as a response.
 One of the actions that required being logged on to the Music Store was checking out the cart with albums.
 To apply `loggedOn` validation on a WebPart (`checkout` in this case), those two could be composed like following:
 
@@ -729,12 +733,12 @@ Unlike authentication, authorization does not rely on providing credentials, but
 
 Most popular challenge these days seems to be the concept of roles.
 A role describes the category of a user.
-As an example, in Music Store there were defined 2 simple roles:
+As an example, in Music Store there were 2 simple roles defined:
 
-* "user" - a standard user, someone who can browse trough and buy music albums
-* "admin" - privileged user of the system, that is allowed to manage albums
+* "user" - a standard user, someone who can browse through and buy music albums
+* "admin" - a privileged user of the system, that is allowed to manage albums
 
-New users that would register to the Music Store, got automatically the "user" role.
+New users that would register to the Music Store, got automatically the "user" role assigned.
 There was only one predefined user with "admin" role and the same name.
 
 Following WebPart was implemented to allow only authorized users to a specific handler:
@@ -744,15 +748,42 @@ let admin f_success =
     loggedOn (session (function
         | UserLoggedOn { Role = "admin" } -> f_success
         | UserLoggedOn _ -> FORBIDDEN "Only for admin"
-        | _ -> UNAUTHORIZED "Not logged in"
-    ))```
+        | _ -> UNAUTHORIZED "Not logged in" ))```
 
-// TODO : describe above
+As was the case with `loggedOn`, `admin` function played a role of a guard over the `f_success` WebPart and allowed only "admin" roles in.
+In fact, it invoked the `loggedOn` (in line 2) to ensure that request was authenticated, because otherwise there would be no one to authorize.
+`session` function was described in details in following section. 
+In context of above snippet, `session` determined the state of the user, of which one possible value was `UserLoggedOn` with `Role` property inside.
+With help of pattern matching, `f_success` got applied only when `Role` matched "admin" (line 3).
+If user was authenticated but his role was not "admin" (line 4), a 403 Forbidden status code was written to the HTTP response.
+Line 5 would return 401 Unauthorized status code in case the request was not authenticated.
+The last case behaved only like a safety net preventing compiler warnings, as the `loggedOn` guard would not allow authenticated requests to pass through.
 
-Once again, the HTTP status code names for 401 and 403 may be confusing in context of this section.
-**401 Unauthorized** code in practice means that request is not **authenticated**, while **403 Forbidden** stands for **unauthorized** to selected resource.
+Once again, the HTTP status code names for 401 and 403 may sound confusing in context of this section.
+**401 Unauthorized** code in practice means that request is not **authenticated**, while **403 Forbidden** stands for being **authenticated**, but **unauthorized** to browse selected resource.
+
+Composing `admin` function with other WebParts looked like the following:
+
+```fsharp
+path "/admin/manage" >>= admin manage
+path "/admin/create" >>= admin createAlbum
+pathScan "/admin/edit/%d" (fun id -> admin (editAlbum id))
+pathScan "/admin/delete/%d" (fun id -> admin (deleteAlbum id))```
+
+While for parameter-less WebParts like `manage` or `createAlbum`, it was only necessary to wrap them with `admin`, those WebParts that took an argument (`editAlbum` and `deleteAlbum`) had to be contained inside a lambda (anonymous) function.
+
+#### Authentication and Authorization in ASP.NET MVC
+
+Authentication and Authorization in ASP.NET MVC are usually handled with code annotations in form of attributes.
+Those attributes are attached to specific controllers / actions and allow to express the concept in declarative way.
+As an example, to mark that every action in a specific controller should be authorized and only "admin" can access these actions, the controller would be `[Authorize(Roles="Administrators")]` attribute.
+While it is a convenient way of dealing with those cross-cutting concerns, such approach can also have its disadvantages.
+Using annotations is related to making the software engineer unaware of what is really happening under the hood.
+In contrast to that, an obligation to connect the authentication and authorization concepts with rest of the application's logic, results in easier reasoning about the implementation as well as discovering potential software defects.
 
 #### Summary
+
+
 
 ### Forms?
 
