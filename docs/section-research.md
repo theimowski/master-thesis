@@ -783,11 +783,38 @@ In contrast to that, an obligation to connect the authentication and authorizati
 
 #### Summary
 
+It is getting more evident that aspects of Web Development follow similar pattern in Music Store application.
+To utilize both authentication and authorization, another building blocks were created.
+All those building blocks happened to reside near WebPart type, which made them reusable and suitable for composition.
+Implementation of the concepts in functional paradigm significantly differs form how they tend to be defined in object-oriented programming.
+Declarative approach used in frameworks like ASP.NET MVC makes it extremely easy to employ authentication and authorization, but has a downside of being less aware of mechanism that drives the program flow.
+Solution that Suave takes advantage of requires the developer to get familiar with the underlying protocol and adapt existing functions into his code.
+Thanks to that, one gets better understanding on how different components are meant to work in integration.
 
+### Session
+
+Another interesting concern with regards to Internet applications development is State Management Mechanism, also known as Session in software engineers' dialect.
+Conceptually it is relatively similar to authentication in some aspects.
+The HTTP protocol is stateless, meaning that details about requests are not retained by the protocol and thus there is no ad hoc relation between two requests.
+Still, majority of web applications keep track of the requests coming from the same initiator.
+To do that, they have to attach specific meta-data in request and responses such as cookies or other headers, arguments in URL paths, contents of the body.
+In addition to that, those application have to persist the state on the server side for later retrieval.
+One could argue, that authentication and authorization is a special case of session, however those concepts seem to be separated in Suave framework hence the first two were described in a separate section.
+
+TODO: describe the below
+
+```fsharp
+type UserLoggedOnSession = {
+    Username : string
+    Role : string
+}
+
+type Session = 
+    | NoSession
+    | CartIdOnly of string
+    | UserLoggedOn of UserLoggedOnSession```
 
 ### Forms?
-
-### Session - move it before auth?
 
 ### Rest of features
 
