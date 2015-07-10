@@ -822,7 +822,7 @@ type Session =
     | CartIdOnly of string
     | UserLoggedOn of UserLoggedOnSession```
 
-An F# Record structure was declared in first line.
+An F# Record type was declared in first line.
 Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
 
 * immutability by default 
@@ -833,7 +833,8 @@ Records behave similarly to standard C# classes, however there is a number of ad
 The `UserLoggedOnSession` record type has two properties: `Username` and `Role`, both of `string type.
 This type was part of the discriminated union case (line 9).
 
-Discriminated union in F# is a .... /// TODO write about discriminated union.
+Discriminated unions in F# provide support for values that can be one of a number of named cases, possibly each with different values and types {{{msdn}}}.
+They allow for declaring a type with a set of applicable values and are designed to work with pattern matching.
 
 `Session` type (line 6) was declared as a discriminated union.
 It consisted of three possible cases:
@@ -841,6 +842,24 @@ It consisted of three possible cases:
 * `NoSession` (line 7) - indicated that no session is attached to context request
 * `CartIdOnly` (line 8) - reflected that user is adding albums to his cart without being authenticated
 * `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type)
+
+Main reason for creating this type in Music Store was to achieve a unified way of determining user state.
+For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined:
+
+```fsharp
+let session f = 
+    statefulForSession
+    >>= context (fun x -> 
+        match x |> HttpContext.state with
+        | None -> f NoSession
+        | Some state ->
+            match state.get "cartid", state.get "username", state.get "role" with
+            | Some cartId, None, None -> f (CartIdOnly cartId)
+            | _, Some username, Some role -> f (UserLoggedOn {Username = username; Role = role})
+            | _ -> f NoSession)```
+
+As its starting point (line 2), session invoked `statefulForSession` which comes from Suave and is a WebPart that initiates user store to work with.
+TODO: describe `session`
 
 #### Summary
 
