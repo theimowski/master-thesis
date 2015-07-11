@@ -619,12 +619,10 @@ Typed routes feature from Suave confirmed to be highly composable, and thus the 
 ### Session
 
 Another interesting concern with regards to Internet applications development is State Management Mechanism, also known as Session in software engineers' dialect.
-Conceptually it is relatively similar to authentication in some aspects.
 The HTTP protocol is stateless, meaning that details about requests are not retained by the protocol and thus there is no ad hoc relation between two requests.
 Still, majority of web applications keep track of the requests coming from the same initiator.
 To do that, they have to attach specific meta-data in request and responses such as cookies or other headers, arguments in URL paths, contents of the body.
 In addition to that, those application have to persist the state on the server side for later retrieval.
-One could argue, that authentication and authorization is a special case of session, however those concepts seem to be separated in Suave framework hence the first two were described in a separate section.
 
 In Music Store, session was used to track state of cart identifier and details of logged on user (if present).
 The application allowed anonymous users to add albums to their cart (without authentication).
@@ -735,9 +733,31 @@ One can write:
 let f = function 
     | ... ->```
 
+Another example on `Session` type usage looked following:
+
+```fsharp
+let cart = 
+    session (function
+    | NoSession -> View.emptyCart |> html
+    | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
+        let ctx = Db.getContext()
+        Db.getCartsDetails cartId ctx |> View.cart |> html)```
+
+In the snippet, `cart` WebPart was declared.
+Its purpose was to display contents of the current user's cart.
+In case he did not have any session attached (and no albums in cart), the user was shown a `View.emptyCart` page.
+That page had to encourage the user to do the shopping.
+On the other hand, if user had already some albums in his cart, contents of the cart were displayed on `View.cart` page.
+
 #### Session in ASP.NET MVC
 
+Handling session concept in ASP.NET MVC is relatively similar to how it was achieved in Music Store with F# and Suave.
+There exists a `Session` property in Controller to serve values indexed by keys of type `string`.
+
 #### Summary
+
+State management mechanism in Music Store was implemented in akin manner when comparing to how it is usually dealt with in imperative, object-oriented frameworks.
+Thanks to Discriminated Unions and the great feature of pattern matching in F#, it was convenient to model all possible states and handle each of them separately.
 
 ### Authentication and Authorization
 
@@ -745,7 +765,9 @@ Access to some contents of a WebSite is not always public these days anymore.
 Companies that make money on selling information across the web have certain limitations with regards to who and when can browse specific part of their site.
 Web applications that use concept of accounts to tie data with users, must know the identity of a person that is performing certain actions.
 There are also web sites that tend to make profit on persisting in database and selling details about a significant amount of users and their emails.
-Such needs as in above examples led to forming the concepts of Authentication and Authorization.
+Such needs as in above examples led to forming the concepts of authentication and authorization.
+Both of them can be built on top of the state management mechanism by using cookies.
+Since authentication, authorization and session are rather orthogonal with regards to session, the first two are described here in a separate section.
 
 #### Authentication
 
@@ -875,9 +897,10 @@ let admin f_success =
 
 As was the case with `loggedOn`, `admin` function played a role of a guard over the `f_success` WebPart and allowed only "admin" roles in.
 In fact, it invoked the `loggedOn` (in line 2) to ensure that request was authenticated, because otherwise there would be no one to authorize.
-`session` function was described in details in following section. 
-In context of above snippet, `session` determined the state of the user, of which one possible value was `UserLoggedOn` with `Role` property inside.
-With help of pattern matching, `f_success` got applied only when `Role` matched "admin" (line 3).
+`session` function was utilized to determine the state of the user.
+Among three possible values, on of them was `UserLoggedOn` with `Name` and `Role` properties inside.
+The fact that record types such as `UserLoggedOnSession` can be subject of pattern matching was exploited to match on `Role` property.
+Thanks to that, `f_success` got applied only when `Role` matched "admin" (line 3).
 If user was authenticated but his role was not "admin" (line 4), a 403 Forbidden status code was written to the HTTP response.
 Line 5 would return 401 Unauthorized status code in case the request was not authenticated.
 The last case behaved only like a safety net preventing compiler warnings, as the `loggedOn` guard would not allow authenticated requests to pass through.
