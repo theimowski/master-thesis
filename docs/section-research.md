@@ -616,6 +616,129 @@ With their uniform logic, they tend to be used for the purpose of demonstrating 
 Snippets above proved that one can cope with this common programming challenge in functional-first language such as F#.
 Typed routes feature from Suave confirmed to be highly composable, and thus the WebParts that were built could be matched together in a transparent manner.
 
+### Session
+
+Another interesting concern with regards to Internet applications development is State Management Mechanism, also known as Session in software engineers' dialect.
+Conceptually it is relatively similar to authentication in some aspects.
+The HTTP protocol is stateless, meaning that details about requests are not retained by the protocol and thus there is no ad hoc relation between two requests.
+Still, majority of web applications keep track of the requests coming from the same initiator.
+To do that, they have to attach specific meta-data in request and responses such as cookies or other headers, arguments in URL paths, contents of the body.
+In addition to that, those application have to persist the state on the server side for later retrieval.
+One could argue, that authentication and authorization is a special case of session, however those concepts seem to be separated in Suave framework hence the first two were described in a separate section.
+
+In Music Store, session was used to track state of cart identifier and details of logged on user (if present).
+The application allowed anonymous users to add albums to their cart (without authentication).
+For that purpose, a unique identifier was assigned in a cookie and corresponding database table row.
+Thanks to that, users could add albums to cart without being logged on to the Store.
+Authentication was however required, when the user wanted to checkout with his albums in cart.
+If user was authenticated, session consisted of the user's name as well as role.
+The first proved helpful for displaying a greeting at the very top of the page, and the second was used for authorization.
+From the database point of view both anonymous cart identifier and user's name were used for "cartId" database table row.
+
+In order to model possible session states, following types were declared:
+
+```fsharp
+type UserLoggedOnSession = {
+    Username : string
+    Role : string
+}
+
+type Session = 
+    | NoSession
+    | CartIdOnly of string
+    | UserLoggedOn of UserLoggedOnSession```
+
+An F# Record type was declared in first line.
+Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
+
+* immutability by default 
+* structural equality by default
+* pattern matching
+* copy and update expressions
+
+The `UserLoggedOnSession` record type has two properties: `Username` and `Role`, both of `string type.
+This type was part of the discriminated union case (line 9).
+
+Discriminated unions in F# provide support for values that can be one of a number of named cases, possibly each with different values and types {{{msdn}}}.
+They allow for declaring a type with a set of applicable values and are designed to work with pattern matching.
+
+`Session` type (line 6) was declared as a discriminated union.
+It consisted of three possible cases:
+
+* `NoSession` (line 7) - indicated that no session is attached to context request
+* `CartIdOnly` (line 8) - reflected that user is adding albums to his cart without being authenticated
+* `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type)
+
+Main reason for creating this type in Music Store was to achieve a unified way of determining user state.
+For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined:
+
+```fsharp
+let session f = 
+    statefulForSession
+    >>= context (fun x -> 
+        match x |> HttpContext.state with
+        | None -> f NoSession
+        | Some state ->
+            match state.get "cartid", state.get "username", state.get "role" with
+            | Some cartId, None, None -> CartIdOnly cartId
+            | _, Some username, Some role -> UserLoggedOn {Username = username; Role = role}
+            | _ -> NoSession
+            |> f )```
+
+At its starting point (line 2), session invoked `statefulForSession` which is a WebPart from Suave library that initiates user's state to work with.
+The initialization was then bound to the `context` function (line 3) to allow browsing user's state.
+For browsing the state, `HttpContext.state` proved useful (line 4).
+Its return type is `SessionStore option` where `SessionStore` accumulates a reader `get` and a writer `set` functions, for fetching and modifying state respectively.
+A pattern matching on a triple (tuple with three values) of user's state keys matched following cases (lines 7-10): 
+
+* if a "cartid" key was present, but there was no "username" and no "role" keys, `CartIdOnly` would be returned
+* if both "username" and "role" keys appeared in the session store, `UserLoggedOn` value applied
+* as a fall-back, `NoSession` was chosen when none of those keys were present
+
+Result of pattern matching block was applied (or colloquially "piped") to function `f` (line 11), which came as an argument to `session` and had a type of `Session -> WebPart`. 
+
+Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner:
+
+```fsharp
+let addToCart albumId =
+    let ctx = Db.getContext()
+    session (function
+            | NoSession -> 
+                let cartId = Guid.NewGuid().ToString("N")
+                Db.addToCart cartId albumId ctx
+                sessionStore (fun store ->
+                    store.set "cartid" cartId)
+            | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
+                Db.addToCart cartId albumId ctx
+                succeed)
+        >>= Redirection.FOUND Path.Cart.overview```
+
+As the `Session` type utilizes Discriminated Unions, pattern matching could be used again for handling different cases (lines 3-11).
+Whenever `addToCart` was invoked without any session (`NoSession`), a new Globally Unique Identifier (GUID) was generated.
+Using the new GUID value, proper database action was then invoked and the GUID got saved in session store.
+
+For the above `addToCart` function, the same piece of code was invoked when user was logged on to Music Store and when he was not but had already an anonymous cart identifier assigned to his session.
+In order to express such logic, a double-matching pattern was used (line 9).
+If that was the case, cartId was sufficient to perform the `Db.addToCart` action, and there was no need to generate new GUID.
+
+A syntactic sugar has been used for pattern matching construct, which comes handy when declaring a one-argument function that immediately pattern matches on this argument.
+Instead of:
+
+```fsharp
+let f x =
+    match x with
+    | ... -> ```
+
+One can write:
+
+```fsharp
+let f = function 
+    | ... ->```
+
+#### Session in ASP.NET MVC
+
+#### Summary
+
 ### Authentication and Authorization
 
 Access to some contents of a WebSite is not always public these days anymore.
@@ -790,129 +913,6 @@ Implementation of the concepts in functional paradigm significantly differs form
 Declarative approach used in frameworks like ASP.NET MVC makes it extremely easy to employ authentication and authorization, but has a downside of being less aware of mechanism that drives the program flow.
 Solution that Suave takes advantage of requires the developer to get familiar with the underlying protocol and adapt existing functions into his code.
 Thanks to that, one gets better understanding on how different components are meant to work in integration.
-
-### Session
-
-Another interesting concern with regards to Internet applications development is State Management Mechanism, also known as Session in software engineers' dialect.
-Conceptually it is relatively similar to authentication in some aspects.
-The HTTP protocol is stateless, meaning that details about requests are not retained by the protocol and thus there is no ad hoc relation between two requests.
-Still, majority of web applications keep track of the requests coming from the same initiator.
-To do that, they have to attach specific meta-data in request and responses such as cookies or other headers, arguments in URL paths, contents of the body.
-In addition to that, those application have to persist the state on the server side for later retrieval.
-One could argue, that authentication and authorization is a special case of session, however those concepts seem to be separated in Suave framework hence the first two were described in a separate section.
-
-In Music Store, session was used to track state of cart identifier and details of logged on user (if present).
-The application allowed anonymous users to add albums to their cart (without authentication).
-For that purpose, a unique identifier was assigned in a cookie and corresponding database table row.
-Thanks to that, users could add albums to cart without being logged on to the Store.
-Authentication was however required, when the user wanted to checkout with his albums in cart.
-If user was authenticated, session consisted of the user's name as well as role.
-The first proved helpful for displaying a greeting at the very top of the page, and the second was used for authorization.
-From the database point of view both anonymous cart identifier and user's name were used for "cartId" database table row.
-
-In order to model possible session states, following types were declared:
-
-```fsharp
-type UserLoggedOnSession = {
-    Username : string
-    Role : string
-}
-
-type Session = 
-    | NoSession
-    | CartIdOnly of string
-    | UserLoggedOn of UserLoggedOnSession```
-
-An F# Record type was declared in first line.
-Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
-
-* immutability by default 
-* structural equality by default
-* pattern matching
-* copy and update expressions
-
-The `UserLoggedOnSession` record type has two properties: `Username` and `Role`, both of `string type.
-This type was part of the discriminated union case (line 9).
-
-Discriminated unions in F# provide support for values that can be one of a number of named cases, possibly each with different values and types {{{msdn}}}.
-They allow for declaring a type with a set of applicable values and are designed to work with pattern matching.
-
-`Session` type (line 6) was declared as a discriminated union.
-It consisted of three possible cases:
-
-* `NoSession` (line 7) - indicated that no session is attached to context request
-* `CartIdOnly` (line 8) - reflected that user is adding albums to his cart without being authenticated
-* `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type)
-
-Main reason for creating this type in Music Store was to achieve a unified way of determining user state.
-For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined:
-
-```fsharp
-let session f = 
-    statefulForSession
-    >>= context (fun x -> 
-        match x |> HttpContext.state with
-        | None -> f NoSession
-        | Some state ->
-            match state.get "cartid", state.get "username", state.get "role" with
-            | Some cartId, None, None -> CartIdOnly cartId
-            | _, Some username, Some role -> UserLoggedOn {Username = username; Role = role}
-            | _ -> NoSession
-            |> f )```
-
-At its starting point (line 2), session invoked `statefulForSession` which is a WebPart from Suave library that initiates user's state to work with.
-The initialization was then bound to the `context` function (line 3) to allow browsing user's state.
-For browsing the state, `HttpContext.state` proved useful (line 4).
-Its return type is `SessionStore option` where `SessionStore` accumulates a reader `get` and a writer `set` functions, for fetching and modifying state respectively.
-A pattern matching on a triple (tuple with three values) of user's state keys matched following cases (lines 7-10): 
-
-* if a "cartid" key was present, but there was no "username" and no "role" keys, `CartIdOnly` would be returned
-* if both "username" and "role" keys appeared in the session store, `UserLoggedOn` value applied
-* as a fall-back, `NoSession` was chosen when none of those keys were present
-
-Result of pattern matching block was applied (or colloquially "piped") to function `f` (line 11), which came as an argument to `session` and had a type of `Session -> WebPart`. 
-
-Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner:
-
-```fsharp
-let addToCart albumId =
-    let ctx = Db.getContext()
-    session (function
-            | NoSession -> 
-                let cartId = Guid.NewGuid().ToString("N")
-                Db.addToCart cartId albumId ctx
-                sessionStore (fun store ->
-                    store.set "cartid" cartId)
-            | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
-                Db.addToCart cartId albumId ctx
-                succeed)
-        >>= Redirection.FOUND Path.Cart.overview```
-
-As the `Session` type utilizes Discriminated Unions, pattern matching could be used again for handling different cases (lines 3-11).
-Whenever `addToCart` was invoked without any session (`NoSession`), a new Globally Unique Identifier (GUID) was generated.
-Using the new GUID value, proper database action was then invoked and the GUID got saved in session store.
-
-For the above `addToCart` function, the same piece of code was invoked when user was logged on to Music Store and when he was not but had already an anonymous cart identifier assigned to his session.
-In order to express such logic, a double-matching pattern was used (line 9).
-If that was the case, cartId was sufficient to perform the `Db.addToCart` action, and there was no need to generate new GUID.
-
-A syntactic sugar has been used for pattern matching construct, which comes handy when declaring a one-argument function that immediately pattern matches on this argument.
-Instead of:
-
-```fsharp
-let f x =
-    match x with
-    | ... -> ```
-
-One can write:
-
-```fsharp
-let f = function 
-    | ... ->```
-
-#### Session in ASP.NET MVC
-
-#### Summary
 
 ### Forms?
 
