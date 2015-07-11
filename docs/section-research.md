@@ -808,6 +808,7 @@ Thanks to that, users could add albums to cart without being logged on to the St
 Authentication was however required, when the user wanted to checkout with his albums in cart.
 If user was authenticated, session consisted of the user's name as well as role.
 The first proved helpful for displaying a greeting at the very top of the page, and the second was used for authorization.
+From the database point of view both anonymous cart identifier and user's name were used for "cartId" database table row.
 
 In order to model possible session states, following types were declared:
 
@@ -854,12 +855,62 @@ let session f =
         | None -> f NoSession
         | Some state ->
             match state.get "cartid", state.get "username", state.get "role" with
-            | Some cartId, None, None -> f (CartIdOnly cartId)
-            | _, Some username, Some role -> f (UserLoggedOn {Username = username; Role = role})
-            | _ -> f NoSession)```
+            | Some cartId, None, None -> CartIdOnly cartId
+            | _, Some username, Some role -> UserLoggedOn {Username = username; Role = role}
+            | _ -> NoSession
+            |> f )```
 
-As its starting point (line 2), session invoked `statefulForSession` which comes from Suave and is a WebPart that initiates user store to work with.
-TODO: describe `session`
+At its starting point (line 2), session invoked `statefulForSession` which is a WebPart from Suave library that initiates user's state to work with.
+The initialization was then bound to the `context` function (line 3) to allow browsing user's state.
+For browsing the state, `HttpContext.state` proved useful (line 4).
+Its return type is `SessionStore option` where `SessionStore` accumulates a reader `get` and a writer `set` functions, for fetching and modifying state respectively.
+A pattern matching on a triple (tuple with three values) of user's state keys matched following cases (lines 7-10): 
+
+* if a "cartid" key was present, but there was no "username" and no "role" keys, `CartIdOnly` would be returned
+* if both "username" and "role" keys appeared in the session store, `UserLoggedOn` value applied
+* as a fall-back, `NoSession` was chosen when none of those keys were present
+
+Result of pattern matching block was applied (or colloquially "piped") to function `f` (line 11), which came as an argument to `session` and had a type of `Session -> WebPart`. 
+
+Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner:
+
+```fsharp
+let addToCart albumId =
+    let ctx = Db.getContext()
+    session (function
+            | NoSession -> 
+                let cartId = Guid.NewGuid().ToString("N")
+                Db.addToCart cartId albumId ctx
+                sessionStore (fun store ->
+                    store.set "cartid" cartId)
+            | UserLoggedOn { Username = cartId } | CartIdOnly cartId ->
+                Db.addToCart cartId albumId ctx
+                succeed)
+        >>= Redirection.FOUND Path.Cart.overview```
+
+As the `Session` type utilizes Discriminated Unions, pattern matching could be used again for handling different cases (lines 3-11).
+Whenever `addToCart` was invoked without any session (`NoSession`), a new Globally Unique Identifier (GUID) was generated.
+Using the new GUID value, proper database action was then invoked and the GUID got saved in session store.
+
+For the above `addToCart` function, the same piece of code was invoked when user was logged on to Music Store and when he was not but had already an anonymous cart identifier assigned to his session.
+In order to express such logic, a double-matching pattern was used (line 9).
+If that was the case, cartId was sufficient to perform the `Db.addToCart` action, and there was no need to generate new GUID.
+
+A syntactic sugar has been used for pattern matching construct, which comes handy when declaring a one-argument function that immediately pattern matches on this argument.
+Instead of:
+
+```fsharp
+let f x =
+    match x with
+    | ... -> ```
+
+One can write:
+
+```fsharp
+let f = function 
+    | ... ->```
+
+#### Session in ASP.NET MVC
 
 #### Summary
 
