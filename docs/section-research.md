@@ -937,7 +937,70 @@ Declarative approach used in frameworks like ASP.NET MVC makes it extremely easy
 Solution that Suave takes advantage of requires the developer to get familiar with the underlying protocol and adapt existing functions into his code.
 Thanks to that, one gets better understanding on how different components are meant to work in integration.
 
-### Forms?
+### Forms
+
+HTML form is the most popular way of communication between browser-based user interface and the server.
+Values provided in form fields are aggregated and pasted into the request body when a form is submitted.
+Implementation of form communication consists of a number of steps:
+
+* rendering proper HTML markup with named inputs 
+* client-side validation of form fields values
+* formatting the request body upon submitting (usually this is step is handled by browsers)
+* parsing of the body on the server side
+* server-side validation of form fields values
+* actual handler for request
+
+Most rich and heavy-weight frameworks for Internet applications (including ASP.NET MVC) already include in their functionality suite modules and helpers for handling above scenario.
+Since Suave is very light-weight, it does not (at the time of writing) come out with ready to use functions for up-to-down form communication between client and server.
+Engaging part of the research was thus ability to create utility modules for working with forms in Suave.
+Even more inviting experience was that the written modules were accepted as part of the official Suave package (in its "Experimental" distribution), since Suave is an open-source software hosted at GitHub web site {{{suave}}}.
+
+The prepared functionality aimed to target all of the steps enlisted above.
+It was designed to do so in a declarative way, by providing strongly typed access to values of form fields:
+
+```fsharp
+type Register = {
+    Username : string
+    Email : MailAddress
+    Password : Password
+    ConfirmPassword : Password
+    YearOfBirth : decimal option }```
+
+Form fields were to be enclosed in a record type.
+Supported types for the fields were: 
+
+* `string` - for representing text fields
+* `Password` - for representing passwords
+* `decimal` - for representing numbers (decimal was chosen deliberately to handle both integers as well as fractions)
+* `System.Net.Mail.MailAddress` - built-in .NET type for representing email addresses
+
+In addition to that, the module supported concept of required / optional fields.
+By default field was treated as required.
+If a field was to be marked as optional, it had to be of `option` type.
+Thanks to such solution, all values were type-safe (i.e. no null references would occur while reading a required field).
+
+`Register` type in the above snippet was declared for the sake of registering a new user.
+It reflected a form with following fields:
+
+* `Username` - required field of type `string` being a unique name of the user of Music Store
+* `Email` - required field of type `MailAddress` for email address of the user 
+* `Password` - required field of type `Password` for providing user's password
+* `ConfirmPassword` - the same as above, but used to prevent user from mistyping the passwords
+* `YearOfBirth` - optional field of type `decimal option` that could be used for recommending appropriate albums
+
+TODO : Details for below
+
+```fsharp
+let pattern = @"(\w){6,20}"
+
+let passwordsMatch =
+    (fun f -> f.Password = f.ConfirmPassword), "Passwords must match"
+
+let register : Form<Register> =
+    Form ([ TextProp ((fun f -> <@ f.Username @>), [ maxLength 30 ] )
+            PasswordProp ((fun f -> <@ f.Password @>), [ passwordRegex pattern ] )
+            PasswordProp ((fun f -> <@ f.ConfirmPassword @>), [ passwordRegex pattern ] )
+            ],[ passwordsMatch ])```
 
 ### Rest of features
 
