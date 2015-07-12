@@ -955,6 +955,8 @@ Since Suave is very light-weight, it does not (at the time of writing) come out 
 Engaging part of the research was thus ability to create utility modules for working with forms in Suave.
 Even more inviting experience was that the written modules were accepted as part of the official Suave package (in its "Experimental" distribution), since Suave is an open-source software hosted at GitHub web site {{{suave}}}.
 
+#### Declaration
+
 The prepared functionality aimed to target all of the steps enlisted above.
 It was designed to do so in a declarative way, by providing strongly typed access to values of form fields:
 
@@ -988,6 +990,8 @@ It reflected a form with following fields:
 * `ConfirmPassword` - the same as above, but used to prevent user from mistyping the passwords
 * `YearOfBirth` - optional field of type `decimal option` that could be used for recommending appropriate albums
 
+#### Validation
+
 Next thing that the module supported was declaring certain validation of the fields.
 For the `Register` form, below snippet served as validation logic:
 
@@ -1017,13 +1021,49 @@ Indeed, in the above example it was impossible to compare two fields on client s
 
 Validation rules from the first list could be used both for client and server side, as they involved just a single field.
 Thanks to new `input` element attributes in HTML5 standard, such as `maxlength` or `pattern`, client-side validation could be achieved.
-The rules shown in above snippet are either `TextProp` or `PasswordProp` (property) meaning that they concern text field or password field respectively.
-First argument of the property was a function that made use of F# feature called **quotations**.
-F# quotations allow the capture of type-checked expressions as structured terms (...) that can then be interpreted, analyzed and compiled to alternative languages {{{syme2006leveraging}}}.
-TODO HERE: descirbe props
+The rules shown in above snippet were either `TextProp` or `PasswordProp` (property) meaning that they concerned text field or password fields respectively.
 
-Regular expression pattern defined in first line, matches a string of alphanumeric characters (or underscore) which length is at least 6 and at most 20.
+First argument of the property was a function that made use of F# feature called **quotations**.
+Properties enclosed within the `<@ ... @>` operators were interpreted as quotations by the compiler.
+F# quotations allow the capture of type-checked expressions as structured terms (...) that can then be interpreted, analyzed and compiled to alternative languages {{{syme2006leveraging}}}.
+For the form module utility, F# quotations allowed to extract name of a field to be used in HTML rendering, as well as parsing the request body on server side.
+Thanks to that, no annotations had to be used for the properties of `Register` record type.
+
+Second argument of the `TextProp` and `PasswordProp` were lists of duplex (client and server side) validations rules.
+Type definition of duplex rules was similar to server-side-only rules, except they required also a tuple of string (key and value) for to depict proper attribute of HTML `input` element:
+
+* `maxLength 30` determined a string for text input, no longer than 30 characters
+* `passwordRegex pattern` specified a regular expression to be matched on password inputs
+
+Regular expression `pattern` defined in first line, matches a string of alphanumeric characters (or underscore) which length is at least 6 and at most 20.
 This regular expression designated possible passwords for newly coming users.
+
+#### Rendering HTML form
+
+Music Store application consisted of a few forms, and all of them followed similar layout.
+In order to unify way of rendering the forms in HTML markup, following types were defined for structuring form layout: 
+
+```fsharp
+type Field<'a> = {
+    Label : string
+    Xml : Form<'a> -> Suave.Html.Xml
+}
+
+type Fieldset<'a> = {
+    Legend : string
+    Fields : Field<'a> list
+}
+
+type FormLayout<'a> = {
+    Fieldsets : Fieldset<'a> list
+    SubmitText : string
+    Form : Form<'a>
+}```
+
+`Xml` property of `Field<'a>` type was a function from `Form<'a>` to `Suave.Html.Xml` type, which represented object model for HTML markup.
+Rest of record type properties are rather self-explanatory.
+
+With help of the `FormLayout` type, the `Register` form as defined earlier could be then used to render a corresponding HTML markup:
 
 ```fsharp
 renderForm
@@ -1042,6 +1082,19 @@ renderForm
                     { Label = "Confirm password"
                       Xml = input (fun f -> <@ f.ConfirmPassword @>) [] } ] } ]
       SubmitText = "Register" }```
+
+Function `renderForm` was responsible for unified HTML markup of all forms in Music Store.
+Partial application mechanism proved to be useful with regard to defining `Xml` property (lines 7,9,11,13,15).
+`input` function took following arguments (in order):
+
+* `'a -> Expr<'b>` - function for pointing out a proper field from the record type
+* `(string * string) list` - additional attributes to be used for HTML `input` element (not used in above snippet)
+* `Form<'a>` - definition of the form of type `'a`
+
+Because the `input` function was being invoked with only 2 parameters, the last `Form<'a>` argument became curried.
+As a result, return type of the partial application on `input` function was `Form<'a> -> Suave.Html.Xml`, which turned out to match exactly the expected type for `Xml` property.
+
+#### Processing form on server
 
 #### Summary
 
