@@ -988,10 +988,11 @@ It reflected a form with following fields:
 * `ConfirmPassword` - the same as above, but used to prevent user from mistyping the passwords
 * `YearOfBirth` - optional field of type `decimal option` that could be used for recommending appropriate albums
 
-TODO : Details for below
+Next thing that the module supported was declaring certain validation of the fields.
+For the `Register` form, below snippet served as validation logic:
 
 ```fsharp
-let pattern = @"(\w){6,20}"
+let pattern = @"^\w{6,20}$"
 
 let passwordsMatch =
     (fun f -> f.Password = f.ConfirmPassword), "Passwords must match"
@@ -1001,6 +1002,48 @@ let register : Form<Register> =
             PasswordProp ((fun f -> <@ f.Password @>), [ passwordRegex pattern ] )
             PasswordProp ((fun f -> <@ f.ConfirmPassword @>), [ passwordRegex pattern ] )
             ],[ passwordsMatch ])```
+
+Actual declaration of the `Register` form occurred in line 6.
+It consisted of single union case `Form` with two lists as its arguments: 
+
+* first list (lines 7-9) contained validation rules that could be used both on client and server side
+* second list (line 10) with a single element `passwordsMatch` accommodated additional validations that could be performed only on server side
+
+The server side validation functions had to be of type `('t -> bool) * string`.
+This meant a tuple of predicate function and `string` message that would be used in case of violation of that rule.
+Argument of the predicate function was a record enclosing form fields, which in case of `Register` allowed to query for and compare `Password` with `ConfirmPassword` fields.
+Such server-side only validation rules could be used for logic that could not be easily expressed without any JavaScript code on the client side.
+Indeed, in the above example it was impossible to compare two fields on client side without having to write additional script.
+
+Validation rules from the first list could be used both for client and server side, as they involved just a single field.
+Thanks to new `input` element attributes in HTML5 standard, such as `maxlength` or `pattern`, client-side validation could be achieved.
+The rules shown in above snippet are either `TextProp` or `PasswordProp` (property) meaning that they concern text field or password field respectively.
+First argument of the property was a function that made use of F# feature called **quotations**.
+F# quotations allow the capture of type-checked expressions as structured terms (...) that can then be interpreted, analyzed and compiled to alternative languages {{{syme2006leveraging}}}.
+TODO HERE: descirbe props
+
+Regular expression pattern defined in first line, matches a string of alphanumeric characters (or underscore) which length is at least 6 and at most 20.
+This regular expression designated possible passwords for newly coming users.
+
+```fsharp
+renderForm
+    { Form = Form.register
+      Fieldsets = 
+          [ { Legend = "Create a New Account"
+              Fields = 
+                  [ { Label = "User name (max 30 characters)"
+                      Xml = input (fun f -> <@ f.Username @>) [] }
+                    { Label = "Email address"
+                      Xml = input (fun f -> <@ f.Email @>) [] }
+                    { Label = "Year of birth"
+                      Xml = input (fun f -> <@ f.YearOfBirth @>) [] }
+                    { Label = "Password (between 6 and 20 characters)"
+                      Xml = input (fun f -> <@ f.Password @>) [] }
+                    { Label = "Confirm password"
+                      Xml = input (fun f -> <@ f.ConfirmPassword @>) [] } ] } ]
+      SubmitText = "Register" }```
+
+#### Summary
 
 ### Rest of features
 
