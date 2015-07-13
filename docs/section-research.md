@@ -1091,12 +1091,53 @@ Partial application mechanism proved to be useful with regard to defining `Xml` 
 * `(string * string) list` - additional attributes to be used for HTML `input` element (not used in above snippet)
 * `Form<'a>` - definition of the form of type `'a`
 
-Because the `input` function was being invoked with only 2 parameters, the last `Form<'a>` argument became curried.
-As a result, return type of the partial application on `input` function was `Form<'a> -> Suave.Html.Xml`, which turned out to match exactly the expected type for `Xml` property.
+Because the `input` function was being invoked with only 2 parameters, the last `Form<'a>` argument got curried.
+As a result of partial application on `input` function, the return type was `Form<'a> -> Suave.Html.Xml`, which turned out to match exactly the expected type for `Xml` property.
 
 #### Processing form on server
 
+Having served proper HTML markup, an actual handler for registering users could be defined:
+
+```fsharp
+let register =
+    choose [
+        GET >>= (View.register "" |> html)
+        POST >>= bindToForm Form.register (fun form ->
+            let ctx = Db.getContext()
+            match Db.getUser form.Username ctx with
+            | Some existing -> 
+                View.register "Sorry this username is already taken. Try another one." |> html
+            | None ->
+                let (Password password) = form.Password
+                let email = form.Email.Address
+                let user = Db.newUser (form.Username, passHash password, email) ctx
+                authenticateUser user
+        )
+    ]```
+
+Handler for POST requests to "/user/register" route was defined in line 4.
+It employed the `bindToForm` function, which was part of the created form utility module.
+Intent of `bindToForm` was to parse the request body, encoded in standard form's way, into a corresponding type determined by the first argument of `bindToForm`.
+In this case the argument was `Form.register` which meant that the parser looked for field names such as `Username`, `Email` or `Password`.
+After successful extraction of values for those fields, the parser would try to parse the values to proper types.
+At the end of the day, if request body was not malformed, instance of `Register` type would be created and passed (`form` in line 4) into function which was second argument of `bindToForm`.
+The function's type was `'a -> WebPart` where `'a` was the type of form.
+In case of parsing failures, `bindToForm` would return 400 Bad Request status code with an informative message on which part could not be processed.
+
+#### Forms in ASP.NET MVC
+
+End to end form data handling with validation in ASP.NET MVC framework works in declarative fashion as well.
+It usually does so with the help of appropriate annotations on members of a class.
+For the client-side validation rules it makes use of quite complex JavaScript code.
+In addition to that, it utilizes concept of "scaffolding", which automatically generates corresponding forms for creating and editing an entity.
+While quite extensive and heavy-weight, the mechanism of creating forms with ASP.NET MVC framework meets the challenge.
+
 #### Summary
+
+Suave framework with its concise nature did not ship with a ready-to-use form handling utility.
+Thanks to Suave being highly composable, it was opportune to create a form utility module that could fit into the WebPart pipeline.
+With the help of a few features in F# language, the module managed to be reusable in declarative and succinct way.
+Also, it turned out to be a fascinating experience to be able to contribute to the Suave framework by sharing implementation of the module.
 
 ### Rest of features
 
