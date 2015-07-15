@@ -28,19 +28,42 @@ Main actions performed in imperative paradigm are updating statements, jumps and
 First programming languages were machine languages, which offered Application Programming Interface (API) consisting of registers manipulation, jump instructions, basic arithmetic and logic operators.
 The machine languages followed thus imperative paradigm, which was the only known approach back then.
 Building complex systems with machine code usually resulted in enormous code bases, which turned out to be painful to maintain.
-That is why higher level languages were introduced, such as FORTRAN, ALGOL, COBOL and BASIC, all of which can also be considered imperative.
+
+That is why in the late 50s and in the beginning of 60s higher level languages were introduced, such as FORTRAN, ALGOL, COBOL and BASIC, all of which can be considered imperative.
 They aimed to reduce the cost of code maintainability in comparison to machine languages by abstracting set of machine code instructions with more human-readable statements.
 
-In 1970s, languages like Pascal or C were created.
+In 70s, languages like Pascal or C were created.
+While Pascal served mainly for educational purposes, C language quickly became a mainstream programming language and at the time of the writing still remains one of the most popular in ranks {{{tiobeindex}}}.
+With its distinctive syntax, C originated a whole family of languages, commonly known as "C-based syntax" languages.
+Such constructs as `for` and `while` loops with their syntax proposed by C, are the most basic building blocks for an imperative program in majority of contemporary languages.
 
-Together with the 1980s, growing interest in object-oriented approach came.
-Smalltalk, C++
+Together with the 80s came a growing interest in object-oriented approach, which also has it roots in imperative approach.
+From the imperative category, Smalltalk and C++ were invented, the latter being "extension" to the C language with object concept among its new features.
 
-Python, Visual Basic, PHP, Java, Ruby in 1990s.
-
-Millennium - C#, 
+The imperative approach evolved since then, with languages like Python, Visual Basic, PHP, Java, Ruby developed in the 90s and C# after the Millennium.
+Despite some of these languages aimed to target multiple paradigms, the concept of building program's flow step by step, with the help of statements, remained ubiquitous.
 
 #### Example
+
+Following listing is inspired by {{{imperativevsfunctional}}} and presents how a strictly imperative approach is used with C# language:
+
+```csharp
+var errors = new List<String>();
+var errorCount = 0;
+using (var reader = File.OpenText("log"))
+{
+    var line = reader.ReadLine();
+    while (errorCount < 10 && line != null)
+    {
+        if (line.StartsWith("[ERROR]"))
+        {
+            errors.Add(line);
+            errorCount++;
+        }
+        line = reader.ReadLine();
+    }
+}
+```
 
 Declarative
 -----------
@@ -53,6 +76,18 @@ Object-Oriented
 
 Functional
 ----------
+
+#### History
+
+#### Example
+
+```csharp
+var errors = 
+    File.ReadAllLines("log")
+        .Where(line => line.StartsWith("[ERROR]"))
+        .Take(10)
+        .ToList();
+```
 
 Impact of paradigm choice
 -------------------------

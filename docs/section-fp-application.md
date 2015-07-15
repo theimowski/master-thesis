@@ -1,9 +1,6 @@
 APPLICATION OF FUNCTIONAL PROGRAMMING
 ======================================
 
-Brief history
--------------
-
 Popular languages
 -----------------
 
