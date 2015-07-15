@@ -111,9 +111,11 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
   stringstyle=\color{redstrings},
 }
 
-
 \lstnewenvironment{mylisting}[3][]
   {
+    \noindent
+    \minipage{\linewidth} 
+    \vspace{0.5\baselineskip}
     \lstset{
         language=#1,
         basicstyle=\ttfamily,
@@ -124,8 +126,7 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
         caption=#2,
         label=#3}
   }
-  {
-  }
+  {\endminipage}
 
 
 
@@ -152,8 +153,8 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
 \bibliography{bibliography}
 
 \clearpage
-\addcontentsline{toc}{section}{LIST OF FIGURES}
-\listoffigures
+\addcontentsline{toc}{section}{LISTINGS}
+\lstlistoflistings
 
 \clearpage
 \addcontentsline{toc}{section}{LIST OF TABLES}

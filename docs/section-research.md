@@ -83,7 +83,8 @@ The most important building block in Suave is **WebPart**.
 It is a basic unit of composition in the framework - when combining two smaller WebParts together, another WebPart gets created.
 WebPart is a **type alias** for the following: 
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 HttpContext -> Async<HttpContext option>```
 
 The above notation describes a function from `HttpContext` to `Async<HttpContext option>`.
@@ -106,12 +107,14 @@ Thanks to that, it is hardly possible to get a Null Reference exception in F# co
 `Option` type is commonly in F# used to model a property that may or may not have a value.
 If a property has value, then it is `Some`:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let x: int option = Some 28 (* there is value 28 *)```
 
 Otherwise, it is `None`:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let x: int option = None (* there is no value *)```
 
 In context of WebPart, `Option` determines whether a result should be applied.
@@ -124,7 +127,8 @@ In addition to that, the return value is surrounded with asynchronous computatio
 
 The simplest possible WebPart can be defined following:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let webPart = OK "Hello World!"```
 
 The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response:
@@ -134,7 +138,8 @@ The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP respo
 
 Such WebPart can now be used to start an HTTP server using default configuration:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 startWebServer defaultConfig webPart```
 
 From the above snippets it is evident that Suave allows to build Web applications in a very succinct way and does not require too much ceremony.
@@ -145,7 +150,8 @@ Routing is a basic concept of Web Development.
 It allows to delegate request handling to a specific component based on the request URL path.
 Below is a snippet which shows how routing for the Music Store can be implemented in Suave:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let browse =
     request (fun r ->
         match r.queryParam "genre" with
@@ -248,7 +254,8 @@ Indeed the HTML DSL in Suave relies on creating XML tree and formatting it to pl
 
 Below follows a code snippet that shows how a basic HTML page for Music Store has been defined:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let index = 
     html [
         head [
@@ -271,7 +278,8 @@ let index =
 
 Result of the above snippet is the following HTML markup:
 
-```html
+```xxx
+{HTML]{Caption placeholder}{rerffff}
 <html>
     <head>
         <title>Suave Music Store</title>
@@ -293,7 +301,8 @@ As the example showed static content, no real benefits were gained from using a 
 Such benefits arise when there is need to display some kind of data model in a view.
 In Music Store, this can be demonstrated by rendering page for list of genres:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let store genres = [
     h2 "Browse Genres"
     p [
@@ -346,7 +355,8 @@ Folding comes also from the functional background.
 In fact, every functional programming defines `fold` in its core library function suite.
 Type signature for the one in F# is following:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
 
 `List.fold` calculates result `'State` from the initial `'State` and list of `'T` elements.
@@ -387,7 +397,8 @@ As the name suggests, it provides types for a relational database schema.
 This means that no Object-Relational Mapping libraries or hand-rolled models are needed to implement Data Access Layer.
 To use SQL Provider in Music Store, it is only necessary to deliver a SQL connection string to the Type Provider:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 type Sql = 
     SqlDataProvider< 
         "Server=(LocalDb)\\v11.0;Database=SuaveMusicStore;Trusted_Connection=True", 
@@ -398,7 +409,8 @@ In Music Store, types for both database tables and views will be used.
 
 Following is a snippet for defining type aliases for the generated (provided) types:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 // database context
 type DbContext      = Sql.dataContext
 
@@ -421,7 +433,8 @@ The last 3 type aliases (lines 12-14) represent database views which will be use
 
 Queries can be constructed with SQL Provider like following:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
 let getGenres (ctx : DbContext) : Genre list = 
@@ -487,7 +500,8 @@ As a part of administration management module, following features were implement
 
 For the sake of new album feature, `createAlbum` WebPart was created:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let createAlbum =
     let ctx = Db.getContext()
     choose [
@@ -532,7 +546,8 @@ Browsers treat 302 status code as a signal to issue another request to the URL d
 Next feature implemented in the administration management module was editing an existing album.
 WebPart for this functionality was placed in following snippet: 
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let editAlbum id =
     let ctx = Db.getContext()
     match Db.getAlbum id ctx with
@@ -564,7 +579,8 @@ Similar set of steps as in the previously described `createAlbum` WebPart were f
 In addition to that, `editAlbum` took a parameter `id` of type `int` to identify a proper album.
 It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easily and gracefully with a typed route WebPart:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 pathScan "/admin/edit/%d" editAlbum```
 
 Because there is no guarantee that an album with a given `id` exists, `Db.getAlbum` (line 3) had to be invoked, and two cases handled.
@@ -579,7 +595,8 @@ Last functionality added to the administration management module was deleting an
 After an album is deleted, it is no longer available in the Music Store for users to buy.
 Implementation of this action required following code:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let deleteAlbum id =
     let ctx = Db.getContext()
     match Db.getAlbum id ctx with
@@ -606,7 +623,8 @@ Logic for POST WebPart invoked proper action on `Db` module, and returned redire
 Both POST and GET WebParts had to be surrounded with `warbler`s, because eager evaluation would cause unwanted effects.
 Again, as was the case with editing album, the `deleteAlbum` composed nicely with the typed route:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 pathScan "/admin/delete/%d" deleteAlbum```
 
 #### Summary
@@ -635,7 +653,8 @@ From the database point of view both anonymous cart identifier and user's name w
 
 In order to model possible session states, following types were declared:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 type UserLoggedOnSession = {
     Username : string
     Role : string
@@ -670,7 +689,8 @@ It consisted of three possible cases:
 Main reason for creating this type in Music Store was to achieve a unified way of determining user state.
 For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let session f = 
     statefulForSession
     >>= context (fun x -> 
@@ -697,7 +717,8 @@ Result of pattern matching block was applied (or colloquially "piped") to functi
 
 Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let addToCart albumId =
     let ctx = Db.getContext()
     session (function
@@ -722,20 +743,23 @@ If that was the case, cartId was sufficient to perform the `Db.addToCart` action
 A syntactic sugar has been used for pattern matching construct, which comes handy when declaring a one-argument function that immediately pattern matches on this argument.
 Instead of:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let f x =
     match x with
     | ... -> ```
 
 One can write:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let f = function 
     | ... ->```
 
 Another example on `Session` type usage looked following:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let cart = 
     session (function
     | NoSession -> View.emptyCart |> html
@@ -783,7 +807,8 @@ This mechanism should always be accompanied with SSL encryption, meaning that HT
 For the sake of simplicity, SSL encryption is not covered in Music Store application.
 Snippet below shows how basic form authentication was implemented in Music Store:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let returnPathOrHome = 
     request (fun x -> 
         let path = 
@@ -836,7 +861,8 @@ Otherwise (line 6), the redirection would be made to the main page, `Path.home`.
 
 Below functions were necessary to verify if incoming request is authenticated:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let redirectWithReturnPath redirection =
     request (fun x ->
         let path = x.url.AbsolutePath
@@ -869,7 +895,8 @@ That could potentially mean a malicious request, that is why 400 Bad Request sta
 One of the actions that required being logged on to the Music Store was checking out the cart with albums.
 To apply `loggedOn` validation on a WebPart (`checkout` in this case), those two could be composed like following:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 path "/cart/checkout" >>= loggedOn checkout```
 
 #### Authorization 
@@ -888,7 +915,8 @@ There was only one predefined user with "admin" role and the same name.
 
 Following WebPart was implemented to allow only authorized users to a specific handler:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let admin f_success =
     loggedOn (session (function
         | UserLoggedOn { Role = "admin" } -> f_success
@@ -910,7 +938,8 @@ Once again, the HTTP status code names for 401 and 403 may sound confusing in co
 
 Composing `admin` function with other WebParts looked like the following:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 path "/admin/manage" >>= admin manage
 path "/admin/create" >>= admin createAlbum
 pathScan "/admin/edit/%d" (fun id -> admin (editAlbum id))
@@ -960,7 +989,8 @@ Even more inviting experience was that the written modules were accepted as part
 The prepared functionality aimed to target all of the steps enlisted above.
 It was designed to do so in a declarative way, by providing strongly typed access to values of form fields:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 type Register = {
     Username : string
     Email : MailAddress
@@ -995,7 +1025,8 @@ It reflected a form with following fields:
 Next thing that the module supported was declaring certain validation of the fields.
 For the `Register` form, below snippet served as validation logic:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let pattern = @"^\w{6,20}$"
 
 let passwordsMatch =
@@ -1043,7 +1074,8 @@ This regular expression designated possible passwords for newly coming users.
 Music Store application consisted of a few forms, and all of them followed similar layout.
 In order to unify way of rendering the forms in HTML markup, following types were defined for structuring form layout: 
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 type Field<'a> = {
     Label : string
     Xml : Form<'a> -> Suave.Html.Xml
@@ -1065,7 +1097,8 @@ Rest of record type properties are rather self-explanatory.
 
 With help of the `FormLayout` type, the `Register` form as defined earlier could be then used to render a corresponding HTML markup:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 renderForm
     { Form = Form.register
       Fieldsets = 
@@ -1098,7 +1131,8 @@ As a result of partial application on `input` function, the return type was `For
 
 Having served proper HTML markup, an actual handler for registering users could be defined:
 
-```fsharp
+```xxx
+{FSharp]{Caption placeholder}{rerffff}
 let register =
     choose [
         GET >>= (View.register "" |> html)
