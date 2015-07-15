@@ -33,6 +33,13 @@ They aimed to reduce the cost of code maintainability in comparison to machine l
 
 In 1970s, languages like Pascal or C were created.
 
+Together with the 1980s, growing interest in object-oriented approach came.
+Smalltalk, C++
+
+Python, Visual Basic, PHP, Java, Ruby in 1990s.
+
+Millennium - C#, 
+
 #### Example
 
 Declarative
