@@ -47,6 +47,10 @@ let numberSections filePath =
     let replaced = Regex.Replace(replaced, "\\\{\\\{\\\{([\w+, ]+)\\\}\\\}\\\}", "\cite{$1}")
     let replaced = Regex.Replace(replaced, "---([\w+ ]+)---", "\\begin{table}[h]\\caption{$1}\\centering\\setlength\\extrarowheight{2pt}")
     let replaced = replaced.Replace("\end{tabular}", "\end{tabular}\end{table}")
+
+    let replaced = replaced.Replace( "\\begin{lstlisting}\n", "\\begin{mylisting}")
+    let replaced = replaced.Replace( "\\end{lstlisting}", "\\end{mylisting}")
+
     File.WriteAllText(filePath, replaced)
 
 CreateDir outputDir

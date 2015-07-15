@@ -47,7 +47,8 @@ Despite some of these languages aimed to target multiple paradigms, the concept 
 
 Following listing is inspired by {{{imperativevsfunctional}}} and presents how a strictly imperative approach is used with C# language:
 
-```csharp
+```xxx 
+[C]{Useless code}{useless}
 var errors = new List<String>();
 var errorCount = 0;
 using (var reader = File.OpenText("log"))
@@ -62,8 +63,7 @@ using (var reader = File.OpenText("log"))
         }
         line = reader.ReadLine();
     }
-}
-```
+}```
 
 Declarative
 -----------
@@ -81,13 +81,15 @@ Functional
 
 #### Example
 
-```csharp
+Placeholder text
+
+```xxx
+[C]{Even more usefull code}{usefull}
 var errors = 
     File.ReadAllLines("log")
         .Where(line => line.StartsWith("[ERROR]"))
         .Take(10)
-        .ToList();
-```
+        .ToList();```
 
 Impact of paradigm choice
 -------------------------
