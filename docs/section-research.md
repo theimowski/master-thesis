@@ -81,10 +81,10 @@ Following this pattern, one can get eventually end up with a complex function (b
 
 The most important building block in Suave is **WebPart**.
 It is a basic unit of composition in the framework - when combining two smaller WebParts together, another WebPart gets created.
-WebPart is a **type alias** for the following: 
+WebPart is a **type alias** defined in listing {{fswebpartalias}}: 
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Type alias for WebPart}{fswebpartalias}
 HttpContext -> Async<HttpContext option>```
 
 The above notation describes a function from `HttpContext` to `Async<HttpContext option>`.
@@ -105,16 +105,16 @@ The compiler prevents from doing that by issuing a compile-time error.
 Thanks to that, it is hardly possible to get a Null Reference exception in F# code (when no interoperability or reflection is used).
 
 `Option` type is commonly in F# used to model a property that may or may not have a value.
-If a property has value, then it is `Some`:
+If a property has value, then it is `Some`, like shown in listing {{fsoptionsome}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{FSharp Option type - Some value}{fsoptionsome}
 let x: int option = Some 28 (* there is value 28 *)```
 
-Otherwise, it is `None`:
+As opposed, listing {{fsoptionnone}} presents the `None` value.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{FSharp Option type - None}{fsoptionnone}
 let x: int option = None (* there is no value *)```
 
 In context of WebPart, `Option` determines whether a result should be applied.
@@ -125,10 +125,10 @@ In addition to that, the return value is surrounded with asynchronous computatio
 
 #### Example
 
-The simplest possible WebPart can be defined following:
+The simplest possible WebPart can be defined as in listing {{fswebparthello}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{WebPart - hello world example}{fswebparthello}
 let webPart = OK "Hello World!"```
 
 The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response:
@@ -136,10 +136,10 @@ The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP respo
 * 200 OK status code
 * "Hello World!" response body content
 
-Such WebPart can now be used to start an HTTP server using default configuration:
+Such WebPart can now be used to start an HTTP server using default configuration (listing {{fssuavebootstrap}}).
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Bootstrap code for Suave}{fssuavebootstrap}
 startWebServer defaultConfig webPart```
 
 From the above snippets it is evident that Suave allows to build Web applications in a very succinct way and does not require too much ceremony.
@@ -148,10 +148,10 @@ From the above snippets it is evident that Suave allows to build Web application
 
 Routing is a basic concept of Web Development.
 It allows to delegate request handling to a specific component based on the request URL path.
-Below is a snippet which shows how routing for the Music Store can be implemented in Suave:
+Listing {{fssuaverouting}} shows how routing for the Music Store can be implemented in Suave.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Routing in Suave}{fssuaverouting}
 let browse =
     request (fun r ->
         match r.queryParam "genre" with
@@ -252,10 +252,10 @@ Based on the above definition, HTML DSL available in Suave could be categorized 
 HTML markup can be a valid XML markup, under the condition that all element tags are closed.
 Indeed the HTML DSL in Suave relies on creating XML tree and formatting it to plain text.
 
-Below follows a code snippet that shows how a basic HTML page for Music Store has been defined:
+Listing {{fssuaveindexpage}} shows how a basic HTML page for Music Store was defined.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Rendering index page with Suave HTML DSL}{fssuaveindexpage}
 let index = 
     html [
         head [
@@ -276,10 +276,10 @@ let index =
         ]
     ]```
 
-Result of the above snippet is the following HTML markup:
+In result of evaluating code from listing {{fssuaveindexpage}}, HTML markup presented in listing {{htmlsuaveindexpage}} is returned.
 
 ```xxx
-{HTML]{Caption placeholder}{rerffff}
+{HTML]{HTML markup for index page}{htmlsuaveindexpage}
 <html>
     <head>
         <title>Suave Music Store</title>
@@ -299,10 +299,10 @@ Thanks to that it should be relatively easy for an HTML developer who is not fam
 
 As the example showed static content, no real benefits were gained from using a DSL instead of plain HTML.
 Such benefits arise when there is need to display some kind of data model in a view.
-In Music Store, this can be demonstrated by rendering page for list of genres:
+In Music Store, this can be demonstrated by rendering page for list of genres, as shown in listing {{fssuavestoreview}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Rendering page with a given data parameter}{fssuavestoreview}
 let store genres = [
     h2 "Browse Genres"
     p [
@@ -315,7 +315,7 @@ let store genres = [
     ]
 ]```
 
-The `store` function in snippet returns a list of nodes, which can then be passed as an argument to the `index` function defined earlier and displayed in a container between header and footer.
+The `store` function in listing {{fssuavestoreview}} returns a list of nodes, which can then be passed as an argument to the `index` function defined earlier and displayed in a container between header and footer.
 First node (line 2) is a standalone `h2` element with "Browse Genres" sign.
 
 The second node (lines 3-5) is a paragraph that displays number of all genres in the Store.
@@ -353,10 +353,10 @@ Immutability is one of the major concept of functional programming itself, that 
 In order to obtain certain state in Event Sourcing, **fold** operation is performed on the stored events.
 Folding comes also from the functional background.
 In fact, every functional programming defines `fold` in its core library function suite.
-Type signature for the one in F# is following:
+Type signature for the one in F# is presented in listing {{fsfoldsignature}}:
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Fold function signature in FSharp}{fsfoldsignature}
 List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
 
 `List.fold` calculates result `'State` from the initial `'State` and list of `'T` elements.
@@ -395,22 +395,22 @@ The feature is quite unique - apart from Idris, no other programming language ha
 Among various Type Provider libraries there is one called **SQL Provider**. 
 As the name suggests, it provides types for a relational database schema.
 This means that no Object-Relational Mapping libraries or hand-rolled models are needed to implement Data Access Layer.
-To use SQL Provider in Music Store, it is only necessary to deliver a SQL connection string to the Type Provider:
+To use SQL Provider in Music Store, it is only necessary to deliver a SQL connection string to the Type Provider (listing {{fssqlproviderdef}}).
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Providing types for SQL connection in FSharp}{fssqlproviderdef}
 type Sql = 
     SqlDataProvider< 
         "Server=(LocalDb)\\v11.0;Database=SuaveMusicStore;Trusted_Connection=True", 
         DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >```
 
-This code executes proper queries against the given connection and generates necessary types in the background.
+This code in listing {{fssqlproviderdef}} executes proper queries against the given connection and generates necessary types in the background.
 In Music Store, types for both database tables and views will be used.
 
-Following is a snippet for defining type aliases for the generated (provided) types:
+Listing {{fssqlprovideraliases}} defines type aliases for the generated (provided) types.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Defining type aliases for SQL Provider}{fssqlprovideraliases}
 // database context
 type DbContext      = Sql.dataContext
 
@@ -431,10 +431,10 @@ The last 3 type aliases (lines 12-14) represent database views which will be use
 
 #### Database queries
 
-Queries can be constructed with SQL Provider like following:
+Queries can be constructed with SQL Provider like shown in listing {{fssqlproviderqueries}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Constructing queries with SQL Provider}{fssqlproviderqueries}
 let firstOrNone s = s |> Seq.tryFind (fun _ -> true)
 
 let getGenres (ctx : DbContext) : Genre list = 
@@ -498,10 +498,10 @@ As a part of administration management module, following features were implement
 
 #### Creating album
 
-For the sake of new album feature, `createAlbum` WebPart was created:
+For the sake of new album feature, listing {{fsmusiccreatealbum}} was utilized.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Music Store - creating album}{fsmusiccreatealbum}
 let createAlbum =
     let ctx = Db.getContext()
     choose [
@@ -544,10 +544,10 @@ Browsers treat 302 status code as a signal to issue another request to the URL d
 #### Editing album
 
 Next feature implemented in the administration management module was editing an existing album.
-WebPart for this functionality was placed in following snippet: 
+WebPart for this functionality was placed in listing {{fsmusiceditalbum}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Music Store - editing album}{fsmusiceditalbum}
 let editAlbum id =
     let ctx = Db.getContext()
     match Db.getAlbum id ctx with
@@ -569,7 +569,7 @@ let editAlbum id =
     | None -> 
         never```
 
-Similar set of steps as in the previously described `createAlbum` WebPart were followed in `editAlbum`:
+Similar set of steps as in listing {{fsmusiccreatealbum}} were followed in listing {{fsmusiceditalbum}}:
 
 * instantiation the database context
 * distinction between two allowed HTTP methods: GET and POST
@@ -577,26 +577,27 @@ Similar set of steps as in the previously described `createAlbum` WebPart were f
 * in case of POST, update action performed on the database and redirection to main management page 
 
 In addition to that, `editAlbum` took a parameter `id` of type `int` to identify a proper album.
-It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easily and gracefully with a typed route WebPart:
 
-```xxx
-{FSharp]{Caption placeholder}{rerffff}
-pathScan "/admin/edit/%d" editAlbum```
-
-Because there is no guarantee that an album with a given `id` exists, `Db.getAlbum` (line 3) had to be invoked, and two cases handled.
+Because there is no guarantee that an album with a given `id` exists, `Db.getAlbum` (line 3) in listing {{fsmusiceditalbum}} had to be invoked, and two cases handled.
 The `Db.getAlbum` was designed to return `Album option`, that's why a pattern matching could be employed in the example.
 In case the `id` was correct and album was found (`Some album`), `choose` WebPart (line 5) would apply
 Otherwise, if `Db.getAlbum` turned out to return `None` (album was not found) then `never` (line 20) WebPart would have been used.
 WebPart `never` always "fails" (returns `None`), causing the composed typed route to return `None` as well and mark the WebPart as not applicable for such request.
 
+It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easily and gracefully with a typed route WebPart, as presented in listing {{fssuavetypedroute}}.
+
+```xxx
+{FSharp]{Composing typed route in Suave - edit album}{fssuavetypedroute}
+pathScan "/admin/edit/%d" editAlbum```
+
 #### Deleting album
 
 Last functionality added to the administration management module was deleting an album.
 After an album is deleted, it is no longer available in the Music Store for users to buy.
-Implementation of this action required following code:
+Implementation of this action required code from listing {{fsmusicdeletealbum}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Music Store - deleting album}{fsmusicdeletealbum}
 let deleteAlbum id =
     let ctx = Db.getContext()
     match Db.getAlbum id ctx with
@@ -621,10 +622,10 @@ Sending a POST request confirmed the deletion.
 The user could also navigate away from the confirmation page, or move back in browsing history, which would not affect the album in question.
 Logic for POST WebPart invoked proper action on `Db` module, and returned redirection WebPart afterwards (the same as in `editAlbum`).
 Both POST and GET WebParts had to be surrounded with `warbler`s, because eager evaluation would cause unwanted effects.
-Again, as was the case with editing album, the `deleteAlbum` composed nicely with the typed route:
+Again, as was the case with editing album, the `deleteAlbum` composed nicely with the typed route (listing {{fssuavetypedroute2}}).
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Composing typed route in Suave - delete album}{fssuavetypedroute2}
 pathScan "/admin/delete/%d" deleteAlbum```
 
 #### Summary
@@ -651,10 +652,10 @@ If user was authenticated, session consisted of the user's name as well as role.
 The first proved helpful for displaying a greeting at the very top of the page, and the second was used for authorization.
 From the database point of view both anonymous cart identifier and user's name were used for "cartId" database table row.
 
-In order to model possible session states, following types were declared:
+In order to model possible session states, types from listing {{fsmusicsessiontype}} were declared.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Modelling session in Music Store}{fsmusicsessiontype}
 type UserLoggedOnSession = {
     Username : string
     Role : string
@@ -687,10 +688,10 @@ It consisted of three possible cases:
 * `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type)
 
 Main reason for creating this type in Music Store was to achieve a unified way of determining user state.
-For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined:
+For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined in listing {{fsmusicsessionfun}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Determining session state in Music Store}{fsmusicsessionfun}
 let session f = 
     statefulForSession
     >>= context (fun x -> 
@@ -715,10 +716,10 @@ A pattern matching on a triple (tuple with three values) of user's state keys ma
 
 Result of pattern matching block was applied (or colloquially "piped") to function `f` (line 11), which came as an argument to `session` and had a type of `Session -> WebPart`. 
 
-Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner:
+Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner, with one example shown in listing {{fsmusicaddtocart}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Session in Music Store - adding to cart}{fsmusicaddtocart}
 let addToCart albumId =
     let ctx = Db.getContext()
     session (function
@@ -741,25 +742,23 @@ In order to express such logic, a double-matching pattern was used (line 9).
 If that was the case, cartId was sufficient to perform the `Db.addToCart` action, and there was no need to generate new GUID.
 
 A syntactic sugar has been used for pattern matching construct, which comes handy when declaring a one-argument function that immediately pattern matches on this argument.
-Instead of:
+Listing {{fspatternmatchsugar}} shows how the syntactic sugar can be used to make the code more concise.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Caption placeholder}{fspatternmatchsugar}
+// standard syntax
 let f x =
     match x with
+    | ... ->
+
+// shortcut "syntactic sugar" syntax
+let f = function 
     | ... -> ```
 
-One can write:
+Another example on `Session` type usage is presented in listing {{fsmusicviewcart}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
-let f = function 
-    | ... ->```
-
-Another example on `Session` type usage looked following:
-
-```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Session in Music Store - viewing the cart}{fsmusicviewcart}
 let cart = 
     session (function
     | NoSession -> View.emptyCart |> html
@@ -767,7 +766,7 @@ let cart =
         let ctx = Db.getContext()
         Db.getCartsDetails cartId ctx |> View.cart |> html)```
 
-In the snippet, `cart` WebPart was declared.
+In listing {{fsmusicviewcart}}, `cart` WebPart was declared.
 Its purpose was to display contents of the current user's cart.
 In case he did not have any session attached (and no albums in cart), the user was shown a `View.emptyCart` page.
 That page had to encourage the user to do the shopping.

@@ -50,6 +50,7 @@ let numberSections filePath =
 
     let replaced = replaced.Replace( "\\begin{lstlisting}\n{", "\n\n\\begin{mylisting}[")
     let replaced = replaced.Replace( "\\end{lstlisting}", "\\end{mylisting}\n\n")
+    let replaced = Regex.Replace(replaced, "\\\{\\\{([\w+, ]+)\\\}\\\}", "\\ref{$1}")
 
     File.WriteAllText(filePath, replaced)
 

@@ -45,10 +45,10 @@ Despite some of these languages aimed to target multiple paradigms, the concept 
 
 #### Example
 
-Following listing is inspired by {{{imperativevsfunctional}}} and presents how a strictly imperative approach is used with C# language:
+Listing {{csparadigmimperative}} is inspired by {{{imperativevsfunctional}}} and presents how a strictly imperative approach is used with C# language:
 
 ```xxx
-{C]{Useless code}{useless}
+{C]{Example of imperative approach in CSharp}{csparadigmimperative}
 var errors = new List<String>();
 var errorCount = 0;
 using (var reader = File.OpenText("log"))
@@ -84,7 +84,7 @@ Functional
 Placeholder text
 
 ```xxx
-{C]{Even more usefull code}{usefull}
+{C]{Example of functional approach in CSharp}{csparadigmfunctional}
 var errors = 
     File.ReadAllLines("log")
         .Where(line => line.StartsWith("[ERROR]"))
