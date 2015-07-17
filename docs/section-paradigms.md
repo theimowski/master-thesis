@@ -20,13 +20,13 @@ Imperative
 Imperative word looked up in a dictionary means "giving a command".
 That definition summarizes what really imperative programming is all about.
 When writing software in imperative paradigm, one gives commands to the computer and tells it what to do.
-It is based on implicit modification of program state in order to achieve the desired goal.
+It is based on explicit modification of program state in order to achieve a desired goal.
 Main actions performed in imperative paradigm are updating statements, jumps and intermediate input / output, which spoil referential transparency by introducing the possibility of "side effects" or transfers of control during expression evaluations {{{tennent1976denotational}}}.
 
 #### History
 
 First programming languages were machine languages, which offered Application Programming Interface (API) consisting of registers manipulation, jump instructions, basic arithmetic and logic operators.
-The machine languages followed thus imperative paradigm, which was the only known approach back then.
+Machine languages are the precursors of imperative programming, despite the fact that the concept of paradigms was not yet born back then.
 Building complex systems with machine code usually resulted in enormous code bases, which turned out to be painful to maintain.
 
 That is why in the late 50s and in the beginning of 60s higher level languages were introduced, such as FORTRAN, ALGOL, COBOL and BASIC, all of which can be considered imperative.
@@ -41,7 +41,7 @@ Together with the 80s came a growing interest in object-oriented approach, which
 From the imperative category, Smalltalk and C++ were invented, the latter being "extension" to the C language with object concept among its new features.
 
 The imperative approach evolved since then, with languages like Python, Visual Basic, PHP, Java, Ruby developed in the 90s and C# after the Millennium.
-Despite some of these languages aimed to target multiple paradigms, the concept of building program's flow step by step, with the help of statements, remained ubiquitous.
+Despite some of these languages aimed to target multiple paradigms, the concept of building program's flow step by step, with the help of commands, remained ubiquitous.
 
 #### Example
 
@@ -84,6 +84,16 @@ Another interesting thing to note in listing {{csparadigmimperative}} is separat
 
 Declarative
 -----------
+
+Declarative paradigm is an opposite to imperative with regards to how code is written.
+Program written in declarative style focuses on the **what** rather than **how**.
+This means that it does not specify exact low level instructions to be executed in a given order, but rather synthesizes a set of other components.
+It does so by declaring how the components relate to themselves, hence the name of the paradigm.
+As per Padawitz {{{padawitz2006deductive}}}, the term declarative is a combination of functional (applicative) and relational (logic) programming.
+
+#### History
+
+
 
 Procedural
 ----------
