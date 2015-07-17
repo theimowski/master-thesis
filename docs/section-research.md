@@ -745,7 +745,7 @@ A syntactic sugar has been used for pattern matching construct, which comes hand
 Listing {{fspatternmatchsugar}} shows how the syntactic sugar can be used to make the code more concise.
 
 ```xxx
-{FSharp]{Caption placeholder}{fspatternmatchsugar}
+{FSharp]{Syntactic sugar for pattern matching in FSharp}{fspatternmatchsugar}
 // standard syntax
 let f x =
     match x with
@@ -804,10 +804,10 @@ In Music Store, form authentication approach was applied.
 Form authentication relies on passing users credentials in request body, encoded with `application/x-www-form-urlencoded` Content-Type header (or `multipart/form-data` in some cases).
 This mechanism should always be accompanied with SSL encryption, meaning that HTTPS scheme should be used, because form authentication does not provide ad hoc encryption and the request body is often sent in plain text.
 For the sake of simplicity, SSL encryption is not covered in Music Store application.
-Snippet below shows how basic form authentication was implemented in Music Store:
+Listing {{fsmusiclogon}} shows how basic form authentication was implemented in Music Store.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Authentication in Music Store}{fsmusiclogon}
 let returnPathOrHome = 
     request (fun x -> 
         let path = 
@@ -858,10 +858,10 @@ WebPart `returnPathOrHome` (line 1) had a look inside the incoming request to fi
 If that was the case (line 5), then value of this parameter would determine to what location redirection should happen.
 Otherwise (line 6), the redirection would be made to the main page, `Path.home`.
 
-Below functions were necessary to verify if incoming request is authenticated:
+Functions from listing {{fsmusicisauthenticate}} were necessary to verify if incoming request is authenticated.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Helper functions for authentication}{fsmusicisauthenticate}
 let redirectWithReturnPath redirection =
     request (fun x ->
         let path = x.url.AbsolutePath
@@ -892,10 +892,10 @@ This meant that when someone tried to get to a resource without being authentica
 Line 11, on the other hand, was used when the cookie could not be decrypted with secrete server key.
 That could potentially mean a malicious request, that is why 400 Bad Request status code was chosen as a response.
 One of the actions that required being logged on to the Music Store was checking out the cart with albums.
-To apply `loggedOn` validation on a WebPart (`checkout` in this case), those two could be composed like following:
+To apply `loggedOn` validation on a `checkout` WebPart, those two could be composed like in lisiting {{fsmusiccomposeauthentication}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Composing authentication with other WebParts}{fsmusiccomposeauthentication}
 path "/cart/checkout" >>= loggedOn checkout```
 
 #### Authorization 
@@ -912,10 +912,10 @@ As an example, in Music Store there were 2 simple roles defined:
 New users that would register to the Music Store, got automatically the "user" role assigned.
 There was only one predefined user with "admin" role and the same name.
 
-Following WebPart was implemented to allow only authorized users to a specific handler:
+Function from listing {{fsmusicadminauth}} was implemented to allow only authorized users to a specific handler.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Authorize access for administrator in Music Store}{fsmusicadminauth}
 let admin f_success =
     loggedOn (session (function
         | UserLoggedOn { Role = "admin" } -> f_success
@@ -935,10 +935,10 @@ The last case behaved only like a safety net preventing compiler warnings, as th
 Once again, the HTTP status code names for 401 and 403 may sound confusing in context of this section.
 **401 Unauthorized** code in practice means that request is not **authenticated**, while **403 Forbidden** stands for being **authenticated**, but **unauthorized** to browse selected resource.
 
-Composing `admin` function with other WebParts looked like the following:
+Composing `admin` function with other WebParts looked like in listing {{fsmusiccomposingauthorization}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Composing authorization with other WebParts}{fsmusiccomposingauthorization}
 path "/admin/manage" >>= admin manage
 path "/admin/create" >>= admin createAlbum
 pathScan "/admin/edit/%d" (fun id -> admin (editAlbum id))
@@ -986,10 +986,10 @@ Even more inviting experience was that the written modules were accepted as part
 #### Declaration
 
 The prepared functionality aimed to target all of the steps enlisted above.
-It was designed to do so in a declarative way, by providing strongly typed access to values of form fields:
+It was designed to do so in a declarative way, by providing strongly typed access to values of form fields, an example of which is shown in listing {{fsformfields}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Declaration of fields for registration form}{fsformfields}
 type Register = {
     Username : string
     Email : MailAddress
@@ -1022,10 +1022,10 @@ It reflected a form with following fields:
 #### Validation
 
 Next thing that the module supported was declaring certain validation of the fields.
-For the `Register` form, below snippet served as validation logic:
+For the `Register` form, validation rules were presented in listing {{fsformvalid}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Validating field values in registration form}{fsformvalid}
 let pattern = @"^\w{6,20}$"
 
 let passwordsMatch =
@@ -1071,10 +1071,10 @@ This regular expression designated possible passwords for newly coming users.
 #### Rendering HTML form
 
 Music Store application consisted of a few forms, and all of them followed similar layout.
-In order to unify way of rendering the forms in HTML markup, following types were defined for structuring form layout: 
+In order to unify way of structuring forms' layout and rendering the forms in HTML markup, specific types were defined as shown in listing {{fsformlayouttypes}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Declaration of form layout types}{fsformlayouttypes}
 type Field<'a> = {
     Label : string
     Xml : Form<'a> -> Suave.Html.Xml
@@ -1094,10 +1094,10 @@ type FormLayout<'a> = {
 `Xml` property of `Field<'a>` type was a function from `Form<'a>` to `Suave.Html.Xml` type, which represented object model for HTML markup.
 Rest of record type properties are rather self-explanatory.
 
-With help of the `FormLayout` type, the `Register` form as defined earlier could be then used to render a corresponding HTML markup:
+With help of the `FormLayout` type, the `Register` form as defined earlier could be then used to render a corresponding HTML markup, which was shown in listing {{fsformrenderhtml}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Rendering HTML markup from form layout}{fsformrenderhtml}
 renderForm
     { Form = Form.register
       Fieldsets = 
@@ -1128,10 +1128,11 @@ As a result of partial application on `input` function, the return type was `For
 
 #### Processing form on server
 
-Having served proper HTML markup, an actual handler for registering users could be defined:
+Having served proper HTML markup, an actual handler for registering users could be defined.
+Registration WebPart was presented in listing {{fsmusicregister}}.
 
 ```xxx
-{FSharp]{Caption placeholder}{rerffff}
+{FSharp]{Implementation of register WebPart in Music Store}{fsmusicregister}
 let register =
     choose [
         GET >>= (View.register "" |> html)

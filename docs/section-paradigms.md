@@ -45,7 +45,9 @@ Despite some of these languages aimed to target multiple paradigms, the concept 
 
 #### Example
 
-Listing {{csparadigmimperative}} is inspired by {{{imperativevsfunctional}}} and presents how a strictly imperative approach is used with C# language:
+Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
+Language used in listing {{csparadigmimperative}} is C#, which allows to write in such manner.
+Code was taken from a tweet {{{imperativevsfunctional}}} and adjusted for C# language syntax.
 
 ```xxx
 {C]{Example of imperative approach in CSharp}{csparadigmimperative}
@@ -64,6 +66,21 @@ using (var reader = File.OpenText("log"))
         line = reader.ReadLine();
     }
 }```
+
+Problem, which listing {{csparadigmimperative}} is trying to solve can be defined following:
+
+> Given a log file, extract 10 first error entries (lines that start with \[ERROR\] prefix).
+
+It is evident that the implementation consists of a step-by-step instructions.
+Code focuses on **how** to achieve the goal rather than **what** is the goal.
+In contract, listing {{csparadigmfunctional}} demonstrates how the very same program could be written without providing a detailed recipe.
+
+Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}):
+
+* **Reading from a file** interlaces in lines 3,5,6 (null check),13
+* **Collecting error lines** in lines 1,10
+* **Counting errors** in lines 2,6,11
+* **Filtering results** in line 8
 
 Declarative
 -----------
@@ -86,7 +103,7 @@ Placeholder text
 ```xxx
 {C]{Example of functional approach in CSharp}{csparadigmfunctional}
 var errors = 
-    File.ReadAllLines("log")
+    File.ReadLines("log")
         .Where(line => line.StartsWith("[ERROR]"))
         .Take(10)
         .ToList();```
