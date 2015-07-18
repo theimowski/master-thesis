@@ -51,7 +51,7 @@ Language used in listing {{csparadigmimperative}} is C#, which allows to write i
 Code was taken from a tweet {{{imperativevsfunctional}}} and adjusted for C# language syntax.
 
 ```xxx
-{C]{Example of imperative approach in CSharp}{csparadigmimperative}
+{CSharp]{Example of imperative approach in CSharp}{csparadigmimperative}
 var errors = new List<String>();
 var errorCount = 0;
 using (var reader = File.OpenText("log"))
@@ -116,7 +116,7 @@ As per Padawitz {{{padawitz2006deductive}}}, the term declarative is a combinati
 Placeholder text
 
 ```xxx
-{C]{Example of functional approach in CSharp}{csparadigmfunctional}
+{CSharp]{Example of functional approach in CSharp}{csparadigmfunctional}
 var errors = 
     File.ReadLines("log")
         .Where(line => line.StartsWith("[ERROR]"))

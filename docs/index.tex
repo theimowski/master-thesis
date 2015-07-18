@@ -30,65 +30,28 @@
 \counterwithin{figure}{section}
 
 \usepackage{array}
+\usepackage{setspace}
 
 \addto\captionsenglish{
   \renewcommand{\contentsname}
     {CONTENTS} % Contents uppercased
 }
 
+\renewcommand{\baselinestretch}{1.5} 
+
 % space after table caption
 \usepackage{caption} 
 \captionsetup[table]{skip=6pt}
-
-% Identifiers in color code #000000
-\newcommand{\id}[1]{\textcolor{black}{#1}}
-
-% Comments in green
-\definecolor{officegreen}{rgb}{0, 0.5, 0}
-\newcommand{\com}[1]{\textcolor{officegreen}{#1}}
-
-% Inactive elements in color code #808080
-\newcommand{\inact}[1]{\textcolor{gray}{#1}}
-
-% Keywords in color code #000080
-\definecolor{navy}{rgb}{0, 0, 0.5}
-\newcommand{\kwd}[1]{\textcolor{navy}{#1}}
-
-% Numbers in color code #008000
-\newcommand{\num}[1]{\textcolor{officegreen}{#1}}
-
-% Operators in color code #800080
-\newcommand{\ops}[1]{\textcolor{purple}{#1}}
-
-% Preprocessors in color code #800080
-\newcommand{\prep}[1]{\textcolor{purple}{#1}}
-
-% Strings in color code #808000
-\newcommand{\str}[1]{\textcolor{olive}{#1}}
-
-% Lines in color code #80b0b0
-% Define relative color to work correctly with \newcommand
-\definecolor{linecolor}{rgb}{0.5, 0.6875, 0.6875}
-\newcommand{\lines}[1]{\textcolor{linecolor}{#1}}
-
-% fsi output in color code #606060
-\definecolor{outputcolor}{rgb}{0.375, 0.375, 0.375}
-\newcommand{\fsi}[1]{\textcolor{outputcolor}{#1}}
-
-% Omitted parts in color code #808080
-\newcommand{\omi}[1]{\textcolor{gray}{#1}}
-
-% Overriding color and style of line numbers
-\renewcommand{\theFancyVerbLine}{
-\lines{\small \arabic{FancyVerbLine}:}}
-
 
 \definecolor{bluekeywords}{rgb}{0.13,0.13,1}
 \definecolor{greencomments}{rgb}{0,0.5,0}
 \definecolor{redstrings}{rgb}{0.5,0,0}
 
 \usepackage{upquote}
- 
+\usepackage{tocloft}
+\setlength{\cftbeforesecskip}{6pt}
+\setlength{\cftbeforesubsecskip}{6pt}
+\setlength{\cftbeforesubsubsecskip}{6pt}
 
 \lstdefinelanguage{FSharp}%
 {morekeywords={let, new, match, with, rec, open, module, namespace, type, of, member, % 
@@ -110,6 +73,36 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
   literate={`}{\`}1,
   stringstyle=\color{redstrings},
 }
+
+\lstdefinelanguage{CSharp}%
+{ morekeywords = {abstract,event,new,struct,as,explicit,%
+    null,switch,base,extern,object,this,bool,false,%
+    operator,throw,break,finally,out,true,byte,fixed,%
+    override,try,case,float,params,typeof,catch,for,%
+    private,uint,char,foreach,protected,ulong,checked,%
+    goto,public,unchecked,class,if,readonly,unsafe,%
+    const,implicit,ref,ushort,continue,in,return,using,%
+    decimal,int,sbyte,virtual,default,interface,sealed,%
+    volatile,delegate,internal,short,void,do,is,sizeof,%
+    while,double,lock,stackalloc,else,long,static,%
+    enum,namespace,string,partial},
+  otherkeywords={ var, from, select, where, order, by },
+  keywordstyle=\color{bluekeywords},
+  sensitive=true,
+  basicstyle=\ttfamily,
+  breaklines=true,
+  xleftmargin=\parindent,
+  aboveskip=\bigskipamount,
+  tabsize=4,
+  morecomment=[l][\color{greencomments}]{///},
+  morecomment=[l][\color{greencomments}]{//},
+  morecomment=[s][\color{greencomments}]{{(*}{*)}},
+  morestring=[b]",
+  showstringspaces=false,
+  literate={`}{\`}1,
+  stringstyle=\color{redstrings},
+}
+
 
 \lstnewenvironment{mylisting}[3][]
   {
@@ -140,7 +133,9 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
 \include{streszczenie}
 \selectlanguage{english}
 \include{abstract}
+\begin{spacing}{1.0}
 \tableofcontents
+\end{spacing}
 \include{section-intro}
 \include{section-paradigms}
 \include{section-fp-application}
@@ -156,8 +151,8 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
 \addcontentsline{toc}{section}{LISTINGS}
 \lstlistoflistings
 
-\clearpage
-\addcontentsline{toc}{section}{LIST OF TABLES}
-\listoftables
+% \clearpage
+% \addcontentsline{toc}{section}{LIST OF TABLES}
+% \listoftables
 
 \end{document}
