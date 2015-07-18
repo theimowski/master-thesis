@@ -22,11 +22,11 @@ The tutorial would guide step by step on how to build an E-commerce website call
 In the "Music Store" user could browse music albums by genres, add his favorite to cart and buy.
 Apart from that, the application would show a plenty of other common aspects of Web Development, such as:
 
-* Data access
-* Create, Update, Delete operations 
-* Authorization
-* Managing user's state in cookies
-* HTML rendering
+* Data access,
+* Create, Update, Delete operations,
+* Authorization,
+* Managing user's state in cookies,
+* HTML rendering.
 
 Implementing such application and preparing tutorial turned out to be a great candidate for research part of this thesis.
 The detailed tutorial has been published and is available on-line {{{suavemusicstoretutorial}}}.
@@ -133,8 +133,8 @@ let webPart = OK "Hello World!"```
 
 The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response:
 
-* 200 OK status code
-* "Hello World!" response body content
+* 200 OK status code,
+* "Hello World!" response body content.
 
 Such WebPart can now be used to start an HTTP server using default configuration (listing {{fssuavebootstrap}}).
 
@@ -335,8 +335,8 @@ Thanks to the type-inference, no explicit type annotations are required, and the
 
 Two great benefits from using such a DSL for rendering HTML can be enlisted:
 
-* Type system can prevent common bugs in compile-time
-* Every language syntax construct can be used in the DSL, making it easier to express complex logic
+* Type system can prevent common bugs in compile-time,
+* Every language syntax construct can be used in the DSL, making it easier to express complex logic.
 
 ### Data Access
 
@@ -344,7 +344,7 @@ Data Access is yet another important aspect of software development in any domai
 There is a wide variety of options, when it comes to choose how to persist data.
 Common classification of the options consists of two main classes: 
 
-* Relational databases
+* Relational databases,
 * No-SQL databases: graph databases, key-value stores, document databases, etc.
 
 Among plethora of No-SQL solutions, there is one approach that can be especially associated with functional programming named **Event Sourcing**.
@@ -362,8 +362,8 @@ List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
 `List.fold` calculates result `'State` from the initial `'State` and list of `'T` elements.
 It takes 3 arguments (enlisted in reverse order):
 
-* `'T list` - a list of `'T` elements
-* `'State` - initial state
+* `'T list` - a list of `'T` elements,
+* `'State` - initial state,
 * `('State -> 'T -> 'State)` - "folder" function which is applied on each `'T` element of the list, and based on the value of the element and the intermediate `'State` it produces new `'State.
 
 While the Event Sourcing could be a good candidate for persistence mechanism in application written in functional language, it was not used for the Music Store.
@@ -492,9 +492,9 @@ In this section implementation of commands is shown.
 
 As a part of administration management module, following features were implemented in Music Store application:
 
-* Creating a new album from scratch by assigning a title, price, artist and genre (the last two being restricted to discrete subset of possible values)
-* Editing an existing album by modifying any of the properties 
-* Deleting an album from the Music Store, making it impossible for users to buy
+* Creating a new album from scratch by assigning a title, price, artist and genre (the last two being restricted to discrete subset of possible values),
+* Editing an existing album by modifying any of the properties,
+* Deleting an album from the Music Store, making it impossible for users to buy.
 
 #### Creating album
 
@@ -571,10 +571,10 @@ let editAlbum id =
 
 Similar set of steps as in listing {{fsmusiccreatealbum}} were followed in listing {{fsmusiceditalbum}}:
 
-* instantiation the database context
-* distinction between two allowed HTTP methods: GET and POST
-* in case of GET, creation of edit album form
-* in case of POST, update action performed on the database and redirection to main management page 
+* instantiation the database context,
+* distinction between two allowed HTTP methods: GET and POST,
+* in case of GET, creation of edit album form,
+* in case of POST, update action performed on the database and redirection to main management page.
 
 In addition to that, `editAlbum` took a parameter `id` of type `int` to identify a proper album.
 
@@ -669,10 +669,10 @@ type Session =
 An F# Record type was declared in first line.
 Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
 
-* immutability by default 
-* structural equality by default
-* pattern matching
-* copy and update expressions
+* immutability by default,
+* structural equality by default,
+* pattern matching,
+* copy and update expressions.
 
 The `UserLoggedOnSession` record type has two properties: `Username` and `Role`, both of `string type.
 This type was part of the discriminated union case (line 9).
@@ -683,9 +683,9 @@ They allow for declaring a type with a set of applicable values and are designed
 `Session` type (line 6) was declared as a discriminated union.
 It consisted of three possible cases:
 
-* `NoSession` (line 7) - indicated that no session is attached to context request
-* `CartIdOnly` (line 8) - reflected that user is adding albums to his cart without being authenticated
-* `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type)
+* `NoSession` (line 7) - indicated that no session is attached to context request,
+* `CartIdOnly` (line 8) - reflected that user is adding albums to his cart without being authenticated,
+* `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type).
 
 Main reason for creating this type in Music Store was to achieve a unified way of determining user state.
 For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined in listing {{fsmusicsessionfun}}.
@@ -710,9 +710,9 @@ For browsing the state, `HttpContext.state` proved useful (line 4).
 Its return type is `SessionStore option` where `SessionStore` accumulates a reader `get` and a writer `set` functions, for fetching and modifying state respectively.
 A pattern matching on a triple (tuple with three values) of user's state keys matched following cases (lines 7-10): 
 
-* if a "cartid" key was present, but there was no "username" and no "role" keys, `CartIdOnly` would be returned
-* if both "username" and "role" keys appeared in the session store, `UserLoggedOn` value applied
-* as a fall-back, `NoSession` was chosen when none of those keys were present
+* if a "cartid" key was present, but there was no "username" and no "role" keys, `CartIdOnly` would be returned,
+* if both "username" and "role" keys appeared in the session store, `UserLoggedOn` value applied,
+* as a fall-back, `NoSession` was chosen when none of those keys were present.
 
 Result of pattern matching block was applied (or colloquially "piped") to function `f` (line 11), which came as an argument to `session` and had a type of `Session -> WebPart`. 
 
@@ -881,11 +881,11 @@ WebPart `loggedOn`, which was defined in line 6 can be thought of like a "guard"
 `loggedOn` challenged the request with another built into Suave helper `Auth.authenticate`.
 The `Auth.authenticate` took 5 arguments:
 
-* `CookieLife.Session` life expiry - the same as was used for setting authentication cookie
-* `false` which reflected that secure protocol was not employed
-* function which determined what should happen in case authentication cookie was missing
-* another function which would be invoked if the cookie was present, but decryption of the cookie value failed
-* finally the `f_success` WebPart that was applied when request came with valid authentication cookie
+* `CookieLife.Session` life expiry - the same as was used for setting authentication cookie,
+* `false` which reflected that secure protocol was not employed,
+* function which determined what should happen in case authentication cookie was missing,
+* another function which would be invoked if the cookie was present, but decryption of the cookie value failed,
+* finally the `f_success` WebPart that was applied when request came with valid authentication cookie.
 
 In line 10, `redirectWithReturnPath` was applied in case of missing cookie.
 This meant that when someone tried to get to a resource without being authenticated, he would be redirected to the login page.
@@ -906,8 +906,8 @@ Most popular challenge these days seems to be the concept of roles.
 A role describes the category of a user.
 As an example, in Music Store there were 2 simple roles defined:
 
-* "user" - a standard user, someone who can browse through and buy music albums
-* "admin" - a privileged user of the system, that is allowed to manage albums
+* "user" - a standard user, someone who can browse through and buy music albums,
+* "admin" - a privileged user of the system, that is allowed to manage albums.
 
 New users that would register to the Music Store, got automatically the "user" role assigned.
 There was only one predefined user with "admin" role and the same name.
@@ -971,12 +971,12 @@ HTML form is the most popular way of communication between browser-based user in
 Values provided in form fields are aggregated and pasted into the request body when a form is submitted.
 Implementation of form communication consists of a number of steps:
 
-* rendering proper HTML markup with named inputs 
-* client-side validation of form fields values
-* formatting the request body upon submitting (usually this is step is handled by browsers)
-* parsing of the body on the server side
-* server-side validation of form fields values
-* actual handler for request
+* rendering proper HTML markup with named inputs,
+* client-side validation of form fields values,
+* formatting the request body upon submitting (usually this is step is handled by browsers),
+* parsing of the body on the server side,
+* server-side validation of form fields values,
+* actual handler for request.
 
 Most rich and heavy-weight frameworks for Internet applications (including ASP.NET MVC) already include in their functionality suite modules and helpers for handling above scenario.
 Since Suave is very light-weight, it does not (at the time of writing) come out with ready to use functions for up-to-down form communication between client and server.
@@ -1000,10 +1000,10 @@ type Register = {
 Form fields were to be enclosed in a record type.
 Supported types for the fields were: 
 
-* `string` - for representing text fields
-* `Password` - for representing passwords
-* `decimal` - for representing numbers (decimal was chosen deliberately to handle both integers as well as fractions)
-* `System.Net.Mail.MailAddress` - built-in .NET type for representing email addresses
+* `string` - for representing text fields,
+* `Password` - for representing passwords,
+* `decimal` - for representing numbers (decimal was chosen deliberately to handle both integers as well as fractions),
+* `System.Net.Mail.MailAddress` - built-in .NET type for representing email addresses.
 
 In addition to that, the module supported concept of required / optional fields.
 By default field was treated as required.
@@ -1013,11 +1013,11 @@ Thanks to such solution, all values were type-safe (i.e. no null references woul
 `Register` type in the above snippet was declared for the sake of registering a new user.
 It reflected a form with following fields:
 
-* `Username` - required field of type `string` being a unique name of the user of Music Store
-* `Email` - required field of type `MailAddress` for email address of the user 
-* `Password` - required field of type `Password` for providing user's password
-* `ConfirmPassword` - the same as above, but used to prevent user from mistyping the passwords
-* `YearOfBirth` - optional field of type `decimal option` that could be used for recommending appropriate albums
+* `Username` - required field of type `string` being a unique name of the user of Music Store,
+* `Email` - required field of type `MailAddress` for email address of the user,
+* `Password` - required field of type `Password` for providing user's password,
+* `ConfirmPassword` - the same as above, but used to prevent user from mistyping the passwords,
+* `YearOfBirth` - optional field of type `decimal option` that could be used for recommending appropriate albums.
 
 #### Validation
 
@@ -1040,8 +1040,8 @@ let register : Form<Register> =
 Actual declaration of the `Register` form occurred in line 6.
 It consisted of single union case `Form` with two lists as its arguments: 
 
-* first list (lines 7-9) contained validation rules that could be used both on client and server side
-* second list (line 10) with a single element `passwordsMatch` accommodated additional validations that could be performed only on server side
+* first list (lines 7-9) contained validation rules that could be used both on client and server side,
+* second list (line 10) with a single element `passwordsMatch` accommodated additional validations that could be performed only on server side.
 
 The server side validation functions had to be of type `('t -> bool) * string`.
 This meant a tuple of predicate function and `string` message that would be used in case of violation of that rule.
@@ -1062,8 +1062,8 @@ Thanks to that, no annotations had to be used for the properties of `Register` r
 Second argument of the `TextProp` and `PasswordProp` were lists of duplex (client and server side) validations rules.
 Type definition of duplex rules was similar to server-side-only rules, except they required also a tuple of string (key and value) for to depict proper attribute of HTML `input` element:
 
-* `maxLength 30` determined a string for text input, no longer than 30 characters
-* `passwordRegex pattern` specified a regular expression to be matched on password inputs
+* `maxLength 30` determined a string for text input, no longer than 30 characters,
+* `passwordRegex pattern` specified a regular expression to be matched on password inputs.
 
 Regular expression `pattern` defined in first line, matches a string of alphanumeric characters (or underscore) which length is at least 6 and at most 20.
 This regular expression designated possible passwords for newly coming users.
@@ -1119,9 +1119,9 @@ Function `renderForm` was responsible for unified HTML markup of all forms in Mu
 Partial application mechanism proved to be useful with regard to defining `Xml` property (lines 7,9,11,13,15).
 `input` function took following arguments (in order):
 
-* `'a -> Expr<'b>` - function for pointing out a proper field from the record type
-* `(string * string) list` - additional attributes to be used for HTML `input` element (not used in above snippet)
-* `Form<'a>` - definition of the form of type `'a`
+* `'a -> Expr<'b>` - function for pointing out a proper field from the record type,
+* `(string * string) list` - additional attributes to be used for HTML `input` element (not used in above snippet),
+* `Form<'a>` - definition of the form of type `'a`.
 
 Because the `input` function was being invoked with only 2 parameters, the last `Form<'a>` argument got curried.
 As a result of partial application on `input` function, the return type was `Form<'a> -> Suave.Html.Xml`, which turned out to match exactly the expected type for `Xml` property.
@@ -1192,10 +1192,10 @@ Such behavior could cause frustration for a new-comer to functional world, but i
 
 Following are some of the main benefits that functional programming may bring for building and maintaining business applications:
 
-* **immutability** - data does not have any behavior which can mutate its internal state - it is hence thread-safe by definition, allowing to scale out easily
-* **less code** - functional code is more concise, thus is more likely to contain less defects 
-* **strongly static typing** (applicable for statically typed functional languages) - type systems of F# or Haskell are very strict, therefore can detect more issues in compile time
-* **composition** - fine-grained functions can be composed into larger building blocks without losing precious properties of pure functions
-* **no side effects** - functional programming is all about transforming inputs to outputs {{{leanfunprog}}} which eliminates bizarre order dependencies from code and results in better reasoning about the code
+* **immutability** - data does not have any behavior which can mutate its internal state - it is hence thread-safe by definition, allowing to scale out easily,
+* **less code** - functional code is more concise, thus is more likely to contain less defects,
+* **strongly static typing** (applicable for statically typed functional languages) - type systems of F# or Haskell are very strict, therefore can detect more issues in compile time,
+* **composition** - fine-grained functions can be composed into larger building blocks without losing precious properties of pure functions,
+* **no side effects** - functional programming is all about transforming inputs to outputs {{{leanfunprog}}} which eliminates bizarre order dependencies from code and results in better reasoning about the code.
 
 Hopefully the research confirmed that it is not only possible, but even profitable to build real-world applications using functional programming.
