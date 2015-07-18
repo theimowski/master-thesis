@@ -34,7 +34,7 @@
 
 \addto\captionsenglish{
   \renewcommand{\contentsname}
-    {CONTENTS} % Contents uppercased
+    {\normalfont\fontsize{12}{15}\bfseries{CONTENTS}} % Contents uppercased
 }
 
 \usepackage{indentfirst}
@@ -68,6 +68,7 @@
 \setlength{\cftbeforesecskip}{6pt}
 \setlength{\cftbeforesubsecskip}{6pt}
 \setlength{\cftbeforesubsubsecskip}{6pt}
+\setlength{\cftbeforetoctitleskip}{12pt}
 
 \lstdefinelanguage{FSharp}%
 {morekeywords={let, new, match, with, rec, open, module, namespace, type, of, member, % 
@@ -127,7 +128,7 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
     \vspace{0.5\baselineskip}
     \lstset{
         language=#1,
-        basicstyle=\ttfamily,
+        basicstyle=\ttfamily\singlespacing,
         breaklines=true,
         frame=single,
         numbers=left,
@@ -136,8 +137,6 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
         label=#3}
   }
   {\endminipage}
-
-
 
 
 \begin{document}
