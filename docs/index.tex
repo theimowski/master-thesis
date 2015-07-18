@@ -32,10 +32,13 @@
 \usepackage{array}
 \usepackage{setspace}
 
-\addto\captionsenglish{
-  \renewcommand{\contentsname}
-    {\normalfont\fontsize{12}{15}\bfseries{CONTENTS}} % Contents uppercased
-}
+
+\addto{\captionsenglish}{\renewcommand{\refname}
+    {\normalfont\fontsize{12}{15}\bfseries{REFERENCES}}}
+
+\addto{\captionsenglish}{\renewcommand{\contentsname}
+    {\normalfont\fontsize{12}{15}\bfseries{CONTENTS}}}
+
 
 \usepackage{indentfirst}
 
@@ -54,6 +57,8 @@
 \titlespacing*{\section}{0pt}{12pt}{6pt}
 \titlespacing*{\subsection}{0pt}{12pt}{6pt}
 \titlespacing*{\subsubsection}{0pt}{12pt}{6pt}
+
+\renewcommand*{\lstlistlistingname}{\normalfont\fontsize{12}{15}\bfseries{LISTINGS}}
 
 % space after table caption
 \usepackage{caption} 
@@ -158,6 +163,7 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
 \include{section-summary}
 
 \clearpage
+\begin{spacing}{1.0}
 \addcontentsline{toc}{section}{REFERENCES}
 \bibliographystyle{plain}
 \bibliography{bibliography}
@@ -165,6 +171,7 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
 \clearpage
 \addcontentsline{toc}{section}{LISTINGS}
 \lstlistoflistings
+\end{spacing}
 
 % \clearpage
 % \addcontentsline{toc}{section}{LIST OF TABLES}
