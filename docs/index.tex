@@ -45,6 +45,16 @@
 \usepackage{enumitem}
 \setlist{labelindent=1.25cm,leftmargin=*,itemsep=0cm,topsep=0cm,parsep=0cm}
 
+\usepackage{titlesec}
+
+\titleformat*{\section}{\normalfont\fontsize{12}{15}\bfseries}
+\titleformat*{\subsection}{\normalfont\fontsize{10}{15}\bfseries\itshape}
+\titleformat*{\subsubsection}{\normalfont\fontsize{10}{15}\itshape}
+
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\subsubsection}{0pt}{12pt}{6pt}
+
 % space after table caption
 \usepackage{caption} 
 \captionsetup[table]{skip=6pt}
