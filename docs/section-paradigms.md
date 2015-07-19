@@ -48,7 +48,9 @@ Despite some of these languages aimed to target multiple paradigms, the concept 
 
 Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
 Language used in listing {{csparadigmimperative}} is C#, which allows to write in such manner.
-Code was taken from a tweet {{{imperativevsfunctional}}} and adjusted for C# language syntax.
+The code reads a log file and extracts 10 first error entries from the file (lines that start with \[ERROR\] prefix).
+Original idea comes from a tweet {{{imperativevsfunctional}}} where Java language was used.
+Here, the program was adjusted to C# syntax.
 
 ```xxx
 {CSharp]{Example of imperative approach in CSharp}{csparadigmimperative}
@@ -68,17 +70,17 @@ using (var reader = File.OpenText("log"))
     }
 }```
 
-Problem, which listing {{csparadigmimperative}} is trying to solve can be defined following:
-
-> Given a log file, extract 10 first error entries (lines that start with \[ERROR\] prefix).
-
-It is evident that the implementation consists of a step-by-step instructions.
-Code focuses on **how** to achieve the goal rather than **what** is the goal.
-In contract, listing {{csparadigmfunctional}} demonstrates how the very same program could be written without providing a detailed recipe.
+It is evident that the implementation in listing {{csparadigmimperative}} consists of a step-by-step instructions.
+Code contains assignment statements (lines 1, 2, 3, 5, 13), jump instructions (line 6, 8) and explicit arithmetic operations (line 11).
+It focuses on the detailed algorithm flow - the engineer has to specify **how** to achieve the goal.
+In contract, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach - without providing a detailed recipe, but using built-in language constructs, the engineer declares **what** is the goal.
 
 Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}):
 
-* **Reading from a file** interlaces in lines 3,5,6 (null check),13
+* **Reading from a file**:
+    * a file has to opened to be read from (line 3), 
+    * a single line is read in the loop (lines 5 and 13),
+    * as null indicates end of file (line 6) it has to be checked,
 * **Collecting error lines** in lines 1,10
 * **Counting errors** in lines 2,6,11
 * **Filtering results** in line 8
