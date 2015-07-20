@@ -72,26 +72,40 @@ using (var reader = File.OpenText("log"))
 
 It is evident that the implementation in listing {{csparadigmimperative}} consists of a step-by-step instructions.
 Code contains assignment statements (lines 1, 2, 3, 5, 13), jump instructions (line 6, 8) and explicit arithmetic operations (line 11).
-It focuses on the detailed algorithm flow - the engineer has to specify **how** to achieve the goal.
-In contract, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach - without providing a detailed recipe, but using built-in language constructs, the engineer declares **what** is the goal.
+It focuses on the detailed algorithm flow, that is the engineer has to specify **how** to achieve the goal.
+In contract, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach, where without providing a detailed recipe, but rather using built-in language constructs, the engineer declares **what** is the goal.
 
-Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}):
+Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}).
+A few concerns are targeted:
 
 * **Reading from a file**:
-    * a file has to opened to be read from (line 3), 
-    * a single line is read in the loop (lines 5 and 13),
-    * as null indicates end of file (line 6) it has to be checked,
-* **Collecting error lines** in lines 1,10
-* **Counting errors** in lines 2,6,11
-* **Filtering results** in line 8
+    * file has to opened to be read from (line 3), 
+    * single line is read inside `while` loop (lines 5 and 13),
+    * end of file is being checked by comparing `line` to `null` (line 6),
+* **Collecting error lines**:
+    * list of errors is initialized in line 1,
+    * every matching error entry is appended to that list (line 10),
+* **Counting errors**:
+    * counter is initialized in line 2,
+    * it is then compared to the maximum number of lines in line 6,
+    * finally it has to be incremented every time an error is added to the list (line 11),
+* **Filtering lines**:
+    * only lines starting with "\[ERROR\]" are taken into account (line 8).
+
+Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
+As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one has to read 10 last lines of file, the whole code snippet has to be redesigned).
 
 ### Object-Oriented
 
-### Criticism
+Majority of imperative programming languages that were developed till the 80s have procedural nature.
+This means that they focus on defining reusable procedures which invoke certain actions.
+Procedures are stateless, and as a result they cannot carry any kind of data with them.
+Object-Oriented approach was introduced in order to combine data with behavior inside an object.
+
+### Referential opacity
 
 As per Tennent {{{tennent1976denotational}}}, main actions performed in imperative paradigm are updating statements, jumps and intermediate input / output, which spoil referential transparency by introducing the possibility of "side effects" or transfers of control during expression evaluations.
-
-#### Referential transparency
+Lack of referential transparency leads to an opposite property, namely referential opacity.
 
 Referential transparency has already been defined a few times {{{sondergaard1990referential, strachey2000fundamental}}}, where it concerns more complex topics such as non-determinism or definiteness.
 In context of this thesis and basic paradigms' characteristics it is enough to say that referential transparency describes a property of programming language, which enables to substitute certain expression with another of the same value, without impact on the program's behavior.
