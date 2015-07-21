@@ -43,7 +43,7 @@ It consists of type constructs such as:
 Strictness in context of static typing means that in order to compile a program, more prerequisites must be met.
 While it makes harder for a software engineer to compile code in strongly statically typed language, a priceless benefit of program correctness is usually gained.
 
-Because of its nature, Haskell still struggles to be visible in enterprise architectures, although companies with a big research center do use it for their tools {{{haskellindustry}}}:
+Because of its nature, Haskell still struggles to be visible in enterprise architectures, although companies do use it for their tools (often as part of their research department){{{haskellindustry}}}:
 
 * **Facebook** internally makes use of *HaXL* that simplifies access to remote data, such as databases or web-based services,
 * **Microsoft** uses Haskell for its production serialization system, *Bond* in high scale services,
@@ -56,15 +56,18 @@ Because of its nature, Haskell still struggles to be visible in enterprise archi
 
 ### OCaml
 
-OCaml was created in 1996 as an extension to the Caml (Categorical Abstract Machine Language) programming language, which in turn comes from the family of ML (Metalanguage) dialects.
+First OCaml version was released in 1996 as an extension to the Caml (Categorical Abstract Machine Language) programming language, which in turn comes from the family of ML (Metalanguage) dialects.
+The development of the language is led by a company called *Inria*.
 
 !!!Opis
 
-OCaml found its adoption in a few prospering companies, such as {{{ocamlindustry}}}:
+OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}}}:
 
 * **Jane Street** - a proprietary trading firm that uses OCaml as its primary development platform,
 * **LexiFi** - company that used OCaml to develop the Modeling Language for Finance (MLFi), which is the first formal language that accurately describes the most sophisticated capital market, credit, and investment products,
-* **Facebook** - which does not require any description, created *Hack* programming language with its compiler written in OCaml as an extension of PHP with static typing.
+* **Facebook** - which does not need any introduction, uses OCaml for the following:
+    * *Hack* programming language with its compiler written in OCaml, as an extension to PHP with static typing,
+    * *pfff* - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
 
 ### F#
 
