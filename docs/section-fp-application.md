@@ -43,11 +43,11 @@ It consists of type constructs such as:
 Strictness in context of static typing means that in order to compile a program, more prerequisites must be met.
 While it makes harder for a software engineer to compile code in strongly statically typed language, a priceless benefit of program correctness is usually gained.
 
-Because of its nature, Haskell still struggles to be visible in enterprise architectures, although companies do use it for their tools (often as part of their research department){{{haskellindustry}}}:
+Because of its nature, Haskell still struggles to be visible in enterprise architectures, although major companies do use it for their tools (often as part of their research department){{{haskellindustry}}}:
 
 * **Facebook** internally makes use of *HaXL* that simplifies access to remote data, such as databases or web-based services,
 * **Microsoft** uses Haskell for its production serialization system, *Bond* in high scale services,
-* plenty of financial institutions including:
+* Haskell was also adopted by a plenty of financial institutions including:
     * Bank of America Merril Lynch,
     * Barclays Capital Quantitative Analytics Group,
     * Credit Suisse Global Modeling and Analytics Group,
@@ -59,7 +59,11 @@ Because of its nature, Haskell still struggles to be visible in enterprise archi
 First OCaml version was released in 1996 as an extension to the Caml (Categorical Abstract Machine Language) programming language, which in turn comes from the family of ML (Metalanguage) dialects.
 The development of the language is led by a company called *Inria*.
 
-!!!Opis
+Coming from the statically typed languages family, OCaml ships with a rich type system offering type inference, as well as various data types, such as records or sums {{{ocamlwebsite}}}.
+Similar to Haskell, OCaml enables interoperability with languages like C, thanks to the foreign function interface feature.
+In addition to that, OCaml provides ability to compile efficient machine code, which boosts its attractiveness.
+The language is a valuable example of hybrid, multi-paradigm movement, combining approaches from both declarative (functional) and imperative (object-oriented) worlds.
+With its distinctive syntax, OCaml became an inspiration for a few modern languages like F#, Scala or Rust.
 
 OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}}}:
 
@@ -70,6 +74,15 @@ OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}
     * *pfff* - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
 
 ### F#
+
+F# is a language that was born in Microsoft Research department with its first version released in 2005 together with Microsoft Visual Studio 2005.
+With great help of the language designer Don Syme, the F# language evolved and newer versions got delivered, with the most recent 4.0 version released in parallel to the time of writing.
+F# design was influenced by a set of other languages, most notably:
+
+* **OCaml**, with regards to main syntactic constructs, 
+* **Python**, by adapting the whitespace sensitivity property, 
+* **Haskell**, from which it accommodated many features,
+* **Erlang**, in respect to the agent-based processing model.
 
 ### Scala
 
