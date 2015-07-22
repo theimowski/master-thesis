@@ -111,11 +111,19 @@ Following are some examples of fruitful employment of F# in the industry {{{fsha
 
 ### Scala
 
-Scala language was built for (competitive platform from Microsoft's point of view) Java Virtual Machine (JVM) in 2004.
+Scala language was built for (competitive from Microsoft's point of view) Java Virtual Machine (JVM) platform in 2004.
 Initially it also targeted the .NET platform, however this distribution stopped being supported some time later.
 The creator of Scala language, Martin Odersky, had solid backgrounds in Java world as he was involved into Java Generics feature (just like Don Syme for .NET generics) as well as Java compiler.
 Scala was considered very prominent, and in result a number of financial investments have been made to promote the language.
 Together with his collaborators, Martin Odersky started a company called "Typesafe Inc." in 2011 in order to offer support and guidance for using Scala for enterprise cases.
+
+Partly thanks to the money invested, but also because of the language power itself, Scala found its way to be incorporated into an impressive amount of significant businesses around the world {{{typesafestories}}}:
+
+* **Twitter** completely re-architected its services to use Scala {{{eriksen2013your}}} and achieve an enormous indicator of hundreds of thousands tweets per second,
+* **LinkedIn** converted from plain Java web frameworks to using Scala and Play framework, which turned out to speed up code and test cycles as well as made the LinkedIn platform more scalable,
+* **Walmart** Canada by rebuilding its web and mobile stacks with combination of Scala language, Play framework and Akka library for agent-based processing, noted a serious improvement in web traffic conversions and mobile orders for their Canada's largest on-line retailing business,
+* **Airbnb**, one of the largest lodge renting services, based their internal tool for scheduling data pipelines on Scala language, making it easier to manage and debug than with previously utilized Cron
+* **The Guardian** upon transition from standard print-based to digital-first newspaper organization, chose stack based on Scala language (similar to Walmart Canada) which proved to be a solid and scalable foundation for its new services.
 
 ### Clojure
 
