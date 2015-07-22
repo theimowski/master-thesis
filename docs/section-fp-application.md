@@ -117,15 +117,33 @@ The creator of Scala language, Martin Odersky, had solid backgrounds in Java wor
 Scala was considered very prominent, and in result a number of financial investments have been made to promote the language.
 Together with his collaborators, Martin Odersky started a company called "Typesafe Inc." in 2011 in order to offer support and guidance for using Scala for enterprise cases.
 
+Just as Haskell, OCaml and F#, Scala is a statically typed language.
+Again, the type system ships with type inference mechanism which minimizes need of type annotating members and functions, making the code much shorter.
+Scala provides a feature called "Traits", which enables to mix multiple interfaces and their behavior within a single class.
+The Traits feature can be compared to concept of Typeclasses in Haskell, however the foundations differ.
+With its full interoperability with JVM and Java, Scala is a multi-paradigm language that allows to write code in functional as well as object-oriented manner.
+Inspired by other languages from functional family, Scala provides with well-known, associated with functional paradigm features, such as Pattern Matching or Higher-order functions.
+Language designers made their best to fit Scala to systems that require distribution and concurrency by adapting agent-based (actor) processing model and making easier to work write asynchronous code with Futures.
+
 Partly thanks to the money invested, but also because of the language power itself, Scala found its way to be incorporated into an impressive amount of significant businesses around the world {{{typesafestories}}}:
 
 * **Twitter** completely re-architected its services to use Scala {{{eriksen2013your}}} and achieve an enormous indicator of hundreds of thousands tweets per second,
 * **LinkedIn** converted from plain Java web frameworks to using Scala and Play framework, which turned out to speed up code and test cycles as well as made the LinkedIn platform more scalable,
 * **Walmart** Canada by rebuilding its web and mobile stacks with combination of Scala language, Play framework and Akka library for agent-based processing, noted a serious improvement in web traffic conversions and mobile orders for their Canada's largest on-line retailing business,
-* **Airbnb**, one of the largest lodge renting services, based their internal tool for scheduling data pipelines on Scala language, making it easier to manage and debug than with previously utilized Cron
+* **Airbnb**, one of the largest lodge renting services, based their internal tool for scheduling data pipelines on Scala language, making the tool easier to manage and debug than with previously utilized Cron,
 * **The Guardian** upon transition from standard print-based to digital-first newspaper organization, chose stack based on Scala language (similar to Walmart Canada) which proved to be a solid and scalable foundation for its new services.
 
 ### Clojure
+
+Clojure was created by Rich Hickey in 2007.
+Its major motivation was to design a language that has Lisp-like syntax, embraces existing virtual machine platform (JVM) and allows to write code in functional style with emphasis on immutability and concurrency support.
+Clojure was made a fully open-source software so that it could be easier adopted by the community.
+
+* **Puppet Labs**
+* **Beanstalk**
+* **ThoughtWorks** IOOF
+* **Sonian**
+* **MailOnline**
 
 ### Erlang
 
