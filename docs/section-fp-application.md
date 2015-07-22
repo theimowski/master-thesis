@@ -75,14 +75,30 @@ OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}
 
 ### F#
 
-F# is a language that was born in Microsoft Research department with its first version released in 2005 together with Microsoft Visual Studio 2005.
+FSharp (F#) is a language that was born in Microsoft Research department with its first version released in 2005 together with Microsoft Visual Studio 2005.
 With great help of the language designer Don Syme, the F# language evolved and newer versions got delivered, with the most recent 4.0 version released in parallel to the time of writing.
+Apart from Microsoft taking care of the language development, there exists a non-profit F# Software Foundation {{{fsharpwebsite}}} that gathers community around the language and makes its best to popularize F#.
 F# design was influenced by a set of other languages, most notably:
 
 * **OCaml**, with regards to main syntactic constructs, 
 * **Python**, by adapting the whitespace sensitivity property, 
-* **Haskell**, from which it accommodated many features,
-* **Erlang**, in respect to the agent-based processing model.
+* **Haskell**, from which it accommodated many functional features,
+* **Erlang**, in respect to the agent-based processing model and asynchrony.
+
+F# is considered (next to Haskell) a very strict statically typed language.
+Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows for imperative constructs.
+Being built on top of .NET, it enables interoperability with all languages from this platform.
+Code written in F# is succinct and readable, making the language an attractive candidate for fast prototyping and reducing time-to-market indicator.
+
+Following are some examples of fruitful employment of F# in the industry {{{fsharpwebsite}}}:
+
+* **Kaggle** - company that deals with Data Science at first used F# only for core analysis algorithms only to discover that the language can replace C# in majority of components,
+* **Jet.com** - service, specializing in on-line shopping field, utilizes F# in most of its back-end processing libraries,
+* **Tachyus** - U.S. based firm which works in energy business, employs F# as a base programming language for their software, 
+* as was the case with Haskell, F# also proves useful in a number of financial institutions, such as:
+    * Credit Suisse,
+    * Counterparty Risk Handelsbanken,
+    * as well as other financial services firms.
 
 ### Scala
 
@@ -92,6 +108,12 @@ F# design was influenced by a set of other languages, most notably:
 
 Profitable areas
 ----------------
+
+* machine learning,
+* financial institutions,
+* insurance companies,
+* power companies,
+* scripting.
 
 Successful examples
 -------------------
