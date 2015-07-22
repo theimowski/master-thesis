@@ -18,7 +18,14 @@ Finally, real-world applications that achieved success in the business are point
 Popular languages
 -----------------
 
-The oldest functional languages like LISP or Scheme are deliberately not included in the list, as they are not really widely used in the industry.
+Six functional programming languages which seem to be the most popular nowadays in software industry, are briefly described.
+Description for each language sticks to the following order:
+
+* first, short history is presented, when a particular language was built and under what circumstances,
+* next, most important features and properties of the language are described, including static typing and purity,
+* finally, names of companies are enlisted that use the language in production or for their internal tools.
+
+The oldest functional languages like LISP or Scheme are deliberately not included in the list, as they are not really widely used in business applications.
 It is however important to remember that those languages became inspiration for more modern functional languages that found their way to the list.
 
 ### Haskell
@@ -77,7 +84,9 @@ OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}
 
 FSharp (F#) is a language that was born in Microsoft Research department with its first version released in 2005 together with Microsoft Visual Studio 2005.
 With great help of the language designer Don Syme, the F# language evolved and newer versions got delivered, with the most recent 4.0 version released in parallel to the time of writing.
-Apart from Microsoft taking care of the language development, there exists a non-profit F# Software Foundation {{{fsharpwebsite}}} that gathers community around the language and makes its best to popularize F#.
+Don Syme, who worked for Microsoft Research was also one of the people responsible for introducing generics into .NET ecosystem.
+In fact, one of the reasons why .NET generics feature was incorporated into the platform, was that F# language required generics for its design {{{donsymeinterview}}}.
+Apart from Microsoft taking care of the language development, there exists a non-profit F# Software Foundation {{{fsharpwebsite}}} that gathers community around the language and makes its best to popularize F# among software engineers.
 F# design was influenced by a set of other languages, most notably:
 
 * **OCaml**, with regards to main syntactic constructs, 
@@ -85,22 +94,28 @@ F# design was influenced by a set of other languages, most notably:
 * **Haskell**, from which it accommodated many functional features,
 * **Erlang**, in respect to the agent-based processing model and asynchrony.
 
-F# is considered (next to Haskell) a very strict statically typed language.
-Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows for imperative constructs.
+F# is statically typed and its type system is considered to be very strict (almost as Haskell).
+Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows also for both imperative and object-oriented constructs.
 Being built on top of .NET, it enables interoperability with all languages from this platform.
-Code written in F# is succinct and readable, making the language an attractive candidate for fast prototyping and reducing time-to-market indicator.
+Code written in F# is succinct and readable, making the language an attractive candidate for fast prototyping and reducing time-to-market factor.
 
 Following are some examples of fruitful employment of F# in the industry {{{fsharpwebsite}}}:
 
 * **Kaggle** - company that deals with Data Science at first used F# only for core analysis algorithms only to discover that the language can replace C# in majority of components,
-* **Jet.com** - service, specializing in on-line shopping field, utilizes F# in most of its back-end processing libraries,
-* **Tachyus** - U.S. based firm which works in energy business, employs F# as a base programming language for their software, 
+* **Jet.com** - service which specializes in on-line shopping field, utilizes F# in most of its back-end processing libraries,
+* **Tachyus** - U.S. based firm which works in energy sector, employs F# as a base programming language for their software, 
 * as was the case with Haskell, F# also proves useful in a number of financial institutions, such as:
     * Credit Suisse,
     * Counterparty Risk Handelsbanken,
-    * as well as other financial services firms.
+    * other financial services firms, which do not reveal their identity.
 
 ### Scala
+
+Scala language was built for (competitive platform from Microsoft's point of view) Java Virtual Machine (JVM) in 2004.
+Initially it also targeted the .NET platform, however this distribution stopped being supported some time later.
+The creator of Scala language, Martin Odersky, had solid backgrounds in Java world as he was involved into Java Generics feature (just like Don Syme for .NET generics) as well as Java compiler.
+Scala was considered very prominent, and in result a number of financial investments have been made to promote the language.
+Together with his collaborators, Martin Odersky started a company called "Typesafe Inc." in 2011 in order to offer support and guidance for using Scala for enterprise cases.
 
 ### Clojure
 
