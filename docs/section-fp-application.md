@@ -139,11 +139,26 @@ Clojure was created by Rich Hickey in 2007.
 Its major motivation was to design a language that has Lisp-like syntax, embraces existing virtual machine platform (JVM) and allows to write code in functional style with emphasis on immutability and concurrency support.
 Clojure was made a fully open-source software so that it could be easier adopted by the community.
 
-* **Puppet Labs**
-* **Beanstalk**
-* **ThoughtWorks** IOOF
-* **Sonian**
-* **MailOnline**
+Unlike previously enlisted languages, Clojure is dynamically typed.
+The code is compiled on-the-fly to corresponding JVM byte-code, but is not type-checked before running, which does not guarantee type safety and can result in this class of run-time errors, which would not be possible in statically typed language.
+Dynamic typing in Clojure made it easier to incorporate macros feature into the language.
+Macro system in Clojure follows philosophy named "code-as-data", which enables to generate and manipulate arbitrary code dynamically.
+This feature is a great advantage for Clojure over most of statically typed functional languages, where it is not present.
+Similarly to F# or Scala, Clojure is functional-first, meaning it provides a set of functional constructs, but it also allows to write impure, imperative code which does not hold referential transparency property.
+Clojure also comes with a great deal of models for concurrent processing, each of which is built on top of the standard Java concurrency libraries {{{clojurewebsite}}}:
+
+* **STM** (Software transactional memory system),
+* **Agents** ,
+* **Atoms** ,
+* **Dynamic var** .
+
+With its distinctive nature, Clojure settled down in code-base of a number of companies, including:
+
+* **Puppet Labs**,
+* **Beanstalk**.
+* **ThoughtWorks** IOOF,
+* **Sonian**,
+* **MailOnline**.
 
 ### Erlang
 
