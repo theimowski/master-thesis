@@ -156,11 +156,24 @@ With its distinctive nature, Clojure settled down in code-bases in a number of c
 
 * **Puppet Labs**, that used Clojure for building *Trapperkeeper* - an open source framework for hosting services which are supposed to run for a long period,
 * **Beanstalk**, whose product is a continuous integration application, after switching to Clojure gained a multiply of 20 boost in performance for their caching component,
-* **ThoughtWorks**, a consulting company, which gave Clojure a try to rewrite their CMS solution, turned out to deliver the software before deadline and under designated budget,
-* **Sonian**,
-* **MailOnline**.
+* **ThoughtWorks**, a consulting company, which gave Clojure a try to rewrite their CMS solution, found out that the language helped them to deliver the software before deadline and under designated budget,
+* **Sonian**, that deals with archiving emails in cloud, employs Clojure for its core back-end components and claims that thanks to such solution is able to ship new features very quickly,
+* **MailOnline**, which is the world's biggest newspaper website, decided to rebuild old service on top of Clojure and did no regret that choice.
 
 ### Erlang
+
+First version of Erlang was released back in 1986.
+In meantime, Erlang was evolving and reached release of stable version 18.0 at the time of the writing.
+Aim of creating Erlang language was to enhance telephony software industry.
+
+Erlang contributed to plenty of success stories for world-class companies' production systems {{{cesarini2009erlang}}}:
+
+* **Amazon**,
+* **Yahoo!**,
+* **Facebook**,
+* **T-Mobile**,
+* **Motorola**,
+* **Ericsson**.
 
 Profitable areas
 ----------------
