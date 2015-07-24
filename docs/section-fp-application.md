@@ -147,16 +147,16 @@ This feature is a great advantage for Clojure over most of statically typed func
 Similarly to F# or Scala, Clojure is functional-first, meaning it provides a set of functional constructs, but it also allows to write impure, imperative code which does not hold referential transparency property.
 Clojure also comes with a great deal of models for concurrent processing, each of which is built on top of the standard Java concurrency libraries {{{clojurewebsite}}}:
 
-* **STM** (Software transactional memory system),
-* **Agents** ,
-* **Atoms** ,
-* **Dynamic var** .
+* **STM** (Software transactional memory system) which can modify and share state between multiple threads in a synchronous and coordinated manner,
+* **Agents** model, that separates independent communicating parties and allows for message passing in asynchronous fashion,
+* **Atoms** system, being similar to agents, but with the difference in synchronous communication,
+* **Dynamic var**, which isolates modifiable state within the communicating threads.
 
-With its distinctive nature, Clojure settled down in code-base of a number of companies, including:
+With its distinctive nature, Clojure settled down in code-bases in a number of companies, including {{{clojurestories}}}:
 
-* **Puppet Labs**,
-* **Beanstalk**.
-* **ThoughtWorks** IOOF,
+* **Puppet Labs**, that used Clojure for building *Trapperkeeper* - an open source framework for hosting services which are supposed to run for a long period,
+* **Beanstalk**, whose product is a continuous integration application, after switching to Clojure gained a multiply of 20 boost in performance for their caching component,
+* **ThoughtWorks**, a consulting company, which gave Clojure a try to rewrite their CMS solution, turned out to deliver the software before deadline and under designated budget,
 * **Sonian**,
 * **MailOnline**.
 
