@@ -246,7 +246,7 @@ It will not however go into much details of HTML rendering or try to compare to 
 
 For the Music Store rendering engine, a simple to use and built into Suave **DSL** has been chosen. Domain Specific Language has plenty of definitions, one of which is following {{{van2000domain}}}:
 
->> A domain-specific language (DSL) is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
+>> *"A domain-specific language (DSL) is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain."*
 
 Based on the above definition, HTML DSL available in Suave could be categorized as a set of functions focused on building HTML markup. 
 HTML markup can be a valid XML markup, under the condition that all element tags are closed.

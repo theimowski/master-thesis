@@ -104,8 +104,11 @@ Object-Oriented approach was introduced in order to combine data with behavior i
 
 ### Referential opacity
 
-As per Tennent {{{tennent1976denotational}}}, main actions performed in imperative paradigm are updating statements, jumps and intermediate input / output, which spoil referential transparency by introducing the possibility of "side effects" or transfers of control during expression evaluations.
-Lack of referential transparency leads to an opposite property, namely referential opacity.
+Both imperative and object-oriented paradigms suffer from referential opacity. 
+Referential opacity is an opposite of referential transparency property.
+Tennent in his works explains {{{tennent1976denotational}}}: 
+
+>> *"Main actions performed in imperative paradigm are updating statements, jumps and intermediate input / output, which spoil referential transparency by introducing the possibility of "side effects" or transfers of control during expression evaluations."*
 
 Referential transparency has already been defined a few times {{{sondergaard1990referential, strachey2000fundamental}}}, where it concerns more complex topics such as non-determinism or definiteness.
 In context of this thesis and basic paradigms' characteristics it is enough to say that referential transparency describes a property of programming language, which enables to substitute certain expression with another of the same value, without impact on the program's behavior.
