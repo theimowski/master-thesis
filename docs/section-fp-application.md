@@ -4,16 +4,17 @@ APPLICATION OF FUNCTIONAL PROGRAMMING
 For many, functional programming is associated with academic environment only.
 People tend to think of functional programming paradigm as an experimental area which is not used in practice.
 This might be because functional programming has its roots in mathematics.
-Indeed there exist concepts from mathematics which are the components of functional paradigm, such as:
+Indeed there exist concepts from mathematics which are the foundations for functional paradigm, such as:
 
 * **Lambda calculus** - formal mathematical system which became the base of functional paradigm,
-* **Functions** - treated as first-class citizens in functional programming; their purity as seen by mathematicians allow to use powerful constructs,
-* **Category theory** - this very abstract field of mathematics is reflected in type system of a few functional languages.
+* **Functions** - treated as first-class citizens in functional programming; their purity as seen by mathematicians allows to use powerful techniques,
+* **Category theory** - this very abstract field of mathematics is reflected in type system of statically typed functional languages.
 
-Despite the fact that the paradigm comes from academic background, it is being widely adopted in business use cases, and what is more this observation at the time of writing turns out to be specially true.
+Despite the fact that functional paradigm has academic background, it is being widely adopted in business cases.
+This observation turns out to be specially true at the time of writing, as more and more companies show interest in using functional programming.
 This section first goes through the most popular functional languages, describing how they got created and what are their main premises.
 Next, areas are enumerated where the paradigm really shines, leaving other approaches behind.
-Finally, real-world applications that achieved success in the business are pointed out together with substantiation of why functional programming proved helpful.
+Finally, real-world applications that achieved success in the industry are pointed out together with substantiation of why functional programming proved helpful.
 
 Popular languages
 -----------------
@@ -21,9 +22,9 @@ Popular languages
 Six functional programming languages which seem to be the most popular nowadays in software industry, are briefly described.
 Description for each language sticks to the following order:
 
-* first, short history is presented, when a particular language was built and under what circumstances,
-* next, most important features and properties of the language are described, including static typing and purity,
-* finally, names of companies are enlisted that use the language in production or for their internal tools.
+* **short history** is first presented, when a particular language was built and under what circumstances,
+* **most important features** and properties of the language are described next, including static typing and purity,
+* **names of companies** are finally enlisted that use the language in production or for their internal tools.
 
 The oldest functional languages like LISP or Scheme are deliberately not included in the list, as they are not really widely used in business applications.
 It is however important to remember that those languages became inspiration for more modern functional languages that found their way to the list.
@@ -188,14 +189,26 @@ Besides Ericsson, Erlang contributed to plenty of success stories for world-clas
 * **T-Mobile** uses the language to support their Short Message Service (SMS), as well as authentication services,
 * **Motorola** utilizes Erlang in public-safety sector for analyzing and processing telephone calls.
 
-Profitable areas
-----------------
+Dominated areas
+---------------
 
-* machine learning,
-* financial institutions,
-* insurance companies,
-* power companies,
-* scripting.
+Functional programming is getting more and more popular in the software industry.
+Not only the languages that were designed with functional approach in mind are being used, but also those languages that originate from a different paradigm branch incorporate functional techniques.
+Good examples of such languages are C# and Java, which initially supported only object-oriented imperative style of programming, but new versions of these two introduce concepts well known to functional programmers, such as higher-order functions, lambda expressions or type polymorphism.
+
+While there are a lot of fields in software industry where functional programming is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm **dominates** and leaves other behind.
+This domination manifests with impact of institutions that achieved success with the paradigm on other players that have not yet tried different approach than imperative.
+Such areas, where functional seems to take the lead are described in this section, together with a rationale on why functional programming is more promising in specific case.
+
+### Financial industry
+
+Several works describe role of functional programming in software development for financial sector {{{minsky2008caml,berthold2012functional,fsharp2014deep}}}.
+
+### Data science
+
+### Concurrent systems?
+
+### Machine learning?
 
 Successful examples
 -------------------
