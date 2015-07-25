@@ -214,9 +214,12 @@ Functional programming turns out to address most of these problems and that is w
 Several works describe role of functional programming in software development for financial sector and explain why the paradigm proved helpful {{{minsky2008caml,berthold2012functional,fsharp2014deep}}}.
 Below are excerpts from these works that point out main reasons why financial industry benefits from application of functional programming:
 
-* **Maintainability** - thanks to the code being more succinct and readable, it is much easier for a developer to reason about a specific piece (especially since financial models can be really complex) and thus it makes the system more maintainable {{{minsky2008caml}}}, moreover such properties as immutability or referential transparency cause a less number of software defects;
+* **Maintainability** - thanks to the code being more succinct and readable, it is much easier for a developer to reason about a specific piece (especially since financial models can be really complex) and thus it makes the system more maintainable {{{minsky2008caml,fsharp2014deep}}}, moreover such properties as immutability or referential transparency cause a less number of software defects;
 * **Performance** - compiled code turns out to be really fast when certain optimization techniques are used {{{minsky2008caml}}}, plus the interoperability with libraries built from different languages (with help of foreign function interface) allows to natively execute chunks that are performance critical for the business;
-* **Hiring better engineers** - it was noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford implied higher salaries), even though there is a minority of developers that know the language (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
+* **Generalization** - higher order functions and currying abstract away the behavior from data, making it possible to implement simulation algorithms applicable to various pricing derivatives {{{fsharp2014deep}}}, type polymorphism done this way leads to less amount of code compared to what it would require with only object-oriented techniques used;
+* **Parallelization** - immutable data structures that are used in functional programming encourage to process data in parallel, as there is a lower risk of any kind of concurrency issue, resulting in vertical processing scalability and allowing to consume larger volumes of data for financial analysis {{{berthold2012functional}}};
+* **Hiring better engineers** - it is noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that know the language (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
+
 
 ### Data science
 
