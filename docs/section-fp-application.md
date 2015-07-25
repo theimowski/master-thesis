@@ -75,7 +75,7 @@ With its distinctive syntax, OCaml became an inspiration for a few modern langua
 
 OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}}}:
 
-* **Jane Street** - a proprietary trading firm that uses OCaml as its primary development platform,
+* **Jane Street** - a proprietary trading firm that uses OCaml as its primary development platform {{{minsky2008caml}}},
 * **LexiFi** - company that used OCaml to develop the Modeling Language for Finance (MLFi), which is the first formal language that accurately describes the most sophisticated capital market, credit, and investment products,
 * **Facebook** - which does not need any introduction, uses OCaml for the following:
     * *Hack* programming language with its compiler written in OCaml, as an extension to PHP with static typing,
@@ -194,15 +194,29 @@ Dominated areas
 
 Functional programming is getting more and more popular in the software industry.
 Not only the languages that were designed with functional approach in mind are being used, but also those languages that originate from a different paradigm branch incorporate functional techniques.
-Good examples of such languages are C# and Java, which initially supported only object-oriented imperative style of programming, but new versions of these two introduce concepts well known to functional programmers, such as higher-order functions, lambda expressions or type polymorphism.
+Good examples of such languages are C# and Java, which initially supported only object-oriented and imperative style of programming, but new versions of these two introduce concepts well known to functional programmers, such as higher-order functions, lambda expressions or type polymorphism.
 
 While there are a lot of fields in software industry where functional programming is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm **dominates** and leaves other behind.
 This domination manifests with impact of institutions that achieved success with the paradigm on other players that have not yet tried different approach than imperative.
 Such areas, where functional seems to take the lead are described in this section, together with a rationale on why functional programming is more promising in specific case.
+As a disclaimer, it is important to note, that the domination does not necessary mean more job openings on the market (as non-functional paradigms are in general still more popular), but rather that there is a visible trend of growing employments in these areas.
 
 ### Financial industry
 
-Several works describe role of functional programming in software development for financial sector {{{minsky2008caml,berthold2012functional,fsharp2014deep}}}.
+Financial sector faces many challenges related to computing nowadays.
+Institutions compete with each other with regards to real-time processing speed of their systems.
+Stochastic simulations of mathematical models used in financial software can potentially strive to infinite amount of compute cycles.
+Those models in turn happen to be very complicated and require tough logic implementation.
+In addition to that, volumes of data to be processed reach unbelievable sizes, and the trend seems to grow.
+Those challenges squeeze huge amounts of money invested in financial software, but as this industry does not suffer from poverty, funds are still allocated to improve the overall quality and performance of systems.
+Functional programming turns out to address most of these problems and that is why it settled down for good in the financial industry.
+
+Several works describe role of functional programming in software development for financial sector and explain why the paradigm proved helpful {{{minsky2008caml,berthold2012functional,fsharp2014deep}}}.
+Below are excerpts from these works that point out main reasons why financial industry benefits from application of functional programming:
+
+* **Maintainability** - thanks to the code being more succinct and readable, it is much easier for a developer to reason about a specific piece (especially since financial models can be really complex) and thus it makes the system more maintainable {{{minsky2008caml}}}, moreover such properties as immutability or referential transparency cause a less number of software defects;
+* **Performance** - compiled code turns out to be really fast when certain optimization techniques are used {{{minsky2008caml}}}, plus the interoperability with libraries built from different languages (with help of foreign function interface) allows to natively execute chunks that are performance critical for the business;
+* **Hiring better engineers** - it was noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford implied higher salaries), even though there is a minority of developers that know the language (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
 
 ### Data science
 
