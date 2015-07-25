@@ -92,7 +92,7 @@ F# design was influenced by a set of other languages, most notably:
 * **OCaml**, with regards to main syntactic constructs, 
 * **Python**, by adapting the whitespace sensitivity property, 
 * **Haskell**, from which it accommodated many functional features,
-* **Erlang**, in respect to the agent-based processing model and asynchrony.
+* **Erlang**, in respect to the message passing model and asynchrony.
 
 F# is statically typed and its type system is considered to be very strict (almost as Haskell).
 Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows also for both imperative and object-oriented constructs.
@@ -123,13 +123,13 @@ Scala provides a feature called "Traits", which enables to mix multiple interfac
 The Traits feature can be compared to concept of Typeclasses in Haskell, however the foundations differ.
 With its full interoperability with JVM and Java, Scala is a multi-paradigm language that allows to write code in functional as well as object-oriented manner.
 Inspired by other languages from functional family, Scala provides with well-known, associated with functional paradigm features, such as Pattern Matching or Higher-order functions.
-Language designers made their best to fit Scala to systems that require distribution and concurrency by adapting agent-based (actor) processing model and making easier to work write asynchronous code with Futures.
+Language designers made their best to fit Scala to systems that require distribution and concurrency by adapting actor-based processing model and making it easier to work write asynchronous code with Futures.
 
 Partly thanks to the money invested, but also because of the language power itself, Scala found its way to be incorporated into an impressive amount of significant businesses around the world {{{typesafestories}}}:
 
 * **Twitter** completely re-architected its services to use Scala {{{eriksen2013your}}} and achieve an enormous indicator of hundreds of thousands tweets per second,
 * **LinkedIn** converted from plain Java web frameworks to using Scala and Play framework, which turned out to speed up code and test cycles as well as made the LinkedIn platform more scalable,
-* **Walmart** Canada by rebuilding its web and mobile stacks with combination of Scala language, Play framework and Akka library for agent-based processing, noted a serious improvement in web traffic conversions and mobile orders for their Canada's largest on-line retailing business,
+* **Walmart** Canada by rebuilding its web and mobile stacks with combination of Scala language, Play framework and Akka library for actor-based processing, noted a serious improvement in web traffic conversions and mobile orders for their Canada's largest on-line retailing business,
 * **Airbnb**, one of the largest lodge renting services, based their internal tool for scheduling data pipelines on Scala language, making the tool easier to manage and debug than with previously utilized Cron,
 * **The Guardian** upon transition from standard print-based to digital-first newspaper organization, chose stack based on Scala language (similar to Walmart Canada) which proved to be a solid and scalable foundation for its new services.
 
@@ -162,18 +162,31 @@ With its distinctive nature, Clojure settled down in code-bases in a number of c
 
 ### Erlang
 
-First version of Erlang was released back in 1986.
-In meantime, Erlang was evolving and reached release of stable version 18.0 at the time of the writing.
+First version of Erlang was released back in 1986. 
+Erlang evolution led to release of stable version 18.0 at the time of the writing.
 Aim of creating Erlang language was to enhance telephony software industry.
+Origin of the language's name is ambiguous: some claim that it is a tribute to danish mathematician Agner Krarup Erlang, while other say that it is an abbreviation of "Ericsson language".
+Indeed, Ericsson is not only the company that first incorporated Erlang, but also the one that started the development of the language at its Ericsson Computer Science Laboratory.
+Erlang was born in Ericsson labs thanks to Joe Armstrong and Robert Virding together with help of Mike Williams {{{armstrong2007history}}}.
+At first, the language usage was restricted to Ericsson only, however it became open sourced some time later. 
 
-Erlang contributed to plenty of success stories for world-class companies' production systems {{{cesarini2009erlang}}}:
+The most important aspect of Erlang is concurrency, for which the language has a very sophisticated runtime.
+It enables to span multiple processes with little cost (a process is related to runtime, not operating system).
+As processes do not share memory, the main philosophy of Erlang is based on passing messages between them.
+Message passing technique relies on process isolation and asynchronous communication.
+All processes are autonomic, thus there is no single point of failure in systems built on top of Erlang.
+The message passing approach introduced in Erlang influenced plenty of other languages that appeared afterwards.
+Erlang language is dynamically typed, which entails all the related drawbacks of dynamic languages, but it does also imply some advantages, one of which is ability of providing hot code replacement.
+Hot code replacement is a very powerful feature, that allows to deploy new versions of software to production, without need to stop the existing ones.
+While Erlang was designed with functional approach in mind and it mainly consists of functional constructs, it is not pure with respect to implementation of a single process which can follow imperative techniques.
 
-* **Amazon**,
-* **Yahoo!**,
-* **Facebook**,
-* **T-Mobile**,
-* **Motorola**,
-* **Ericsson**.
+Besides Ericsson, Erlang contributed to plenty of success stories for world-class companies' production systems {{{cesarini2009erlang}}}:
+
+* **Amazon** makes use of Erlang for its database component SimpleDB, that is a building block of Amazon Elastic Compute Cloud (EC2),
+* **Yahoo!** employs Erlang for its product called Delicious, a bookmarking service that deals with millions of users and hundreds of millions of bookmarks,
+* **Facebook** powers the back-end services of its chat service with Erlang, delivering messages to people all around the world,
+* **T-Mobile** uses the language to support their Short Message Service (SMS), as well as authentication services,
+* **Motorola** utilizes Erlang in public-safety sector for analyzing and processing telephone calls.
 
 Profitable areas
 ----------------
