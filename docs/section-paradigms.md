@@ -10,10 +10,10 @@ One of the first attempts to describe methods of organizing code was made by Dij
 In 1978, Floyd received Turing Award for his paper, where he described the notion of a **paradigm** and how it can influence language designers {{{floyd1979paradigms}}}.
 Those early works prove that the concept and its impact on programming has been studied since the beginning of software industry.
 
-In this section most popular programming paradigms will be surveyed.
-The thesis focuses on a clear separation between imperative and declarative and their derivatives.
+In this section most popular programming paradigms are surveyed.
+The thesis focuses on a clear separation between imperative and declarative paradigms, and describes their derivatives.
 Since there exist plenty of different taxonomies for programming paradigms, the presented categorization should not be treated as the only appropriate one.
-It must be emphasized that most programming languages usually span over more than one paradigm, which makes them multi-paradigm.
+It must be emphasized that most programming languages usually span over more than one paradigm, which makes them labeled with multi-paradigm notion.
 The paradigms are not thus mutually exclusive in context of a specific language.
 
 Imperative
@@ -30,7 +30,7 @@ First programming languages were machine languages, which offered Application Pr
 Because of their nature, which was based on giving low level commands to the processor, machine languages became the precursors of imperative programming.
 Building complex systems with machine code usually resulted in enormous code bases, which turned out to be painful to maintain.
 
-That is why in the late 50s and in the beginning of 60s higher level languages were introduced, such as FORTRAN, ALGOL, COBOL and BASIC, all of which can be considered imperative.
+That is why in the late 50s and in the beginning of 60s one level higher languages were introduced, such as FORTRAN, ALGOL, COBOL and BASIC, all of which can be considered imperative.
 They aimed to reduce the cost of code maintainability in comparison to machine languages by abstracting set of machine code instructions with more human-readable statements.
 
 In 70s, languages like Pascal or C were created.
@@ -72,7 +72,7 @@ using (var reader = File.OpenText("log"))
 
 It is evident that the implementation in listing {{csparadigmimperative}} consists of a step-by-step instructions.
 Code contains assignment statements (lines 1, 2, 3, 5, 13), jump instructions (line 6, 8) and explicit arithmetic operations (line 11).
-It focuses on the detailed algorithm flow, that is the engineer has to specify **how** to achieve the goal.
+It focuses on the detailed algorithm flow, hence the engineer specifies **how** to achieve the goal.
 In contract, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach, where without providing a detailed recipe, but rather using built-in language constructs, the engineer declares **what** is the goal.
 
 Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}).
@@ -93,20 +93,52 @@ A few concerns are targeted:
     * only lines starting with "\[ERROR\]" are taken into account (line 8).
 
 Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
-As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one has to read 10 last lines of file, the whole code snippet has to be redesigned).
+As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one would have to read 10 last lines of file, the whole algorithm would have to be redesigned).
 
 ### Object-Oriented
 
 Majority of imperative programming languages that were developed till the 80s have procedural nature.
 This means that they focus on defining reusable procedures which invoke certain actions.
 Procedures are stateless, and as a result they cannot carry any kind of data with them.
-Object-Oriented approach was introduced in order to combine data with behavior inside an object.
+Object-Oriented approach was introduced in order to combine data with behavior inside an object, in order to enable relations between object, its internal state and applicable operations on that object.
+Object-Oriented follows imperative approach with regards to how behavior of an object is defined.
+The paradigm outlines a few principles for design of a program.
+
+**Objects** are the basic building blocks of the program.
+In some Object-Oriented languages, every data structure (including primitive types) is an object.
+Instance of an object is usually shaped by the concept of class, which defines available members - fields and methods.
+Fields persist state of an object that methods can operate on.
+
+**Encapsulation** is an interesting principle of Object-Oriented software, that often gets misunderstood.
+It aims to hide information, that is to make the internals of an object invisible to the outside scope, but to provide a public interface that does not leak unnecessary data for other components interacting with that object.
+Encapsulation is fulfilled when the call site neither has to make any assumptions about nor be aware of existence of the internals of called object.
+The misconception occurs because developers treat encapsulation as a way of sharing internal state through trivial methods (known as getters and setters in Java and properties in C#).
+
+**Inheritance** allows a class to derive behavior as well as state from another class.
+The derived members can then be reused to implement more specific sub-class methods.
+Thanks to the mechanism, some implementation can be shared between multiple classes of objects and duplication of code avoided.
+Often languages allow for shadowing of derived members, that is overriding definition of a member, which can result in spoiled abstraction.
+Inheritance also leads to forming of class hierarchies which easily get big and complex.
+
+**Polymorphism** is a concept known from functional programming, that in Object-Oriented approach relies on inheritance.
+"Poly" standing for "many" and "morphism" which can be thought of "form" describe the ability to treat objects of different classes in unified way.
+In Object-Oriented paradigm however this ability is forced by belonging to a specific class hierarchy.
+
+**Abstraction** is closely related to polymorphism, and allows to treat referenced objects as if they were of the most possible general type, while in runtime they appear to be an instance of a very specific class.
+Abstraction enables better testability of code, and late binding which can be used for inversion of control (IOC).
+As stated above, when not cautious, abstraction can be easily spoiled in Object-Oriented programming by overriding behavior or leaking internals of an object.
+
+Many other principles and design patterns apply to Object-Oriented programming.
+With the SOLID acronym, Bob C. Martin {{{martin2003agile}}} presents set of five principles that ensure software to be maintainable.
+Multiple design patterns described in the famous Design Patterns book {{{gamma1994design}}} demonstrate common approaches that address cross cutting concerns in Object-Oriented program.
+While it is certainly a good thing that such patterns are established for software engineers to follow, majority of them tend to be quite cumbersome and utilizing them cause complexity of software to grow exponentially.
+Many of the standardized patterns seem to **solve problems that the Object-Oriented programming caused** itself.
 
 ### Referential opacity
 
 Both imperative and object-oriented paradigms suffer from referential opacity. 
 Referential opacity is an opposite of referential transparency property.
-Tennent in his works explains {{{tennent1976denotational}}}: 
+Tennent in his work explains {{{tennent1976denotational}}}: 
 
 >> *"Main actions performed in imperative paradigm are updating statements, jumps and intermediate input / output, which spoil referential transparency by introducing the possibility of "side effects" or transfers of control during expression evaluations."*
 
