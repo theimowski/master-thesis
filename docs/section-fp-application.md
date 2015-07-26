@@ -2,15 +2,9 @@ APPLICATION OF FUNCTIONAL PROGRAMMING
 ======================================
 
 For many, functional programming is associated with academic environment only.
-People tend to think of functional programming paradigm as an experimental area which is not used in practice.
-This might be because functional programming has its roots in mathematics.
-Indeed there exist concepts from mathematics which are the foundations for functional paradigm, such as:
-
-* **Lambda calculus** - formal mathematical system which became the base of functional paradigm,
-* **Functions** - treated as first-class citizens in functional programming; their purity as seen by mathematicians allows to use powerful techniques,
-* **Category theory** - this very abstract field of mathematics is reflected in type system of statically typed functional languages.
-
-Despite the fact that functional paradigm has academic background, it is being widely adopted in business cases.
+People tend to think of functional programming as an experimental area which is not used in practice in software industry.
+This might be because functional programming relies on mathematical foundations.
+Despite the fact that functional paradigm has indeed academic background, it is being widely adopted in business cases.
 This observation turns out to be specially true at the time of writing, as more and more companies show interest in using functional programming.
 This section first goes through the most popular functional languages, describing how they got created and what are their main premises.
 Next, areas are enumerated where the paradigm really shines, leaving other approaches behind.

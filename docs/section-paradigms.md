@@ -108,11 +108,86 @@ Program written in declarative style focuses on **what** goal has to be achieved
 This means that code does not specify how detailed, low level instructions are to be executed in order, but rather synthesizes a set of constructs that are capable of being combined together.
 It does so by **declaring** how these constructs relate to themselves, hence the name of the paradigm.
 Padawitz {{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
-Description of how functional programming fits to declarative paradigm is given in later course of the thesis.
 
 ### History?
 
-### Functional
+Functional
+----------
+
+Functional programming is strongly connected with declarative paradigm, and has its roots in mathematics.
+Among concepts from mathematics which are the foundations for functional paradigm, there are:
+
+* **Lambda calculus** - formal mathematical system which became the base of functional paradigm,
+* **Functions** - treated as first-class citizens in functional programming; their purity as seen by mathematicians allows to use powerful programming techniques,
+* **Category theory** - this very abstract field of mathematics is reflected in type system of statically typed functional languages.
+
+In this section focus is laid on pointing out functional programming properties, which differentiate the paradigm from other.
+Each property comes with a brief description followed by a listing demonstrating the property and its usage in practice.
+All example listings are in F# language.
+
+### Immutability
+
+Immutability is one of the most basic properties of functional programming.
+In imperative paradigm, assignments are made to variables which, as the name suggests, can vary (be mutated) during run-time.
+In functional world on the other hand, it is said that there is a binding of a value to a symbol. 
+Immutability enforces that all values which are evaluated during program execution, once bound to a symbol, cannot be mutated.
+
+For newcomers the property might initially look restrictive, but it turns out that it does not imply any constraints.
+Immutability helps with understanding the flow of program logic, and is a prerequisite of referential transparency when it comes to deferred execution, because if a deferred function refers to a variable that may or may not be modified, the result of evaluating such function is indeterministic.
+The greatest benefit from immutability is discovered in context of concurrent programming, because immutable values are thread-safe by default (they cannot change).
+
+Listing {{funimmutability}} presents how immutability in F#, with the `let` keyword meaning binding of a value on the right side of `=` operator to the symbol on left side.
+Both `x` and `y` values in listing {{funimmutability}} are immutable, and attempt to assign different value to `x` symbol (line 3) fails.
+F# compiler treats the expression in line 3 as equality test, and since `x` is not equal to `6`, the expression evaluates to false.
+
+```xxx
+{FSharp]{Immutability}{funimmutability}
+let x = 5      // value x is immutable
+let y = x + 3  // value y is immutable
+x = 6          // this expression evaluates to false```
+
+### Purity
+
+Purity property allows to associate programming language's functions with mathematical functions.
+A function is pure in mathematical sense, when for a given set of arguments it always returns the same value.
+In context of programming languages, one can say that a pure function does not depend on anything but the arguments it takes.
+
+Again, as was the case with immutability, the purity properties might seem impossible to achieve in a real world application.
+Every software needs to communicate with components outside its process, for example by invoking IO operations or accessing computer's clock.
+Haskell which happens to be purely functional is used in real systems and in the meanwhile preserves purity property.
+This is achievable with technique called "Monad" {{{mcbride2008applicative}}}, which also has its formal mathematical definition. 
+Monads however are quite complicated topic itself, therefore are not explicitly (they are used in the research part anyway) addressed by this thesis.
+
+Listing {{funpurity}} demonstrates two functions, `pureSalary` and `impureSalary`.
+Both functions have the same type signature (`decimal -> decimal -> decimal`), which means that they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.
+Despite they have the same type signature, the functions do differ with regards to purity.
+While `pureSalary` does not depend on any value from outside and always returns the same result for given arguments, the `impureSalary` takes an implicit dependency on `DateTime.Now.DayOfWeek` property, which depends on the current (at the time of executing) day of week.
+As F# is not purely functional, it cannot enforce pure nature of functions, and thus the `impureSalary` compiles correctly.
+
+```xxx
+{FSharp]{Purity}{funpurity}
+let pureSalary (hours: decimal) (rate: decimal) =
+    hours * rate
+
+let impureSalary (hours: decimal) (rate: decimal) =
+    if DateTime.Now.DayOfWeek = DayOfWeek.Saturday then
+        hours * rate * 1.5M
+    else
+        hours * rate```
+
+### Higher-order functions
+
+```xxx
+{FSharp]{Higher-order functions}{funhof}
+let higherOrder () =
+    [|1..10|] 
+    |> Array.filter (fun i -> i % 2 = 0)```
+
+### Recursion
+
+### Currying
+
+### Lazy evaluation
 
 Comparison by example
 ---------------------
