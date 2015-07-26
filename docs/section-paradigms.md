@@ -44,57 +44,6 @@ From the imperative category, Smalltalk and C++ were invented, the latter being 
 The imperative approach evolved since then, with languages like Python, Visual Basic, PHP, Java, Ruby developed in the 90s and C# after the Millennium.
 Despite some of these languages aimed to target multiple paradigms, the concept of building program's flow step by step, with the help of commands, remained ubiquitous.
 
-### Example
-
-Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
-Language used in listing {{csparadigmimperative}} is C#, which allows to write in such manner.
-The code reads a log file and extracts 10 first error entries from the file (lines that start with \[ERROR\] prefix).
-Original idea comes from a tweet {{{imperativevsfunctional}}} where Java language was used.
-Here, the program was adjusted to C# syntax.
-
-```xxx
-{CSharp]{Example of imperative approach in CSharp}{csparadigmimperative}
-var errors = new List<String>();
-var errorCount = 0;
-using (var reader = File.OpenText("log"))
-{
-    var line = reader.ReadLine();
-    while (errorCount < 10 && line != null)
-    {
-        if (line.StartsWith("[ERROR]"))
-        {
-            errors.Add(line);
-            errorCount++;
-        }
-        line = reader.ReadLine();
-    }
-}```
-
-It is evident that the implementation in listing {{csparadigmimperative}} consists of a step-by-step instructions.
-Code contains assignment statements (lines 1, 2, 3, 5, 13), jump instructions (line 6, 8) and explicit arithmetic operations (line 11).
-It focuses on the detailed algorithm flow, hence the engineer specifies **how** to achieve the goal.
-In contract, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach, where without providing a detailed recipe, but rather using built-in language constructs, the engineer declares **what** is the goal.
-
-Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}).
-A few concerns are targeted:
-
-* **Reading from a file**:
-    * file has to opened to be read from (line 3), 
-    * single line is read inside `while` loop (lines 5 and 13),
-    * end of file is being checked by comparing `line` to `null` (line 6),
-* **Collecting error lines**:
-    * list of errors is initialized in line 1,
-    * every matching error entry is appended to that list (line 10),
-* **Counting errors**:
-    * counter is initialized in line 2,
-    * it is then compared to the maximum number of lines in line 6,
-    * finally it has to be incremented every time an error is added to the list (line 11),
-* **Filtering lines**:
-    * only lines starting with "\[ERROR\]" are taken into account (line 8).
-
-Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
-As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one would have to read 10 last lines of file, the whole algorithm would have to be redesigned).
-
 ### Object-Oriented
 
 Majority of imperative programming languages that were developed till the 80s have procedural nature.
@@ -154,17 +103,70 @@ In programming practice, these drawbacks lead to difficulties with understanding
 Declarative
 -----------
 
-Declarative paradigm is an opposite to imperative with regards to how code is written.
-Program written in declarative style focuses on the **what** rather than **how**.
-This means that it does not specify exact low level instructions to be executed in a given order, but rather synthesizes a set of other components.
-It does so by declaring how the components relate to themselves, hence the name of the paradigm.
-As per Padawitz {{{padawitz2006deductive}}}, the term declarative is a combination of functional (applicative) and relational (logic) programming.
+Declarative paradigm is an alternative approach (different than imperative) with regards to how logic is specified.
+Program written in declarative style focuses on **what** goal has to be achieved rather than **how** this goal is to be achieved {{{petricek2009real}}}.
+This means that code does not specify how detailed, low level instructions are to be executed in order, but rather synthesizes a set of constructs that are capable of being combined together.
+It does so by **declaring** how these constructs relate to themselves, hence the name of the paradigm.
+Padawitz {{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
+Description of how functional programming fits to declarative paradigm is given in later course of the thesis.
 
-### History
+### History?
 
-### Example
+### Functional
 
-Placeholder text
+Comparison by example
+---------------------
+
+Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
+Language used in listing {{csparadigmimperative}} is C#, which allows to write in such manner.
+The code reads a log file and extracts 10 first error entries from the file (lines that start with \[ERROR\] prefix).
+Original idea comes from a tweet {{{imperativevsfunctional}}} where Java language was used.
+Here, the program was adjusted to C# syntax.
+
+```xxx
+{CSharp]{Example of imperative approach in CSharp}{csparadigmimperative}
+var errors = new List<String>();
+var errorCount = 0;
+using (var reader = File.OpenText("log"))
+{
+    var line = reader.ReadLine();
+    while (errorCount < 10 && line != null)
+    {
+        if (line.StartsWith("[ERROR]"))
+        {
+            errors.Add(line);
+            errorCount++;
+        }
+        line = reader.ReadLine();
+    }
+}```
+
+It is evident that the implementation in listing {{csparadigmimperative}} consists of a step-by-step instructions.
+Code contains assignment statements (lines 1, 2, 3, 5, 13), jump instructions (line 6, 8) and explicit arithmetic operations (line 11).
+It focuses on the detailed algorithm flow, hence the engineer specifies **how** to achieve the goal.
+In contract, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach, where without providing a detailed recipe, but rather using built-in language constructs, the engineer declares **what** is the goal.
+
+Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}).
+A few concerns are targeted:
+
+* **Reading from a file**:
+    * file has to opened to be read from (line 3), 
+    * single line is read inside `while` loop (lines 5 and 13),
+    * end of file is being checked by comparing `line` to `null` (line 6),
+* **Filtering lines**:
+    * only lines starting with "\[ERROR\]" are taken into account (line 8),
+* **Counting errors**:
+    * counter is initialized in line 2,
+    * it is then compared to the maximum number of lines in line 6,
+    * finally it has to be incremented every time an error is added to the list (line 11),
+* **Collecting error lines**:
+    * list of errors is initialized in line 1,
+    * every matching error entry is appended to that list (line 10).
+
+Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
+As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one would have to read 10 last lines of file, the whole algorithm would have to be redesigned).
+
+On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques.
 
 ```xxx
 {CSharp]{Example of functional approach in CSharp}{csparadigmfunctional}
@@ -174,7 +176,33 @@ var errors =
         .Take(10)
         .ToList();```
 
-### Functional
+At first glance, it is obvious that the implementation in listing {{csparadigmfunctional}} is much more concise with only 5 lines compared to 15 in listing {{csparadigmimperative}} (technically these 5 lines build a single expression which could be written in a single line, but were split to improve readability).
 
-Impact of paradigm choice
--------------------------
+The code in listing {{csparadigmfunctional}} follows a functional pattern with respect to that every function invocation is treated as an expression which takes some input and returns some output:
+
+* `File.ReadLines` in line 2 takes path to file (of type `string`) and returns a sequence of lines (`seq<string`). The sequence is evaluated lazily, which prevents loading whole file into memory;
+* `Where` (line 3) is a function (speaking strictly C# jargon, it is a LINQ extension method) which takes a predicate function as its argument (`Where` is an example of higher-order function) and returns sequence with items that match the predicate;
+* the predicate function in form of anonymous function (lambda expression) passed to the `Where` function is of generic type `'T -> bool`, where `'T` type parameter has been expanded and inferred by C# type system to be of type `string`;
+* `Take` function (line 4) instructs to limit number of items in the sequence to the specified value (all items are returned if the value is larger than number of items);
+* `ToList` function (line 5) collects the items from the lazy sequence into a `List` type. This function forces the sequence to be evaluated;
+* the result of expression is assigned to variable `errors`.
+
+The same concerns apply as in the previous example, however they are separated in much clearer fashion:
+
+* **Reading form a file** is addressed in line 2,
+* **Filtering lines** is addressed in line 3,
+* **Counting errors** is addressed in line 4.
+* **Collecting error lines** is addressed in line 5.
+
+Thanks to such straightforward separation of concerns, applying changes to existing implementation comes much easier.
+Listing {{csparadigmfunctionalreverse}} demonstrates code modification made to collect 10 last instead of 10 first lines from the file.
+In this case, it was enough to add `Reverse` function to the pipeline that reverses the order of lines that are processed.
+
+```xxx
+{CSharp]{Modifications in functional approach in CSharp}{csparadigmfunctionalreverse}
+var errors = 
+    File.ReadLines("log")
+        .Where(line => line.StartsWith("[ERROR]"))
+        .Reverse() // new logic applied
+        .Take(10)
+        .ToList();```
