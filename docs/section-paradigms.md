@@ -121,7 +121,7 @@ Among concepts from mathematics which are the foundations for functional paradig
 * **Functions** - treated as first-class citizens in functional programming; their purity as seen by mathematicians allows to use powerful programming techniques,
 * **Category theory** - this very abstract field of mathematics is reflected in type system of statically typed functional languages.
 
-In this section focus is laid on pointing out functional programming properties, which differentiate the paradigm from other.
+In this section focus is laid on pointing out functional programming properties (or features), which differentiate the paradigm from other.
 Each property comes with a brief description followed by a listing demonstrating the property and its usage in practice.
 All example listings are in F# language.
 
@@ -177,15 +177,30 @@ let impureSalary (hours: decimal) (rate: decimal) =
 
 ### Higher-order functions
 
+Functions in functional programming languages are often referred to as "first-class citizens".
+This usually means that languages treat functions just as any other ordinary values and allow to combine functions together.
+A function is called higher-order when it takes as a parameter or returns another function.
+The concept of function pointers introduced in C and C++ is closely related to higher-order functions, however it does not ensure type safety.
+
+Higher-order functions is a powerful feature that enables to abstract away a common piece of logic and make it more reusable.
+It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with collections (for example filtering or mapping) or null-checking or.
+In addition to that, higher-order functions can be used as a foundation for concept known in Object-Oriented programming as "Dependency Injection".
+Dependency Injection in Object-Oriented paradigm relies on passing abstract interfaces without implementation to consuming classes.
+The interfaces passed to dependent class contain just type signatures of methods to be invoked, hence such interface can be easily replaced with traditional functions.
+
+Listing {{funhof}} shows example of using higher-order function `Array.Filter`.
+It takes two parameters: a function of type `'T -> bool` and an array of type `'T array`.
+The array passed as the second argument contains numbers from 1 to 10, and the predicate function passed as the first argument is an anonymous function (lambda expression) which tests whether a number is even.
+Thanks to the `Array.filter` function being higher-order, one can imagine whole spectrum of predicate functions that could be applied to filter specific elements from the array, and since the function is generic in type `'T` it can accept arrays of any type.
+
 ```xxx
 {FSharp]{Higher-order functions}{funhof}
-let higherOrder () =
-    [|1..10|] 
-    |> Array.filter (fun i -> i % 2 = 0)```
-
-### Recursion
+let evenNumbers =
+    Array.filter (fun i -> i % 2 = 0) [|1..10|] ```
 
 ### Currying
+
+### Recursion
 
 ### Lazy evaluation
 
