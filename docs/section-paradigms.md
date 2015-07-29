@@ -202,21 +202,46 @@ let evenNumbers =
 
 Currying is a concept that strongly relies on higher-order functions, or more closely the property that a function can return another function.
 It makes use of that property to apply arguments to a function partially.
-Partial application allows to "invoke" a function without passing every argument that this function can take.
-When a function is partially applied, it does not return the "final" value, but rather another function which takes these arguments that were not applied as the function's input.
-The above might sound cryptic, but hopefully example shown in listing {{funcurrying}} can explain this interesting feature better. 
+Partial application allows to "invoke" a function with only a strict subset of arguments that the function can take.
+When a function is partially applied, it does not return the "final" value, but rather another function which takes as its input these arguments, that were not applied to the original one.
+The above might sound cryptic, but hopefully example shown in listing {{funcurrying}} can explain this interesting feature better.
+
+Thanks to the currying feature, functional languages gain more re-usability in context of multi-argument functions.
+It is extremely easy to define new, more granular functions that partially match on the multi-argument ones, without losing any initial property.
+
+In listing {{funcurrying}} a standard `add` function is defined (lines 1-2).
+It takes two parameters (`a` and `b`), adds them together and returns the result of addition (F# compiler infers following type signature: `int -> int -> int`).
+Then in lines 4-5 another function `add5` is defined, which partially applies on `add` function, by applying only the first argument (`x` with value 5).
+In result, `add5` gets inferred by the compiler to be of type `int -> int`, because it applied only the first argument to `add` and now needs yet another argument to evaluate the sum.
+Line 7 presents how `add5` can be invoked with a single parameter.
 
 ```xxx
 {FSharp]{Currying}{funcurrying}
 let add x y =
     x + y
 
-let add5 y =
+let add5 =
     add 5
 
 add5 8 // evaluates to 13```
 
 ### Recursion
+
+Recursion is a computational approach that is known in imperative world, but employed much more frequently in functional programming.
+
+Tail-recursive.
+
+Listing {{funrecursion}} presents a recursive `product` function, which computes the product for a given list of numbers.
+Based on the length of `elements` list (with help of pattern matching), the `product` function either returns neutral element for multiplication (1) or invokes itself recursively with the tail of the list.
+Pattern matching case in line 4 splits the non-empty list into head (`h`) - first element of the list, and tail (`t`) - the rest of the elements in list (tail can potentially be empty).
+It is worth noting that the `product` function as defined in listing {{funrecursion}} is not tail-recursive, however with a bit of effort (for example by using technique called accumulator) it could become so.
+
+```xxx
+{FSharp]{Recursion}{funrecursion}
+let rec product elements =
+    match elements with 
+    | [] -> 1
+    | (h::t) -> h * product t```
 
 ### Lazy evaluation
 
