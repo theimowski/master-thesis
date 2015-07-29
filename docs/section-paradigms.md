@@ -228,8 +228,19 @@ add5 8 // evaluates to 13```
 ### Recursion
 
 Recursion is a computational approach that is known in imperative world, but employed much more frequently in functional programming.
+It relies on solving a given problem by decomposing it and retrying on a smaller instance (in context of a function or method it is typically achieved by calling itself with arguments that are smaller in some way).
+A recursive function or method must hold the stop property, meaning that there must exist an instance of a problem, for which the function or method is not going to make a recursive call yet again.
+Recursion technique is an alternate approach to iteration.
+In fact, some programming languages' compilers, for optimization reasons, translate recursive functions into its iterative equivalent.
 
-Tail-recursive.
+According to the Church-Turing thesis:
+
+> *"Every effectively calculable function (effectively decidable predicate) is general recursive."*
+
+This means that for each recursive function there exists a transformation to its corresponding iterative algorithm and the same applies backwards.
+Why bother with recursion at all if in majority of cases an iterative model is more efficient with regards to time complexity and memory consumption?
+Because iteration comes from imperative approach and can harm referential transparency as well as immutability, while recursion fits perfectly for functional world.
+Thanks to complex compilers' code optimizations and techniques such as "Tail recursive calls" (which prevents from stack overflows by avoiding stack frame allocation for recursive calls) a recursive algorithm can be both efficient and easier to comprehend.
 
 Listing {{funrecursion}} presents a recursive `product` function, which computes the product for a given list of numbers.
 Based on the length of `elements` list (with help of pattern matching), the `product` function either returns neutral element for multiplication (1) or invokes itself recursively with the tail of the list.
@@ -244,6 +255,16 @@ let rec product elements =
     | (h::t) -> h * product t```
 
 ### Lazy evaluation
+
+```xxx
+{FSharp]{Lazy evaluation}{funlazy}
+let numbers =
+    Seq.initInfinite (fun i -> i)
+    |> Seq.filter (fun i -> i % 3 <> 0)
+    |> Seq.take 10
+
+Seq.toList numbers // evaluation occurs here```
+
 
 Comparison by example
 ---------------------
