@@ -30,7 +30,7 @@ First programming languages were machine languages, which offered Application Pr
 Because of their nature, which was based on giving low level commands to the processor, machine languages became the precursors of imperative programming.
 Building complex systems with machine code usually resulted in enormous code bases, which turned out to be painful to maintain.
 
-That is why in the late 50s and in the beginning of 60s one level higher languages were introduced, such as FORTRAN, ALGOL, COBOL and BASIC, all of which can be considered imperative.
+That is why in the late 50s and in the beginning of 60s one level higher languages were introduced, such as FORTRAN, COBOL and BASIC, all of which can be considered imperative.
 They aimed to reduce the cost of code maintainability in comparison to machine languages by abstracting set of machine code instructions with more human-readable statements.
 
 In 70s, languages like Pascal or C were created.
@@ -178,19 +178,19 @@ let impureSalary (hours: decimal) (rate: decimal) =
 ### Higher-order functions
 
 Functions in functional programming languages are often referred to as "first-class citizens".
-This usually means that languages treat functions just as any other ordinary values and allow to combine functions together.
+This usually means that functions are treated just as any other ordinary value and are allowed to be combined together.
 A function is called higher-order when it takes as a parameter or returns another function.
-The concept of function pointers introduced in C and C++ is closely related to higher-order functions, however it does not ensure type safety.
+The concept of function pointers introduced in C and C++ is closely related to higher-order functions, though it does not guarantee type safety like in statically typed functional languages.
 
 Higher-order functions is a powerful feature that enables to abstract away a common piece of logic and make it more reusable.
-It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with collections (for example filtering or mapping) or null-checking or.
+It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with collections (for example filtering or mapping) or null-checking.
 In addition to that, higher-order functions can be used as a foundation for concept known in Object-Oriented programming as "Dependency Injection".
 Dependency Injection in Object-Oriented paradigm relies on passing abstract interfaces without implementation to consuming classes.
-The interfaces passed to dependent class contain just type signatures of methods to be invoked, hence such interface can be easily replaced with traditional functions.
+The interfaces passed to dependent class contain only type signatures of methods to be invoked, hence such interface can be easily represented with traditional functions.
 
 Listing {{funhof}} shows example of using higher-order function `Array.Filter`.
 It takes two parameters: a function of type `'T -> bool` and an array of type `'T array`.
-The array passed as the second argument contains numbers from 1 to 10, and the predicate function passed as the first argument is an anonymous function (lambda expression) which tests whether a number is even.
+The array passed as the second argument contains numbers from 1 to 10, and the predicate function passed as the first argument is an anonymous function (lambda expression) which tests whether a number is even or not.
 Thanks to the `Array.filter` function being higher-order, one can imagine whole spectrum of predicate functions that could be applied to filter specific elements from the array, and since the function is generic in type `'T` it can accept arrays of any type.
 
 ```xxx
@@ -199,6 +199,22 @@ let evenNumbers =
     Array.filter (fun i -> i % 2 = 0) [|1..10|] ```
 
 ### Currying
+
+Currying is a concept that strongly relies on higher-order functions, or more closely the property that a function can return another function.
+It makes use of that property to apply arguments to a function partially.
+Partial application allows to "invoke" a function without passing every argument that this function can take.
+When a function is partially applied, it does not return the "final" value, but rather another function which takes these arguments that were not applied as the function's input.
+The above might sound cryptic, but hopefully example shown in listing {{funcurrying}} can explain this interesting feature better. 
+
+```xxx
+{FSharp]{Currying}{funcurrying}
+let add x y =
+    x + y
+
+let add5 y =
+    add 5
+
+add5 8 // evaluates to 13```
 
 ### Recursion
 

@@ -26,7 +26,7 @@ It is however important to remember that those languages became inspiration for 
 ### Haskell
 
 First version of Haskell was developed in 1990, but it awaited newer releases, of which Haskell 2010 is the latest one.
-It was named after a mathematician, Haskell Curry, famous for work in combinatory logic, as well as "currying" concept which is ubiquitous in functional programming.
+It was named after a mathematician, Haskell Curry, famous for work in combinatory logic, as well as the "currying" concept which is ubiquitous in functional programming.
 Glasgow Haskell Compiler (GHC) is the best known compiler of the language.
 Written almost entirely in Haskell, GHC is a freely available, robust and portable compiler for Haskell that generates good quality code {{{jones1993glasgow}}}.
 
