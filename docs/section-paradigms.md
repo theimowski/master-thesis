@@ -256,6 +256,27 @@ let rec product elements =
 
 ### Lazy evaluation
 
+In a standard, imperative approach, when expression is reached by control, it gets immediately evaluated and the computed value is assigned to given variable.
+The same applies in case expression is given as a parameter to a function call - it has to be computed before the result value can be pushed to the stack and the function invoked.
+That strategy is commonly known as eager evaluation.
+On the other hand, evaluation is called to be lazy when the runtime environment postpones evaluating of an expression to the last responsible moment, which is when the value is vital for computations that follow.
+Lazy evaluation therefore treats expressions as first-class citizens and allows to pass them around or assign (bind) to values without evaluation (somehow analogous to how functions can be operated on).
+While functional-first languages like F# use eager evaluation by default with additional constructs for lazy expressions, pure functional languages such as Haskell incorporate laziness into execution run-time in every single place.
+
+Lazy evaluation comes with a number of benefits.
+Thanks to the fact that an expression is not evaluated at once, it is possible to define infinite (in logical sense) data structures: sequences, trees or other recursive data types.
+In case such structure was attempted to be evaluated, program execution would obviously hang, however infinite data structures prove useful when combined with functions that need to access only a part of the structure (see listing {{funlazy}}).
+Another very important advantage of lazy evaluation is the performance boost that is accomplished because of not evaluating unnecessary (from the program execution's point of view) expressions.
+Certain space of expressions defined in a program may not have any impact on the final result, hence lazy evaluation saves on time and memory complexity by omitting irrelevant expressions.
+
+Listing {{funlazy}} demonstrates how lazy evaluation is achieved in F#. 
+In line 2, `Seq.initInfinite` function is used to produce an infinite sequence of integers specified by the given function.
+The anonymous function in this case returns the same number as index (such function is often referred to as "identity" function).
+The sequence is then passed to `Seq.filter` (line 3) function which behavior was explained in context of higher-order functions.
+Finally, `Seq.take` function (line 4) specifies that it is interested in only the first 10 elements from the sequence.
+With such pipeline defined, `numbers` value gets bound to a sequence that will eventually return 10 first numbers that are not divisible by 3, starting with `0` and ending with `14`.
+Thanks to the sequence being evaluated in lazy manner, the actual evaluation happens in line 6, when the sequence is asked to be translated into a finite list.
+
 ```xxx
 {FSharp]{Lazy evaluation}{funlazy}
 let numbers =
