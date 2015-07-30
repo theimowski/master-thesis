@@ -103,13 +103,21 @@ In programming practice, these drawbacks lead to difficulties with understanding
 Declarative
 -----------
 
-Declarative paradigm is an alternative approach (different than imperative) with regards to how logic is specified.
+Declarative paradigm is different than imperative, with regards to how programs are built.
 Program written in declarative style focuses on **what** goal has to be achieved rather than **how** this goal is to be achieved {{{petricek2009real}}}.
 This means that code does not specify how detailed, low level instructions are to be executed in order, but rather synthesizes a set of constructs that are capable of being combined together.
-It does so by **declaring** how these constructs relate to themselves, hence the name of the paradigm.
-Padawitz {{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
+Declarative name refers to the code, which is written by **declaring** how constructs relate to themselves, but it also has its roots in linguistics where a declarative sentence is a complete expression of natural language which is either true or false {{{nilsson1990logic}}}.
+In his work, Padawitz{{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
+Both functional and logic programming can be thought of sub-paradigms for declarative programming.
 
-### History?
+### Logic Programming
+
+Logic programming builds on top of logic formulas.
+By describing potentially infinite relations on objects and applying reasoning of the programming system, certain conclusions are drawn {{{nilsson1990logic}}}.
+
+### Constraint Programming
+
+### DSL
 
 Functional
 ----------
