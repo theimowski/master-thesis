@@ -112,8 +112,19 @@ Both functional and logic programming can be thought of sub-paradigms for declar
 
 ### Logic Programming
 
-Logic programming builds on top of logic formulas.
-By describing potentially infinite relations on objects and applying reasoning of the programming system, certain conclusions are drawn {{{nilsson1990logic}}}.
+Logic programming builds on top of logic formulas, which describe relations between objects in an isolated world{{{nilsson1990logic}}}.
+In order to be processed, logic formulas have to obey a specific formalized syntax.
+Language constructs associated with the syntax are referred to as *predicate logic*, and include{{{nilsson1990logic}}}:
+
+* *variables*, ...,
+* *constants*, for denoting individuals (objects) in the isolated world that do not vary,
+* *functors*, for representing composites (such as family) of individuals; they denote functions over objects in the domain and build up *compound terms*,
+* *predicate symbols*, ...,
+* *logical connectives* among which there is $\wedge$ (conjunction), $\lor$ (disjunction), $\to$ (implication), $\lnot$ (negation) or $\equiv$ (logical equivalence),
+* *quantifiers* such as universal $\forall$ (for all) or existential $\exists$ (exists),
+* *auxiliary* symbols.
+
+By describing potentially infinite relations on objects and applying reasoning of the programming system, certain conclusions are drawn.
 
 ### Constraint Programming
 
