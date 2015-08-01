@@ -22,6 +22,8 @@ open Fake
 open FSharp.Literate
 open System.Text.RegularExpressions
 
+let start = System.Environment.TickCount
+
 let (++) a b = Path.Combine(a,b)
 let withExt ext path = Path.ChangeExtension(path, ext)
 let fileName = Path.GetFileName
@@ -44,9 +46,9 @@ let createPDF fileName =
 let numberSections filePath =
     let contents = File.ReadAllText(filePath)
     let replaced = contents.Replace(@"section*{", @"section{")
-    let replaced = Regex.Replace(replaced, "\\\{\\\{\\\{([\w+, ]+)\\\}\\\}\\\}", "\cite{$1}")
-    let replaced = Regex.Replace(replaced, "---([\w+ ]+)---", "\\begin{table}[h]\\caption{$1}\\centering\\setlength\\extrarowheight{2pt}")
-    let replaced = replaced.Replace("\end{tabular}", "\end{tabular}\end{table}")
+    let replaced = Regex.Replace(replaced, "\\\{\\\{\\\{([\w+, ]+)\\\}\\\}\\\}", "~\cite{$1}")
+//    let replaced = Regex.Replace(replaced, "---([\w+ ]+)---", "\\begin{table}[h]\\caption{$1}\\centering\\setlength\\extrarowheight{2pt}")
+//    let replaced = replaced.Replace("\end{tabular}", "\end{tabular}\end{table}")
 
     let replaced = replaced.Replace( "\\begin{lstlisting}\n{", "\n\n\\begin{mylisting}[")
     let replaced = replaced.Replace( "\\end{lstlisting}", "\\end{mylisting}\n\n")
@@ -67,7 +69,8 @@ Directory.EnumerateFiles(__SOURCE_DIRECTORY__)
 
 Directory.EnumerateFiles(outputDir)
 |> Seq.filter (fun f -> let f = Path.GetFileName(f) in f.StartsWith("section") && f.EndsWith(".tex"))
-|> Seq.iter  numberSections
+|> Seq.toArray
+|> Array.Parallel.iter  numberSections
 
 File.Copy(index, texFile, true) |> ignore
 File.Copy(__SOURCE_DIRECTORY__ ++ "bibliography.bib", outputDir ++ "bibliography.bib", true)
@@ -77,4 +80,8 @@ let newTempFile = Path.GetTempFileName()
 let pdfTempFile = Path.ChangeExtension(newTempFile, "pdf")
 File.Move(newTempFile, pdfTempFile)
 File.Copy(pdf, pdfTempFile, true)
+let _end = System.Environment.TickCount
+
+printfn "took %d ticks" (_end - start)
+
 System.Diagnostics.Process.Start(pdfTempFile)

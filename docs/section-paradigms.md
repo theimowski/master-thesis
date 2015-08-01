@@ -110,25 +110,37 @@ Declarative name refers to the code, which is written by **declaring** how const
 In his work, Padawitz{{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
 Both functional and logic programming can be thought of sub-paradigms for declarative programming.
 
-### Logic Programming
+### Logic programming
 
-Logic programming builds on top of logic formulas, which describe relations between objects in an isolated world{{{nilsson1990logic}}}.
-In order to be processed, logic formulas have to obey a specific formalized syntax.
+Logic programming builds on top of logic formulas, which describe relations between objects in an isolated world.
+In order to be processable, logic formulas have to obey a specific formalized syntax.
 Language constructs associated with the syntax are referred to as *predicate logic*, and include{{{nilsson1990logic}}}:
 
-* *variables*, ...,
-* *constants*, for denoting individuals (objects) in the isolated world that do not vary,
+* *variables* and *constants*, which stand for individuals (objects) in the isolated world that can or cannot vary,
 * *functors*, for representing composites (such as family) of individuals; they denote functions over objects in the domain and build up *compound terms*,
-* *predicate symbols*, ...,
-* *logical connectives* among which there is $\wedge$ (conjunction), $\lor$ (disjunction), $\to$ (implication), $\lnot$ (negation) or $\equiv$ (logical equivalence),
+* *predicate symbols*, that describe relations between the objects,
+* *logical connectives* among which there is $\wedge$ (conjunction), $\lor$ (disjunction), $\to$ (implication), $\lnot$ (negation) or $\leftrightarrow$ (logical equivalence),
 * *quantifiers* such as universal $\forall$ (for all) or existential $\exists$ (exists),
-* *auxiliary* symbols.
+* *auxiliary* symbols such as parentheses or comma.
 
-By describing potentially infinite relations on objects and applying reasoning of the programming system, certain conclusions are drawn.
+When relations on objects are described in formalized syntax, programming system can apply reasoning for given facts and draw certain conclusions.
+That is exactly how Prolog, the most popular logic programming language, works.
+Prolog with its syntax allows to describe facts in predicate logic language, and derive interesting outcomes that it manages to reason.
 
-### Constraint Programming
+### Constraint programming
 
-### DSL
+Constraint programming aims to incorporate into programming languages (also those from imperative background) a declarative principle of applying a set of restrictions (constraints) in order to infer possible results.
+Citing the very first sentence of Apt's book{{{apt2003principles}}}:
+
+>> *"Constraint programming is an alternative approach to programming in which the programming process is limited to a generation of requirements (constraints) and a solution of these requirements by means of general or domain specific methods"*
+
+
+### Domain specific languages
+
+Domain specific language term has been defined a number of times.
+One definition, proposed by Van Deursen et al.{{{van2000domain}}} is the following:
+
+>> *"A domain-specific language (DSL) is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain."*
 
 Functional
 ----------
