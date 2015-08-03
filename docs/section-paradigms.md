@@ -107,21 +107,22 @@ Declarative paradigm is different than imperative, with regards to how programs 
 Program written in declarative style focuses on **what** goal has to be achieved rather than **how** this goal is to be achieved {{{petricek2009real}}}.
 This means that code does not specify how detailed, low level instructions are to be executed in order, but rather synthesizes a set of constructs that are capable of being combined together.
 Declarative name refers to the code, which is written by **declaring** how constructs relate to themselves, but it also has its roots in linguistics where a declarative sentence is a complete expression of natural language which is either true or false {{{nilsson1990logic}}}.
-In his work, Padawitz{{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
+In his work, Padawitz {{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
 Both functional and logic programming can be thought of sub-paradigms for declarative programming.
+Following are enumerated some examples of more specific, based on declarative approach, sub-paradigms.
 
 ### Logic programming
 
 Logic programming builds on top of logic formulas, which describe relations between objects in an isolated world.
 In order to be processable, logic formulas have to obey a specific formalized syntax.
-Language constructs associated with the syntax are referred to as *predicate logic*, and include{{{nilsson1990logic}}}:
+Language constructs associated with the syntax are referred to as *predicate logic*, and include {{{nilsson1990logic}}}:
 
-* *variables* and *constants*, which stand for individuals (objects) in the isolated world that can or cannot vary,
+* *variables* and *constants*, which stand for individuals (objects) in the isolated world,
 * *functors*, for representing composites (such as family) of individuals; they denote functions over objects in the domain and build up *compound terms*,
 * *predicate symbols*, that describe relations between the objects,
-* *logical connectives* among which there is $\wedge$ (conjunction), $\lor$ (disjunction), $\to$ (implication), $\lnot$ (negation) or $\leftrightarrow$ (logical equivalence),
-* *quantifiers* such as universal $\forall$ (for all) or existential $\exists$ (exists),
-* *auxiliary* symbols such as parentheses or comma.
+* *logical connectives*, among which there is $\wedge$ (conjunction), $\lor$ (disjunction), $\to$ (implication), $\lnot$ (negation) or $\leftrightarrow$ (logical equivalence),
+* *quantifiers*, like universal $\forall$ (for all) or existential $\exists$ (exists),
+* *auxiliary* symbols, such as parentheses or comma.
 
 When relations on objects are described in formalized syntax, programming system can apply reasoning for given facts and draw certain conclusions.
 That is exactly how Prolog, the most popular logic programming language, works.
@@ -130,15 +131,22 @@ Prolog with its syntax allows to describe facts in predicate logic language, and
 ### Constraint programming
 
 Constraint programming aims to incorporate into programming languages (also those from imperative background) a declarative principle of applying a set of restrictions (constraints) in order to infer possible results.
-Citing the very first sentence of Apt's book{{{apt2003principles}}}:
+Citing the very first sentence of Apt's book {{{apt2003principles}}}:
 
 >> *"Constraint programming is an alternative approach to programming in which the programming process is limited to a generation of requirements (constraints) and a solution of these requirements by means of general or domain specific methods"*
 
+The method can be applied to plenty of specific problems that are possible to represent in terms of general problem areas, such as:
+
+* Linear and integer programming, where given a set of constraints, certain variable has to be maximized or minimized;
+* Linear algebra, in which the available vector spaces are browsed to find a consistent solution to a problem;
+* Global optimization, that examines all inputs to determine global extrema, as opposed to local optimizations.
+
+Standard approach to solving problems using Constraint programming is constructed in following way {{{apt2003principles}}}:
 
 ### Domain specific languages
 
 Domain specific language term has been defined a number of times.
-One definition, proposed by Van Deursen et al.{{{van2000domain}}} is the following:
+One definition, proposed by Van Deursen et al. {{{van2000domain}}} is the following:
 
 >> *"A domain-specific language (DSL) is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain."*
 
