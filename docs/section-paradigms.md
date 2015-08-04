@@ -143,12 +143,31 @@ The method can be applied to plenty of specific problems that are possible to re
 
 Standard approach to solving problems using Constraint programming is constructed in following way {{{apt2003principles}}}:
 
+* first, the problem instance has to be defined as a Constraint satisfaction problem (CSP) with distinction of all variables, their domains and constraints that apply for those variables;
+* next, in a loop, a number of operation is performed including preprocessing the CSP instance to syntactic form, propagating constraints in order to simplify the CSP, and unless terminating condition is not met, the problem is divided into smaller ones, each of which is being processed recursively;
+* finally, the output of the algorithm, built from combination of sub-solutions, determines the result.
+
 ### Domain specific languages
 
-Domain specific language term has been defined a number of times.
-One definition, proposed by Van Deursen et al. {{{van2000domain}}} is the following:
+Domain specific language (DSL) term has been defined a number of times.
+One definition, proposed by Van Deursen et al. {{{van2000domain}}} is as follows:
 
->> *"A domain-specific language (DSL) is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain."*
+>> *"A domain-specific language is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain."*
+
+DSLs are hence usually of small size, and do their best to address a certain (domain-specific) problem.
+This is achieved by restricting set of possible instructions and operators to the bare minimum, essential for solving given issue.
+Since they aim to make the resulting code as succinct as possible, DSLs tend to have declarative nature.
+DSLs are implemented both as compilable and interpreted languages.
+They can be built on top of an existing programming language, benefiting from extending the underlying syntax.
+Alternatively, a DSL might also be a stand-alone programming language not associated with any specific general-purpose language (GPL).
+
+Most popular DSLs include {{{van2000domain, bentley1986programming}}}:
+
+* PIC - for drawing graphs,
+* YACC - for parsing source code,
+* MAKE - for defining software build scripts,
+* SQL - for manipulating relational databases,
+* HTML (further discussed in research section) - for generating markup that web browsers can render.
 
 Functional
 ----------
@@ -325,9 +344,24 @@ let numbers =
 
 Seq.toList numbers // evaluation occurs here```
 
+Paradigms and code quality
+--------------------------
 
-Comparison by example
----------------------
+### Observations
+
+*Paradigm* {{{ray2014large}}}
+
+>> *"There is a small but significant relationship between language class and defects. Functional languages have a smaller relationship to defects than either procedural or scripting languages."*
+
+*Properties* {{{ray2014large}}}
+
+>> *"Defect types are strongly associated with languages; Some defect type like memory error, concurrency errors also depend on language primitives. Language matters more for specific categories than it does for defects overall."*
+
+*Dependencies* {{{eve2014networks}}}
+
+>> *"C# projects tend to be larger, with more classes and dependencies. They also have longer chains of dependencies on average. Real world F# projects are smaller with cleaner modularity."*
+
+### Example
 
 Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
 Language used in listing {{csparadigmimperative}} is C#, which allows to write in such manner.
@@ -378,7 +412,7 @@ A few concerns are targeted:
 Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
 As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one would have to read 10 last lines of file, the whole algorithm would have to be redesigned).
 
-On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques.
+On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques (a few functional techniques got introduced into C# to make the language more powerful, however it originated as a standard, object-oriented language).
 
 ```xxx
 {CSharp]{Example of functional approach in CSharp}{csparadigmfunctional}
