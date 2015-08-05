@@ -347,9 +347,15 @@ Seq.toList numbers // evaluation occurs here```
 Paradigms and code quality
 --------------------------
 
+Quality of software is a broad topic, that has been studied by many for a long time.
+It has a significant impact on both development process and resulting software product with regards to the software's stability, maintainability and reliance.
+This section will target a matter of what is the relation between a paradigm and code quality, as seen from the point of view of multiple aspects such as number of defects (bugs), dependencies complexity or separation of concerns.
+
 ### Observations
 
-*Paradigm* {{{ray2014large}}}
+Studies on how a programming language class can relate to a potential number of software defects show interesting outcomes.
+In their work, Ray et al. {{{ray2014large}}} measure (by empirical study, using mixed-methods approach) number of defects in open-source software and group the results by programming language classes (paradigms).
+One of the conclusions is that using functional programming languages leads to less software defects in comparison to procedural (imperative) languages:
 
 >> *"There is a small but significant relationship between language class and defects. Functional languages have a smaller relationship to defects than either procedural or scripting languages."*
 
