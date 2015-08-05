@@ -45,7 +45,7 @@ It consists of type constructs such as:
 Strictness in context of static typing means that in order to compile a program, more prerequisites must be met.
 While it makes harder for a software engineer to compile code in strongly statically typed language, a priceless benefit of program correctness is usually gained.
 
-Because of its nature, Haskell still struggles to be visible in enterprise architectures, although major companies do use it for their tools (often as part of their research department){{{haskellindustry}}}:
+Because of its nature, Haskell still struggles to be visible in enterprise architectures, although major companies do use it for their tools (often as part of their research department) {{{haskellindustry}}}:
 
 * **Facebook** internally makes use of *HaXL* that simplifies access to remote data, such as databases or web-based services,
 * **Microsoft** uses Haskell for its production serialization system, *Bond* in high scale services,
@@ -173,7 +173,7 @@ All processes are autonomic, thus there is no single point of failure in systems
 The message passing approach introduced in Erlang influenced plenty of other languages that appeared afterwards.
 Erlang language is dynamically typed, which entails all the related drawbacks of dynamic languages, but it does also imply some advantages, one of which is ability of providing hot code replacement.
 Hot code replacement is a very powerful feature, that allows to deploy new versions of software to production, without need to stop the existing ones.
-While Erlang was designed with functional approach in mind and it mainly consists of functional constructs, it is not pure with respect to implementation of a single process which can follow imperative techniques.
+While Erlang was designed with functional approach in mind and it mainly consists of functional constructs, it is not pure in respect to implementation of a single process which can follow imperative techniques.
 
 Besides Ericsson, Erlang contributed to plenty of success stories for world-class companies' production systems {{{cesarini2009erlang}}}:
 

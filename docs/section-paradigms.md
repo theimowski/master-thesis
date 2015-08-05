@@ -81,7 +81,7 @@ Many other principles and design patterns apply to Object-Oriented programming.
 With the SOLID acronym, Bob C. Martin {{{martin2003agile}}} presents set of five principles that ensure software to be maintainable.
 Multiple design patterns described in the famous Design Patterns book {{{gamma1994design}}} demonstrate common approaches that address cross cutting concerns in Object-Oriented program.
 While it is certainly a good thing that such patterns are established for software engineers to follow, majority of them tend to be quite cumbersome and utilizing them cause complexity of software to grow exponentially.
-Many of the standardized patterns seem to **solve problems that the Object-Oriented programming caused** itself.
+Many of the standardized patterns seem to **solve problems that the Object-Oriented programming introduced** itself.
 
 ### Referential opacity
 
@@ -348,8 +348,8 @@ Paradigms and code quality
 --------------------------
 
 Quality of software is a broad topic, that has been studied by many for a long time.
-It has a significant impact on both development process and resulting software product with regards to the software's stability, maintainability and reliance.
-This section will target a matter of what is the relation between a paradigm and code quality, as seen from the point of view of multiple aspects such as number of defects (bugs), dependencies complexity or separation of concerns.
+To understand why the topic is important, it is enough to say that code quality has a significant impact on both development process and resulting software product with regards to the software's stability, maintainability and reliance.
+This section will target a matter of what is the relation between a programming paradigm and code quality of program implementation that utilize the paradigm, from point of view of aspects such as number of defects (bugs), dependencies complexity or separation of concerns.
 
 ### Observations
 
@@ -359,18 +359,38 @@ One of the conclusions is that using functional programming languages leads to l
 
 >> *"There is a small but significant relationship between language class and defects. Functional languages have a smaller relationship to defects than either procedural or scripting languages."*
 
-*Properties* {{{ray2014large}}}
+Apart from describing relation with general programming paradigm taken under consideration, the paper {{{ray2014large}}} also focuses on connection of number of defects to lower level language properties, such as memory management, static typing or concurrency friendliness:
 
 >> *"Defect types are strongly associated with languages; Some defect type like memory error, concurrency errors also depend on language primitives. Language matters more for specific categories than it does for defects overall."*
 
-*Dependencies* {{{eve2014networks}}}
+A language that combines functional programming paradigm with the properties of static typing, memory management and concurrency support can be therefore considered safer than competitive languages with regards to expected number of software defects. 
+Among languages that fit into this category there is Haskell, F#, Scala and OCaml, all of which are further discussed in next section.
+It must be however emphasized that besides holding described properties, there are many other, obvious factors that affect the software quality, like engineers' skills, productivity or work organization.
+What is more, additional language features usually come with extra cost in respect to performance and memory consumption.
+That is why a language that meets above criteria cannot be treated as a "silver-bullet" for solving every possible problem in the universe.
+
+Primarily appearing functional language in the thesis is F#.
+As F# is built on top of the .NET platform, where the dominating language is (coming from the object-oriented family) C#, the thesis makes a number of comparisons between these two.
+Such comparisons have already also been made by the F# community, from which a significant number of members do have solid experience with C# language.
+Partially thanks to its functional nature, but also thanks to the succinct language syntax, F# is usually considered easier to comprehend and more maintainable than C#.
+One of the observation concerns modules' dependencies complexity in both languages {{{eve2014networks}}}:
 
 >> *"C# projects tend to be larger, with more classes and dependencies. They also have longer chains of dependencies on average. Real world F# projects are smaller with cleaner modularity."*
+
+Another observation corresponds to size of code, which turns out to be much smaller when using F# in comparison to C#.
+Not only the concise syntax of F#, but also functional properties like composability and abstraction led to interesting outcome.
+Experiment that involved rewriting an existing C# application into its F# equivalent resulted in following conclusion {{{cousins2014difference}}}:
+
+>> *"I can fit the whole F# solution in the blank lines of the C# solution with 7,000 lines to spare."*
+
+Above citations prove that functional movement can be the cure for maintaining complex and enormous code-bases.
+Such code-bases when implemented in imperative fashion, lacking of referential transparency property and composable abstractions, can become tough to reason about and thus more expensive and error-prone.
 
 ### Example
 
 Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
-Language used in listing {{csparadigmimperative}} is C#, which allows to write in such manner.
+Language used in listing {{csparadigmimperative}} is C#.
+As C# was born as an object-oriented programming language it allows to write in such manner, and the below code can feel idiomatic for C#.
 The code reads a log file and extracts 10 first error entries from the file (lines that start with \[ERROR\] prefix).
 Original idea comes from a tweet {{{imperativevsfunctional}}} where Java language was used.
 Here, the program was adjusted to C# syntax.
@@ -430,7 +450,7 @@ var errors =
 
 At first glance, it is obvious that the implementation in listing {{csparadigmfunctional}} is much more concise with only 5 lines compared to 15 in listing {{csparadigmimperative}} (technically these 5 lines build a single expression which could be written in a single line, but were split to improve readability).
 
-The code in listing {{csparadigmfunctional}} follows a functional pattern with respect to that every function invocation is treated as an expression which takes some input and returns some output:
+The code in listing {{csparadigmfunctional}} follows a functional pattern in respect to that every function invocation is treated as an expression which takes some input and returns some output:
 
 * `File.ReadLines` in line 2 takes path to file (of type `string`) and returns a sequence of lines (`seq<string`). The sequence is evaluated lazily, which prevents loading whole file into memory;
 * `Where` (line 3) is a function (speaking strictly C# jargon, it is a LINQ extension method) which takes a predicate function as its argument (`Where` is an example of higher-order function) and returns sequence with items that match the predicate;
