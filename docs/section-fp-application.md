@@ -216,7 +216,20 @@ Below are excerpts from these works that point out main reasons why financial in
 
 ### Data science
 
-Another area where functional programming seems to start taking lead is data science, a very broad field which concerns multiple computer science topics, such as machine learning, artificial intelligence or data mining.
- {{{hughes1989functional}}} {{{shukla2014haskell}}}
+Another area where functional programming seems to start taking lead is data science.
+Data science is a very broad field which concerns multiple computer science topics, such as artificial intelligence, machine learning or data mining.
+Because these topics use extensively various numerical methods, functional programming feels like a natural candidate when it comes to choosing a proper paradigm for solving particular problem.
 
-### Concurrent systems?
+In his work {{{hughes1989functional}}}, Hughes describes how functional properties make it convenient to implement an artificial intelligence heuristic.
+The example heuristic in the work is an alpha-beta method of determining best move for computer opponent in a logic game that can be represented by a game state tree.
+Thanks to using higher-order functions, the game tree can be defined in a recursive manner, where the recursive higher-order function aims to provide valid moves from a given node in the tree.
+As a game tree in logic game can be potentially infinite, the functional property of lazy evaluation enables to define the whole tree without actually evaluating unnecessary nodes of the tree.
+
+Machine learning is yet another perfectly suitable field for functional paradigm, what is shown in Brandewinder's book {{{brandewinder2015ml}}}.
+The book presents examples in F# language of addressing concerns feasible for machine learning such as spam filter, optical character recognition, regression models and logical games.
+Interesting aspect of F# in context of machine learning is the interoperability (using F# Type Providers feature) with R language, which is famous for its comprehensive suite of ready functions and tools for data processing.
+
+Proof for growing interest in using functional techniques for data mining are books like Haskell Data Analysis Cookbook {{{shukla2014haskell}}}, where the author illustrates in details a variety of concepts including advanced data analysis and processing as well as input and output operations for consuming the data from and to outside world.
+The latter concept despite standing for hard to express in pure functional approach is clearly explained in the book, which confirms that even purely functional languages can be treated as general-purpose.
+
+### Concurrent systems
