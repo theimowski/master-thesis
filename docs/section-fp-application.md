@@ -193,7 +193,7 @@ Good examples of such languages are C# and Java, which initially supported only 
 While there are a lot of fields in software industry where functional programming is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm **dominates** and leaves other behind.
 This domination manifests with impact of institutions that achieved success with the paradigm on other players that have not yet tried different approach than imperative.
 Such areas, where functional seems to take the lead are described in this section, together with a rationale on why functional programming is more promising in specific case.
-As a disclaimer, it is important to note, that the domination does not necessary mean more job openings on the market (as non-functional paradigms are in general still more popular), but rather that there is a visible trend of growing employments in these areas.
+As a disclaimer, it is important to note, that the domination does not necessarily mean more job openings in the market (as non-functional paradigms are in general still more popular), but rather that there is a visible trend of growing employments in these areas.
 
 ### Financial industry
 
@@ -212,14 +212,11 @@ Below are excerpts from these works that point out main reasons why financial in
 * **Performance** - compiled code turns out to be really fast when certain optimization techniques are used {{{minsky2008caml}}}, plus the interoperability with libraries built from different languages (with help of foreign function interface) allows to natively execute chunks that are performance critical for the business;
 * **Generalization** - higher order functions and currying abstract away the behavior from data, making it possible to implement simulation algorithms applicable to various pricing derivatives {{{fsharp2014deep}}}, type polymorphism done this way leads to less amount of code compared to what it would require with only object-oriented techniques used;
 * **Parallelization** - immutable data structures that are used in functional programming encourage to process data in parallel, as there is a lower risk of any kind of concurrency issue, resulting in vertical processing scalability and allowing to consume larger volumes of data for financial analysis {{{berthold2012functional}}};
-* **Hiring better engineers** - it is noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that know the language (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
-
+* **Hiring better engineers** - it is noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that are familiar with functional programming languages (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
 
 ### Data science
 
+Another area where functional programming seems to start taking lead is data science, a very broad field which concerns multiple computer science topics, such as machine learning, artificial intelligence or data mining.
+ {{{hughes1989functional}}} {{{shukla2014haskell}}}
+
 ### Concurrent systems?
-
-### Machine learning?
-
-Successful examples
--------------------
