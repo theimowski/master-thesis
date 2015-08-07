@@ -233,3 +233,12 @@ Proof for growing interest in using functional techniques for data mining are bo
 The latter concept despite standing for hard to express in pure functional approach is clearly explained in the book, which confirms that even purely functional languages can be treated as general-purpose.
 
 ### Concurrent systems
+
+The survey would not be complete without mentioning concurrent systems, which benefit a lot from functional programming.
+Although they should not be really treated as a separate domain like financial industry or data science, concurrent systems made it to this list, because of the great impact of functional paradigm on concurrency aspect.
+That said, software from arbitrary domain, be it social network or shopping industry, which relies on processing parallelization might potentially gain from employing functional programming.
+
+First obvious advantage that applies to parallelization is that data structures are immutable.
+The immutability is enforced in pure languages, whereas in functional-first languages it is the default behavior that can be overridden, i.e data structures can be made mutable (usually for performance reasons).
+Vast majority of concurrency issues appear in object-oriented software due to the fact that objects are stateful, thus accessing an object in multi-threaded environment may lead to unexpected results when certain precautions are not taken.
+In functional paradigm on the other hand, such danger goes away when immutable data structures are being used, releasing the engineer from non-trivial task of context synchronization and preventing whole class of defects.
