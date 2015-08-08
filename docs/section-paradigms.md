@@ -219,7 +219,7 @@ Again, as was the case with immutability, the purity properties might seem impos
 Every software needs to communicate with components outside its process, for example by invoking IO operations or accessing computer's clock.
 Haskell, which happens to be purely functional, is used in real systems and in still preserves purity property.
 This is achievable with concept called "Monads" {{{mcbride2008applicative}}}, which also has its formal mathematical definition. 
-Monads however are quite complicated topic itself, therefore are not explicitly (they are used in the research part anyway) addressed by this thesis.
+Monads are quite complicated topic itself, therefore they are not addressed by this thesis (explicitly, but they are being used in the research part anyway).
 
 Listing {{funpurity}} demonstrates two functions, `pureSalary` and `impureSalary`.
 Both functions have the same type signature (`decimal -> decimal -> decimal`), which means that they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.
@@ -228,7 +228,7 @@ While `pureSalary` does not depend on any value from outside and always returns 
 As F# is not purely functional, it cannot enforce pure nature of functions, and thus the `impureSalary` compiles correctly.
 
 ```xxx
-{FSharp]{Purity}{funpurity}
+{FSharp]{Example of pure and impure functions}{funpurity}
 let pureSalary (hours: decimal) (rate: decimal) =
     hours * rate
 
@@ -242,40 +242,40 @@ let impureSalary (hours: decimal) (rate: decimal) =
 
 Functions in functional programming languages are often referred to as "first-class citizens".
 This usually means that functions are treated just as any other ordinary value and are allowed to be combined together.
-A function is called higher-order when it takes as a parameter or returns another function.
+A function is called higher-order when it returns or takes as a parameter another function.
 The concept of function pointers introduced in C and C++ is closely related to higher-order functions, though it does not guarantee type safety like in statically typed functional languages.
 
 Higher-order functions is a powerful feature that enables to abstract away a common piece of logic and make it more reusable.
-It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with collections (for example filtering or mapping) or null-checking.
-In addition to that, higher-order functions can be used as a foundation for concept known in Object-oriented programming as "Dependency Injection".
-Dependency Injection in Object-oriented paradigm relies on passing abstract interfaces without implementation to consuming classes.
+It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with lists (for example filtering or mapping) or null-checking.
+In addition to that, higher-order functions can be used as a foundation for concept known in object-oriented programming as "Dependency Injection".
+Dependency Injection in object-oriented paradigm relies on passing abstract interfaces without implementation to consuming classes.
 The interfaces passed to dependent class contain only type signatures of methods to be invoked, hence such interface can be easily represented with traditional functions.
 
-Listing {{funhof}} shows example of using higher-order function `Array.Filter`.
-It takes two parameters: a function of type `'T -> bool` and an array of type `'T array`.
-The array passed as the second argument contains numbers from 1 to 10, and the predicate function passed as the first argument is an anonymous function (lambda expression) which tests whether a number is even or not.
-Thanks to the `Array.filter` function being higher-order, one can imagine whole spectrum of predicate functions that could be applied to filter specific elements from the array, and since the function is generic in type `'T` it can accept arrays of any type.
+Listing {{funhof}} shows example of using higher-order function `List.Filter`.
+It takes two parameters: a function of type `'T -> bool` and a list of type `'T list`.
+The list passed as the second argument contains numbers from 1 to 10, and the predicate function passed as the first argument is an anonymous function (lambda expression) which tests whether a number is even or not.
+Thanks to the `List.filter` function being higher-order, one can imagine whole spectrum of predicate functions that could be applied to filter specific elements from the list, and since the function is generic in type `'T` it can accept lists of any type.
 
 ```xxx
 {FSharp]{Higher-order functions}{funhof}
 let evenNumbers =
-    Array.filter (fun i -> i % 2 = 0) [|1..10|] ```
+    List.filter (fun i -> i % 2 = 0) [1..10] ```
 
 ### Currying
 
 Currying is a concept that strongly relies on higher-order functions, or more closely the property that a function can return another function.
 It makes use of that property to apply arguments to a function partially.
-Partial application allows to "invoke" a function with only a strict subset of arguments that the function can take.
-When a function is partially applied, it does not return the "final" value, but rather another function which takes as its input these arguments, that were not applied to the original one.
+Partial application allows to "invoke" a function with a *strict subset* of arguments that the function can take.
+When a function is partially applied, it does not return the "final" value, but rather another function which takes as its input these arguments, that were not applied in the first place.
 The above might sound cryptic, but hopefully example shown in listing {{funcurrying}} can explain this interesting feature better.
 
 Thanks to the currying feature, functional languages gain more re-usability in context of multi-argument functions.
-It is extremely easy to define new, more granular functions that partially match on the multi-argument ones, without losing any initial property.
+It is extremely easy to define new, more specific functions that partially match on the multi-argument ones, without compromising any property of the curried function.
 
 In listing {{funcurrying}} a standard `add` function is defined (lines 1-2).
 It takes two parameters (`a` and `b`), adds them together and returns the result of addition (F# compiler infers following type signature: `int -> int -> int`).
 Then in lines 4-5 another function `add5` is defined, which partially applies on `add` function, by applying only the first argument (`x` with value 5).
-In result, `add5` gets inferred by the compiler to be of type `int -> int`, because it applied only the first argument to `add` and now needs yet another argument to evaluate the sum.
+In result, `add5` gets inferred by the compiler to be of type `int -> int`, because it applied only the first argument to `add` and now needs yet one more argument to evaluate the sum.
 Line 7 presents how `add5` can be invoked with a single parameter.
 
 ```xxx
@@ -293,21 +293,21 @@ add5 8 // evaluates to 13```
 Recursion is a computational approach that is known in imperative world, but employed much more frequently in functional programming.
 It relies on solving a given problem by decomposing it and retrying on a smaller instance (in context of a function or method it is typically achieved by calling itself with arguments that are smaller in some way).
 A recursive function or method must hold the stop property, meaning that there must exist an instance of a problem, for which the function or method is not going to make a recursive call yet again.
+Exception from the above is a recursive function that does not hold the stop property in order to produce an infinite (lazy) chain of values.
 Recursion technique is an alternate approach to iteration.
-In fact, some programming languages' compilers, for optimization reasons, translate recursive functions into its iterative equivalent.
-
+Indeed, some programming languages' compilers, for optimization reasons, translate recursive functions into its iterative equivalent.
 According to the Church-Turing thesis:
 
 > *"Every effectively calculable function (effectively decidable predicate) is general recursive."*
 
 This means that for each recursive function there exists a transformation to its corresponding iterative algorithm and the same applies backwards.
 Why bother with recursion at all if in majority of cases an iterative model is more efficient with regards to time complexity and memory consumption?
-Because iteration comes from imperative approach and can harm referential transparency as well as immutability, while recursion fits perfectly for functional world.
-Thanks to complex compilers' code optimizations and techniques such as "Tail recursive calls" (which prevents from stack overflows by avoiding stack frame allocation for recursive calls) a recursive algorithm can be both efficient and easier to comprehend.
+Because iteration comes from imperative approach and can harm referential transparency as well as immutability, while recursion fits perfectly into functional world.
+Thanks to complex compilers' code optimizations and techniques such as "tail recursion" (which prevents from stack overflows by avoiding stack frame allocation for recursive calls) a recursive algorithm can be both efficient and easy to comprehend.
 
 Listing {{funrecursion}} presents a recursive `product` function, which computes the product for a given list of numbers.
-Based on the length of `elements` list (with help of pattern matching), the `product` function either returns neutral element for multiplication (1) or invokes itself recursively with the tail of the list.
-Pattern matching case in line 4 splits the non-empty list into head (`h`) - first element of the list, and tail (`t`) - the rest of the elements in list (tail can potentially be empty).
+Based on the length of `elements` list (with help of pattern matching), the `product` function either returns neutral element for multiplication (`1`) or invokes itself recursively with the tail of the list.
+Pattern matching case in line 4 splits the non-empty list into head (`h`) - first element of the list, and tail (`t`) - the rest of the elements in list (tail might be empty).
 It is worth noting that the `product` function as defined in listing {{funrecursion}} is not tail-recursive, however with a bit of effort (for example by using technique called accumulator) it could become so.
 
 ```xxx
@@ -319,12 +319,12 @@ let rec product elements =
 
 ### Lazy evaluation
 
-In a standard, imperative approach, when expression is reached by control, it gets immediately evaluated and the computed value is assigned to given variable.
-The same applies in case expression is given as a parameter to a function call - it has to be computed before the result value can be pushed to the stack and the function invoked.
-That strategy is commonly known as eager evaluation.
+In a standard, imperative approach, when expression is reached by control, it gets immediately evaluated and the computed value is assigned to given symbol.
+Similar behavior applies in case expression is given as a parameter to a function call - it has to be computed before the result value can be pushed to the stack and the function invoked.
+Such strategy is commonly known as eager evaluation.
 On the other hand, evaluation is called to be lazy when the runtime environment postpones evaluating of an expression to the last responsible moment, which is when the value is vital for computations that follow.
-Lazy evaluation therefore treats expressions as first-class citizens and allows to pass them around or assign (bind) to values without evaluation (somehow analogous to how functions can be operated on).
-While functional-first languages like F# use eager evaluation by default with additional constructs for lazy expressions, pure functional languages such as Haskell incorporate laziness into execution run-time in every single place.
+Lazy evaluation therefore treats expressions as first-class citizens and allows to pass them around or assign (bind) to values without actually evaluation (somehow analogous to how higher-order functions allow to operate on functions).
+While functional-first languages like F# use eager evaluation by default, and with help of additional constructs allow for lazy expressions, pure functional languages such as Haskell incorporate laziness into execution run-time in every single place (unless stated differently).
 
 Lazy evaluation comes with a number of benefits.
 Thanks to the fact that an expression is not evaluated at once, it is possible to define infinite (in logical sense) data structures: sequences, trees or other recursive data types.
@@ -376,8 +376,8 @@ That is why a language that meets above criteria cannot be treated as a "silver-
 
 Primarily appearing functional language in the thesis is F#.
 As F# is built on top of the .NET platform, where the dominating language is (coming from the object-oriented family) C#, the thesis makes a number of comparisons between these two.
-Such comparisons have already also been made by the F# community, from which a significant number of members do have solid experience with C# language.
-Partially thanks to its functional nature, but also thanks to the succinct language syntax, F# is usually considered easier to comprehend and more maintainable than C#.
+Such comparisons have also been made by the F# community, from which a significant number of members do have solid experience with C# language.
+Partially thanks to to the succinct language syntax, but also thanks to its functional nature, F# is usually considered easier to comprehend and more maintainable than C#.
 One of the observation concerns modules' dependencies complexity in both languages {{{eve2014networks}}}:
 
 >> *"C# projects tend to be larger, with more classes and dependencies. They also have longer chains of dependencies on average. Real world F# projects are smaller with cleaner modularity."*
@@ -395,7 +395,7 @@ Such code-bases when implemented in imperative fashion, lacking of referential t
 
 Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
 Language used in listing {{csparadigmimperative}} is C#.
-As C# was born as an object-oriented programming language it allows to write in such manner, and the below code can feel idiomatic for C#.
+C# was born with object-oriented paradigm in mind, that is why it allows to write in imperative style, and the below code can feel idiomatic for C#.
 The code reads a log file and extracts 10 first error entries from the file (lines that start with \[ERROR\] prefix).
 Original idea comes from a tweet {{{imperativevsfunctional}}} where Java language was used.
 Here, the program was adjusted to C# syntax.
@@ -421,7 +421,7 @@ using (var reader = File.OpenText("log"))
 It is evident that the implementation in listing {{csparadigmimperative}} consists of a step-by-step instructions.
 Code contains assignment statements (lines 1, 2, 3, 5, 13), jump instructions (line 6, 8) and explicit arithmetic operations (line 11).
 It focuses on the detailed algorithm flow, hence the engineer specifies **how** to achieve the goal.
-In contract, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach, where without providing a detailed recipe, but rather using built-in language constructs, the engineer declares **what** is the goal.
+In contrast, listing {{csparadigmfunctional}} demonstrates the very same program with a different approach, where without providing a detailed recipe, but rather using built-in language constructs, the engineer declares **what** is the goal.
 
 Another interesting thing to note in listing {{csparadigmimperative}} is separation of concerns (emphasized in the referenced tweet {{{imperativevsfunctional}}}).
 A few concerns are targeted:
@@ -443,7 +443,8 @@ A few concerns are targeted:
 Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
 As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one would have to read 10 last lines of file, the whole algorithm would have to be redesigned).
 
-On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques (a few functional techniques got introduced into C# to make the language more powerful, however it originated as a standard, object-oriented language).
+On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques (despite it originated as a standard, object-oriented language, a few functional techniques got introduced into C# to make the language more powerful).
+C# has been chosen for both examples deliberately, to emphasize that programming language is just a tool, and that it is programming style and paradigm used that really matter when considering code quality. 
 
 ```xxx
 {CSharp]{Example of functional approach in CSharp}{csparadigmfunctional}
@@ -453,12 +454,10 @@ var errors =
         .Take(10)
         .ToList();```
 
-At first glance, it is obvious that the implementation in listing {{csparadigmfunctional}} is much more concise with only 5 lines compared to 15 in listing {{csparadigmimperative}} (technically these 5 lines build a single expression which could be written in a single line, but were split to improve readability).
-
-The code in listing {{csparadigmfunctional}} follows a functional pattern in respect to that every function invocation is treated as an expression which takes some input and returns some output:
+At first glance, it is obvious that the implementation in listing {{csparadigmfunctional}} is much more concise with only 5 lines compared to 15 in listing {{csparadigmimperative}} (technically these 5 lines build up a single expression which could be written in a single line, but were split to improve readability). The code in listing {{csparadigmfunctional}} follows a functional pattern in respect to that every function invocation is treated as an expression which takes some input and returns some output:
 
 * `File.ReadLines` in line 2 takes path to file (of type `string`) and returns a sequence of lines (`seq<string`). The sequence is evaluated lazily, which prevents loading whole file into memory;
-* `Where` (line 3) is a function (speaking strictly C# jargon, it is a LINQ extension method) which takes a predicate function as its argument (`Where` is an example of higher-order function) and returns sequence with items that match the predicate;
+* `Where` (line 3) is a function (speaking strictly C# jargon, it is a LINQ extension method) which takes a predicate function as its argument (`Where` is an example of higher-order function, equivalent to `Seq.filter` in F#) and returns sequence with items that match the predicate;
 * the predicate function in form of anonymous function (lambda expression) passed to the `Where` function is of generic type `'T -> bool`, where `'T` type parameter has been expanded and inferred by C# type system to be of type `string`;
 * `Take` function (line 4) instructs to limit number of items in the sequence to the specified value (all items are returned if the value is larger than number of items);
 * `ToList` function (line 5) collects the items from the lazy sequence into a `List` type. This function forces the sequence to be evaluated;
@@ -471,9 +470,9 @@ The same concerns apply as in the previous example, however they are separated i
 * **Counting errors** is addressed in line 4.
 * **Collecting error lines** is addressed in line 5.
 
-Thanks to such straightforward separation of concerns, applying changes to existing implementation comes much easier.
+Thanks to such straightforward separation of concerns, applying changes to existing implementation comes much lower cost.
 Listing {{csparadigmfunctionalreverse}} demonstrates code modification made to collect 10 last instead of 10 first lines from the file.
-In this case, it was enough to add `Reverse` function to the pipeline that reverses the order of lines that are processed.
+In this case, it was enough to add `Reverse` function to the pipeline that reverses the order of lines that are processed (for the sake of simplicity, omitted fact is that all lines have to be loaded into memory for `Reverse` to work).
 
 ```xxx
 {CSharp]{Modifications in functional approach in CSharp}{csparadigmfunctionalreverse}

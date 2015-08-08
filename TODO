@@ -9,11 +9,16 @@ TODO:
 * Declarative - the introductory description is quite poor
 * Functional - describe connection to declarative more clearly
 
+* Paradimgs and code quality -> move to Application of functional programming???
+
 ## Formatting
 
 * Bullets - bolded or what?
 * Bullets - end with comma or semicolon?
 * Listing nr - by sections?
+* Referencing different sections ?
+* Are bolds appropriate?
+* comments in paranthesis - maybe footnotes?
 
 ## Optional
 * logic, constraint programming - examples?
