@@ -98,7 +98,7 @@ Referential transparency has already been defined a few times {{{sondergaard1990
 In context of this thesis and basic paradigms' characteristics it is enough to say that referential transparency describes a property of programming language, which enables to substitute certain expression with another of the same value, without impact on the program's behavior.
 The downsides of imperative program actions mentioned by Tennent {{{tennent1976denotational}}} with regards to referential transparency can be explained as following:
 
-* **side effects** - if an expression evaluates to a certain value, but it has side effects (such as input / output operations), then it cannot be replaced with another expression without changing behavior of the program, even if the latter expression evaluates to the same value,
+* **side effects** - if an expression evaluates to a certain value, but it has side effects, such as input / output (IO) operations, then it cannot be replaced with another expression without changing behavior of the program, even if the latter expression evaluates to the same value,
 * **transfers of control** - if an expression consists of more than one exit points, and the exit point of expression is determined by condition branching (jump statements), then the value of such expression is ambiguous because control can be transferred from arbitrary point of expression to the outside scope.
 
 In programming practice, these drawbacks lead to difficulties with understanding program's flow and behavior, which in turn imply spending more time on code debugging.
@@ -107,11 +107,11 @@ Declarative
 -----------
 
 Declarative paradigm is different than imperative, with regards to how programs are built.
-Program written in declarative style focuses on **what** goal has to be achieved rather than **how** this goal is to be achieved {{{petricek2009real}}}.
-This means that code does not specify how detailed, low level instructions are to be executed in order, but rather synthesizes a set of constructs that are capable of being combined together.
-Declarative name refers to the code, which is written by **declaring** how constructs relate to themselves, but it also has its roots in linguistics where a declarative sentence is a complete expression of natural language which is either true or false {{{nilsson1990logic}}}.
-In his work, Padawitz {{{padawitz2006deductive}}} describes the term declarative as a combination of functional (or applicative) and relational (or logic) programming.
-Both functional and logic programming can be thought of sub-paradigms for declarative programming.
+Program written in declarative style focuses on **what** is the desired goal rather than **how** this goal has to be achieved {{{petricek2009real}}}.
+This means that code does not specify in details, how low level instructions are to be executed in what order, but rather synthesizes a set of constructs that are capable of being glued (combined) together.
+Term declarative refers to the code, which is written by **declaring** how such constructs relate to themselves, but it also has its roots in linguistics, where *"a declarative sentence is a complete expression of natural language which is either true or false"* {{{nilsson1990logic}}}.
+In his work, Padawitz {{{padawitz2006deductive}}} describes the term declarative as *"a combination of functional (or applicative) and relational (or logic) programming"*.
+Both functional and logic programming can be thought of sub-paradigms of declarative paradigm.
 Following are enumerated some examples of more specific, based on declarative approach, sub-paradigms.
 
 ### Logic programming
@@ -133,16 +133,16 @@ Prolog with its syntax allows to describe facts in predicate logic language, and
 
 ### Constraint programming
 
-Constraint programming aims to incorporate into programming languages (also those from imperative background) a declarative principle of applying a set of restrictions (constraints) in order to infer possible results.
+Constraint programming aims to incorporate a declarative principle of applying a set of restrictions (constraints) into programming languages (also those from imperative background), in order to infer possible results.
 Citing the very first sentence of Apt's book {{{apt2003principles}}}:
 
 >> *"Constraint programming is an alternative approach to programming in which the programming process is limited to a generation of requirements (constraints) and a solution of these requirements by means of general or domain specific methods"*
 
-The method can be applied to plenty of specific problems that are possible to represent in terms of general problem areas, such as:
+This method can be applied to plenty of specific problems that are representable in terms of abstract areas, such as:
 
 * Linear and integer programming, where given a set of constraints, certain variable has to be maximized or minimized;
 * Linear algebra, in which the available vector spaces are browsed to find a consistent solution to a problem;
-* Global optimization, that examines all inputs to determine global extrema, as opposed to local optimizations.
+* Global optimization, that examines all inputs to determine global extrema, as opposed to local optimization.
 
 Standard approach to solving problems using Constraint programming is constructed in following way {{{apt2003principles}}}:
 
@@ -170,7 +170,8 @@ Most popular DSLs include {{{van2000domain, bentley1986programming}}}:
 * YACC - for parsing source code,
 * MAKE - for defining software build scripts,
 * SQL - for manipulating relational databases,
-* HTML (further discussed in research section) - for generating markup that web browsers can render.
+* HTML (further discussed in research section) - for generating markup that web browsers can render,
+* XSLT - for transforming XML documents.
 
 Functional
 ----------
@@ -183,23 +184,24 @@ Among concepts from mathematics which are the foundations for functional paradig
 * **Category theory** - this very abstract field of mathematics is reflected in type system of statically typed functional languages.
 
 In this section focus is laid on pointing out functional programming properties (or features), which differentiate the paradigm from other.
-Each property comes with a brief description followed by a listing demonstrating the property and its usage in practice.
+Each property comes with a brief description followed by a rationale on why it is useful and a listing demonstrating the property and its usage in practice.
 All example listings are in F# language.
 
 ### Immutability
 
 Immutability is one of the most basic properties of functional programming.
 In imperative paradigm, assignments are made to variables which, as the name suggests, can vary (be mutated) during run-time.
-In functional world on the other hand, it is said that there is a binding of a value to a symbol. 
+In functional world on the other hand, to emphasize that values are immutable, it is said that there is a binding of a value to a symbol. 
 Immutability enforces that all values which are evaluated during program execution, once bound to a symbol, cannot be mutated.
 
 For newcomers the property might initially look restrictive, but it turns out that it does not imply any constraints.
-Immutability helps with understanding the flow of program logic, and is a prerequisite of referential transparency when it comes to deferred execution, because if a deferred function refers to a variable that may or may not be modified, the result of evaluating such function is indeterministic.
+Immutability helps with understanding the flow of program logic, and is a prerequisite of referential transparency when it comes to deferred execution.
+That is because, if a deferred function refers to a variable that may or may not be modified, the result of evaluating such function is indeterministic.
 The greatest benefit from immutability is discovered in context of concurrent programming, because immutable values are thread-safe by default (they cannot change).
 
-Listing {{funimmutability}} presents how immutability in F#, with the `let` keyword meaning binding of a value on the right side of `=` operator to the symbol on left side.
-Both `x` and `y` values in listing {{funimmutability}} are immutable, and attempt to assign different value to `x` symbol (line 3) fails.
-F# compiler treats the expression in line 3 as equality test, and since `x` is not equal to `6`, the expression evaluates to false.
+Listing {{funimmutability}} presents how immutability works in F#, with the `let` keyword meaning binding of a value on the right side of `=` operator to the symbol on left side.
+Both `x` and `y` values in listing {{funimmutability}} are immutable, and an attempt to assign different value to `x` symbol (line 3) fails.
+F# compiler treats expressions like the one in line 3 as equality test, and since `x` is not equal to `6`, the expression evaluates to false.
 
 ```xxx
 {FSharp]{Immutability}{funimmutability}
@@ -209,14 +211,14 @@ x = 6          // this expression evaluates to false```
 
 ### Purity
 
-Purity property allows to associate programming language's functions with mathematical functions.
+Purity property allows to associate a programming language functions with real functions in mathematical sense.
 A function is pure in mathematical sense, when for a given set of arguments it always returns the same value.
-In context of programming languages, one can say that a pure function does not depend on anything but the arguments it takes.
+In context of programming languages, one can say that a result of pure function does not depend on anything, but the arguments this function takes.
 
 Again, as was the case with immutability, the purity properties might seem impossible to achieve in a real world application.
 Every software needs to communicate with components outside its process, for example by invoking IO operations or accessing computer's clock.
-Haskell which happens to be purely functional is used in real systems and in the meanwhile preserves purity property.
-This is achievable with technique called "Monad" {{{mcbride2008applicative}}}, which also has its formal mathematical definition. 
+Haskell, which happens to be purely functional, is used in real systems and in still preserves purity property.
+This is achievable with concept called "Monads" {{{mcbride2008applicative}}}, which also has its formal mathematical definition. 
 Monads however are quite complicated topic itself, therefore are not explicitly (they are used in the research part anyway) addressed by this thesis.
 
 Listing {{funpurity}} demonstrates two functions, `pureSalary` and `impureSalary`.

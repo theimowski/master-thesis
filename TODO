@@ -1,7 +1,23 @@
 TODO:
 
------------------
-* Editorial Stuff
+# Editorial Stuff
+
+## Content
+
+* Imperative history - origins? genesis of term?
+* OO - Polymorphism - do I get it right?
+* Declarative - the introductory description is quite poor
+* Functional - describe connection to declarative more clearly
+
+## Formatting
+
+* Bullets - bolded or what?
+* Bullets - end with comma or semicolon?
+* Listing nr - by sections?
+
+## Optional
+* logic, constraint programming - examples?
+
 -----------------
 
 * Summary
