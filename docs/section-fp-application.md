@@ -1,26 +1,28 @@
 APPLICATION OF FUNCTIONAL PROGRAMMING
 ======================================
 
-For many, functional programming is associated with academic environment only.
+Many associate functional programming with academic environment only.
 People tend to think of functional programming as an experimental area which is not used in practice in software industry.
-This might be because functional programming relies on mathematical foundations.
+This might be because functional programming relies on mathematical foundations, thus is surely more popular among scholars.
 Despite the fact that functional paradigm has indeed academic background, it is being widely adopted in business cases.
 This observation turns out to be specially true at the time of writing, as more and more companies show interest in using functional programming.
-This section first goes through the most popular functional languages, describing how they got created and what are their main premises.
-Next, areas are enumerated where the paradigm really shines, leaving other approaches behind.
-Finally, real-world applications that achieved success in the industry are pointed out together with substantiation of why functional programming proved helpful.
+This section goes through the most popular functional languages, describing how they got created and what are their main premises.
+Real-world applications that achieved success in the industry are pointed out together with substantiation of why functional programming proved helpful.
+The success stories presented in this section are largely cited from a number of websites.
+After that, three areas where the paradigm really shines and leaves other approaches behind, are enlisted.
 
 Popular languages
 -----------------
 
 Six functional programming languages which seem to be the most popular nowadays in software industry, are briefly described.
-Description for each language sticks to the following order:
+This list is equivalent to the one present at Functional Works website {{{functionalworks}}}, which contains languages that the biggest (at the time of this writing) functional programming recruitment agency around the globe is seeking employees for.
+Description for each language sticks to the following structure:
 
 * **short history** is first presented, when a particular language was built and under what circumstances,
 * **most important features** and properties of the language are described next, including static typing and purity,
 * **names of companies** are finally enlisted that use the language in production or for their internal tools.
 
-The oldest functional languages like LISP or Scheme are deliberately not included in the list, as they are not really widely used in business applications.
+The oldest functional languages like Miranda, LISP or Scheme are deliberately not included in the list, as they are not really widely used in business applications.
 It is however important to remember that those languages became inspiration for more modern functional languages that found their way to the list.
 
 ### Haskell
@@ -28,27 +30,27 @@ It is however important to remember that those languages became inspiration for 
 First version of Haskell was developed in 1990, but it awaited newer releases, of which Haskell 2010 is the latest one.
 It was named after a mathematician, Haskell Curry, famous for work in combinatory logic, as well as the "currying" concept which is ubiquitous in functional programming.
 Glasgow Haskell Compiler (GHC) is the best known compiler of the language.
-Written almost entirely in Haskell, GHC is a freely available, robust and portable compiler for Haskell that generates good quality code {{{jones1993glasgow}}}.
+Written almost entirely in Haskell, GHC is *"a freely available, robust and portable compiler for Haskell that generates good quality code"* {{{jones1993glasgow}}}.
 
-Haskell is the most prominent functional languages among all with regards to purity.
+Haskell is the most prominent functional languages among all with regards to function purity.
 The language does not allow any type of side effects to be performed, meaning that **every** function must be pure.
 Another intriguing property of the language is that it does not evaluate any expressions eagerly.
 Every expression in Haskell is deferred until it has to be evaluated, and never before.
-This property is commonly known as "lazy evaluation" and allows for interesting constructs, such as infinite lists.
+This property, commonly known as "lazy evaluation" was described in previous section.
 Haskell is s statically typed language, with its type system being one of the most strict in this category.
-It consists of type constructs such as:
+Following are some of the type constructs baked into Haskell type system:
 
-* **Type Classes** - provide a uniform solution to overloading, including providing operations for equality, arithmetic, and string conversion {{{hall1996type}}},
-* **Data Types** - represent discrete set of constructors for a specific type of data,
-* **Type Inference** - mechanism used by the type system to infer type of a function or expression to make them statically typed, without the need of manual annotations.
+* **Type Classes**, which *"provide a uniform solution to overloading, including providing operations for equality, arithmetic, and string conversion"* {{{hall1996type}}},
+* **Data Types**, which represent discrete set of constructors for a specific type of data,
+* **Type Inference** - a mechanism used by the type system to infer type of a function or expression to make them statically typed, without the need of manual annotations.
 
 Strictness in context of static typing means that in order to compile a program, more prerequisites must be met.
 While it makes harder for a software engineer to compile code in strongly statically typed language, a priceless benefit of program correctness is usually gained.
 
-Because of its nature, Haskell still struggles to be visible in enterprise architectures, although major companies do use it for their tools (often as part of their research department) {{{haskellindustry}}}:
+Because of its nature, Haskell still struggles to be visible in enterprise architectures, although big players do use it for their tools (often as part of their research department) {{{haskellindustry}}}:
 
-* **Facebook** internally makes use of *HaXL* that simplifies access to remote data, such as databases or web-based services,
-* **Microsoft** uses Haskell for its production serialization system, *Bond* in high scale services,
+* **Facebook** internally makes use of *HaXL* - a tool that simplifies access to remote data, such as databases or web-based services,
+* **Microsoft** uses Haskell for its production serialization system named *Bond*, which proves useful in high scale services,
 * Haskell was also adopted by a plenty of financial institutions including:
     * Bank of America Merril Lynch,
     * Barclays Capital Quantitative Analytics Group,
@@ -72,7 +74,7 @@ OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}
 * **Jane Street** - a proprietary trading firm that uses OCaml as its primary development platform {{{minsky2008caml}}},
 * **LexiFi** - company that used OCaml to develop the Modeling Language for Finance (MLFi), which is the first formal language that accurately describes the most sophisticated capital market, credit, and investment products,
 * **Facebook** - which does not need any introduction, uses OCaml for the following:
-    * *Hack* programming language with its compiler written in OCaml, as an extension to PHP with static typing,
+    * *Hack* - a programming language with its compiler written in OCaml, as an extension to PHP with static typing,
     * *pfff* - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
 
 ### F#
@@ -84,15 +86,15 @@ In fact, one of the reasons why .NET generics feature was incorporated into the 
 Apart from Microsoft taking care of the language development, there exists a non-profit F# Software Foundation {{{fsharpwebsite}}} that gathers community around the language and makes its best to popularize F# among software engineers.
 F# design was influenced by a set of other languages, most notably:
 
-* **OCaml**, with regards to main syntactic constructs, 
+* **OCaml**, with regards to main syntax constructs, 
 * **Python**, by adapting the whitespace sensitivity property, 
 * **Haskell**, from which it accommodated many functional features,
-* **Erlang**, in respect to the message passing model and asynchrony.
+* **Erlang**, in respect to the message passing model and asynchrony support.
 
 F# is statically typed and its type system is considered to be very strict (almost as Haskell).
 Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows also for both imperative and object-oriented constructs.
 Being built on top of .NET, it enables interoperability with all languages from this platform.
-Code written in F# is succinct and readable, making the language an attractive candidate for fast prototyping and reducing time-to-market factor.
+Code written in F# is succinct and readable, making the language an attractive candidate for fast prototyping and reducing time-to-market factor {{{fsharp2014deep}}}.
 
 Following are some examples of fruitful employment of F# in the industry {{{fsharpwebsite}}}:
 
@@ -109,20 +111,20 @@ Following are some examples of fruitful employment of F# in the industry {{{fsha
 Scala language was built for (competitive from Microsoft's point of view) Java Virtual Machine (JVM) platform in 2004.
 Initially it also targeted the .NET platform, however this distribution stopped being supported some time later.
 The creator of Scala language, Martin Odersky, had solid backgrounds in Java world as he was involved into Java Generics feature (just like Don Syme for .NET generics) as well as Java compiler.
-Scala was considered very prominent, and in result a number of financial investments have been made to promote the language.
+A few years after Scala was released, it turned out to be very prominent, and in result a number of financial investments have been made to promote the language.
 Together with his collaborators, Martin Odersky started a company called "Typesafe Inc." in 2011 in order to offer support and guidance for using Scala for enterprise cases.
 
 Just as Haskell, OCaml and F#, Scala is a statically typed language.
-Again, the type system ships with type inference mechanism which minimizes need of type annotating members and functions, making the code much shorter.
+Again, the type system ships with type inference mechanism which minimizes need of type annotating members and functions, making the code shorter.
 Scala provides a feature called "Traits", which enables to mix multiple interfaces and their behavior within a single class.
 The Traits feature can be compared to concept of Typeclasses in Haskell, however the foundations differ.
 With its full interoperability with JVM and Java, Scala is a multi-paradigm language that allows to write code in functional as well as object-oriented manner.
-Inspired by other languages from functional family, Scala provides with well-known, associated with functional paradigm features, such as Pattern Matching or Higher-order functions.
-Language designers made their best to fit Scala to systems that require distribution and concurrency by adapting actor-based processing model and making it easier to work write asynchronous code with Futures.
+Inspired by other languages from functional family, Scala comes with well-known to functional community features, such as pattern matching or higher-order functions.
+Language designers made their best to fit Scala to systems that require distribution and concurrency by adapting actor-based processing model and making it easier to write asynchronous code with Futures.
 
 Partly thanks to the money invested, but also because of the language power itself, Scala found its way to be incorporated into an impressive amount of significant businesses around the world {{{typesafestories}}}:
 
-* **Twitter** completely re-architected its services to use Scala {{{eriksen2013your}}} and achieve an enormous indicator of hundreds of thousands tweets per second,
+* **Twitter** completely re-architected its services to use Scala {{{eriksen2013your}}} and achieved an enormous indicator of hundreds of thousands tweets per second,
 * **LinkedIn** converted from plain Java web frameworks to using Scala and Play framework, which turned out to speed up code and test cycles as well as made the LinkedIn platform more scalable,
 * **Walmart** Canada by rebuilding its web and mobile stacks with combination of Scala language, Play framework and Akka library for actor-based processing, noted a serious improvement in web traffic conversions and mobile orders for their Canada's largest on-line retailing business,
 * **Airbnb**, one of the largest lodge renting services, based their internal tool for scheduling data pipelines on Scala language, making the tool easier to manage and debug than with previously utilized Cron,
@@ -135,32 +137,32 @@ Its major motivation was to design a language that has Lisp-like syntax, embrace
 Clojure was made a fully open-source software so that it could be easier adopted by the community.
 
 Unlike previously enlisted languages, Clojure is dynamically typed.
-The code is compiled on-the-fly to corresponding JVM byte-code, but is not type-checked before running, which does not guarantee type safety and can result in this class of run-time errors, which would not be possible in statically typed language.
+The code is compiled on-the-fly to corresponding JVM byte-code, but is not type-checked before running, which does not guarantee type safety and can result in this class of run-time errors, which would not be otherwise possible in statically typed language.
 Dynamic typing in Clojure made it easier to incorporate macros feature into the language.
 Macro system in Clojure follows philosophy named "code-as-data", which enables to generate and manipulate arbitrary code dynamically.
-This feature is a great advantage for Clojure over most of statically typed functional languages, where it is not present.
+This feature is a great advantage for Clojure over most of statically typed functional languages, which lack of such functionality.
 Similarly to F# or Scala, Clojure is functional-first, meaning it provides a set of functional constructs, but it also allows to write impure, imperative code which does not hold referential transparency property.
 Clojure also comes with a great deal of models for concurrent processing, each of which is built on top of the standard Java concurrency libraries {{{clojurewebsite}}}:
 
-* **STM** (Software transactional memory system) which can modify and share state between multiple threads in a synchronous and coordinated manner,
+* **STM** (Software transactional memory system) which can modify and share state between multiple threads in a synchronous and coordinated manner (STM is also presented in the further course of thesis, in context of concurrency support for Haskell language),
 * **Agents** model, that separates independent communicating parties and allows for message passing in asynchronous fashion,
-* **Atoms** system, being similar to agents, but with the difference in synchronous communication,
+* **Atoms** system, being similar to agents, but with the difference in communication mode which is synchronous,
 * **Dynamic var**, which isolates modifiable state within the communicating threads.
 
 With its distinctive nature, Clojure settled down in code-bases in a number of companies, including {{{clojurestories}}}:
 
 * **Puppet Labs**, that used Clojure for building *Trapperkeeper* - an open source framework for hosting services which are supposed to run for a long period,
-* **Beanstalk**, whose product is a continuous integration application, after switching to Clojure gained a multiply of 20 boost in performance for their caching component,
+* **Beanstalk**, which after switching to Clojure for its continuous integration application gained a multiply of 20 boost in performance for the caching component,
 * **ThoughtWorks**, a consulting company, which gave Clojure a try to rewrite their CMS solution, found out that the language helped them to deliver the software before deadline and under designated budget,
 * **Sonian**, that deals with archiving emails in cloud, employs Clojure for its core back-end components and claims that thanks to such solution is able to ship new features very quickly,
-* **MailOnline**, which is the world's biggest newspaper website, decided to rebuild old service on top of Clojure and did no regret that choice.
+* **MailOnline**, which is the world's biggest newspaper website, decided to rebuild old service on top of Clojure and did not regret that choice.
 
 ### Erlang
 
 First version of Erlang was released back in 1986. 
 Erlang evolution led to release of stable version 18.0 at the time of the writing.
 Aim of creating Erlang language was to enhance telephony software industry.
-Origin of the language's name is ambiguous: some claim that it is a tribute to danish mathematician Agner Krarup Erlang, while other say that it is an abbreviation of "Ericsson language".
+Origin of the language's name is ambiguous: some claim that it is a tribute to danish mathematician Agner Krarup Erlang, while other say that it is an abbreviation of "Ericsson language" {{{armstrong2007history}}}.
 Indeed, Ericsson is not only the company that first incorporated Erlang, but also the one that started the development of the language at its Ericsson Computer Science Laboratory.
 Erlang was born in Ericsson labs thanks to Joe Armstrong and Robert Virding together with help of Mike Williams {{{armstrong2007history}}}.
 At first, the language usage was restricted to Ericsson only, however it became open sourced some time later. 
@@ -201,7 +203,7 @@ Financial sector faces many challenges related to computing nowadays.
 Institutions compete with each other with regards to real-time processing speed of their systems.
 Stochastic simulations of mathematical models used in financial software can potentially strive to infinite amount of compute cycles.
 Those models in turn happen to be very complicated and require tough logic implementation.
-In addition to that, volumes of data to be processed reach unbelievable sizes, and the trend seems to grow.
+In addition to that, volumes of data to be processed reach unbelievable sizes, and the trend seems to grow {{{berthold2012functional}}}.
 Those challenges squeeze huge amounts of money invested in financial software, but as this industry does not suffer from poverty, funds are still allocated to improve the overall quality and performance of systems.
 Functional programming turns out to address most of these problems and that is why it settled down for good in the financial industry.
 
@@ -230,12 +232,12 @@ The book presents examples in F# language of addressing concerns feasible for ma
 Interesting aspect of F# in context of machine learning is the interoperability (using F# Type Providers feature) with R language, which is famous for its comprehensive suite of ready functions and tools for data processing.
 
 Proof for growing interest in using functional techniques for data mining are books like Haskell Data Analysis Cookbook {{{shukla2014haskell}}}, where the author illustrates in details a variety of concepts including advanced data analysis and processing as well as input and output operations for consuming the data from and to outside world.
-The latter concept despite standing for hard to express in pure functional approach is clearly explained in the book, which confirms that even purely functional languages can be treated as general-purpose.
+The latter concept despite standing for hard to express in pure functional approach is clearly explained in the book, which confirms that even purely functional languages can be treated as general-purpose programming languages.
 
 ### Concurrent systems
 
 The survey would not be complete without mentioning concurrent systems, which benefit a lot from functional programming.
-Although they should not be really treated as a separate domain like financial industry or data science, concurrent systems made it to this list, because of the great impact of functional paradigm on concurrency aspect.
+Although they are not really a separate domain like financial industry or data science, concurrent systems made it to this list, because of the great impact of functional paradigm on concurrency aspect.
 That said, software from arbitrary domain, be it social network or shopping industry, which relies on processing parallelization might potentially gain from employing functional programming.
 
 An obvious advantage that applies to parallelization is that data structures are immutable.

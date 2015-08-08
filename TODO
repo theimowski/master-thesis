@@ -8,6 +8,9 @@ TODO:
 * OO - Polymorphism - do I get it right?
 * Declarative - the introductory description is quite poor
 * Functional - describe connection to declarative more clearly
+* Purity - distinction between pure functions and purity in general (language level) ?
+* functional - describe Pattern matching?
+* Dominated areas - good word?
 
 * Paradimgs and code quality -> move to Application of functional programming???
 
@@ -19,6 +22,7 @@ TODO:
 * Referencing different sections ?
 * Are bolds appropriate?
 * comments in paranthesis - maybe footnotes?
+* use FP acronym for Functional Programming
 
 ## Optional
 * logic, constraint programming - examples?
