@@ -242,3 +242,8 @@ First obvious advantage that applies to parallelization is that data structures 
 The immutability is enforced in pure languages, whereas in functional-first languages it is the default behavior that can be overridden, i.e data structures can be made mutable (usually for performance reasons).
 Vast majority of concurrency issues appear in object-oriented software due to the fact that objects are stateful, thus accessing an object in multi-threaded environment may lead to unexpected results when certain precautions are not taken.
 In functional paradigm on the other hand, such danger goes away when immutable data structures are being used, releasing the engineer from non-trivial task of context synchronization and preventing whole class of defects.
+
+One approach to write concurrent programs is described in article by Jones {{{jones2007beautiful}}}, where the author outlines benefits of Software Transactional Memory (STM) mechanism embedded into Haskell.
+The STM prevents issues related to *locks* as well as *condition variables*, therefore allowing the code to be more modular (composable).
+Thanks to the fact that STM bases on the Haskell type system, the compiler disallows illegal (from the concurrency point of view) read / write operations in code blocks that are meant to be executed *atomically*.
+It is worth noting, that the mechanism can also be potentially employed into imperative programming languages, however sophisticated language features and ease of modularity, present in functional languages, allow STM to be fully efficient.
