@@ -238,7 +238,7 @@ The survey would not be complete without mentioning concurrent systems, which be
 Although they should not be really treated as a separate domain like financial industry or data science, concurrent systems made it to this list, because of the great impact of functional paradigm on concurrency aspect.
 That said, software from arbitrary domain, be it social network or shopping industry, which relies on processing parallelization might potentially gain from employing functional programming.
 
-First obvious advantage that applies to parallelization is that data structures are immutable.
+An obvious advantage that applies to parallelization is that data structures are immutable.
 The immutability is enforced in pure languages, whereas in functional-first languages it is the default behavior that can be overridden, i.e data structures can be made mutable (usually for performance reasons).
 Vast majority of concurrency issues appear in object-oriented software due to the fact that objects are stateful, thus accessing an object in multi-threaded environment may lead to unexpected results when certain precautions are not taken.
 In functional paradigm on the other hand, such danger goes away when immutable data structures are being used, releasing the engineer from non-trivial task of context synchronization and preventing whole class of defects.
@@ -247,3 +247,11 @@ One approach to write concurrent programs is described in article by Jones {{{jo
 The STM prevents issues related to *locks* as well as *condition variables*, therefore allowing the code to be more modular (composable).
 Thanks to the fact that STM bases on the Haskell type system, the compiler disallows illegal (from the concurrency point of view) read / write operations in code blocks that are meant to be executed *atomically*.
 It is worth noting, that the mechanism can also be potentially employed into imperative programming languages, however sophisticated language features and ease of modularity, present in functional languages, allow STM to be fully efficient.
+
+Another concurrent programming model associated with functional paradigm is, already described together with Erlang, message passing.
+The model is ubiquitous in context of Erlang, as it is emphasized in {{{cesarini2009erlang}}} that message passing is the only way for communicating between processes in this language.
+Practice has shown that message passing concurrency model is extremely reliable and profitable, as systems relying on this technique achieve one of the highest system up-time indicators, as well as allow to process impressive amount of messages per unit of time.
+
+Above approaches are just examples of how functional paradigm influenced development of concurrent algorithms.
+Success stories demonstrated in previous section prove that employing functional programming in distributed and concurrent systems made them more scalable, stable and efficient.
+This is the main reason, for which more and more companies show interest in incorporating this philosophy into their business applications.
