@@ -7,7 +7,7 @@ TIOBE Index web site, which examines popularity of programming languages, keeps 
 The most common classification of programming languages relies on programming paradigms. 
 Paradigm determines some kind of abstract pattern that is followed by a family of languages.
 One of the first attempts to describe methods of organizing code was made by Dijkstra, who gave it a name of Structured Programming {{{dijkstra1970notes}}}.
-In 1978, Floyd received Turing Award for his paper, where he described the notion of a **paradigm** and how it can influence language designers {{{floyd1979paradigms}}}.
+In 1978, Floyd received Turing Award for his paper, where he described the notion of a paradigm and how it can influence language designers {{{floyd1979paradigms}}}.
 Those early works prove that the concept and its impact on programming has been studied since the beginning of software industry.
 
 In this section most popular programming paradigms are surveyed.
@@ -21,72 +21,75 @@ Imperative
 
 Imperative word looked up in a dictionary means "giving a command".
 That definition summarizes what really imperative programming is all about.
-When writing software in imperative manner, the programmer gives commands to a computer and tells it what to do step by step.
-Imperative is based on explicit modification of program state in order to achieve a desired goal.
+When writing software in imperative manner, the programmer gives commands to a computer and tells it what to do, step by step.
+Imperative relies on explicit modification of state in a program with use of statements, in order to achieve a desired goal.
 
 ### History
 
-First programming languages were machine languages, which offered Application Programming Interface (API) consisting of registers manipulation, jump instructions, basic arithmetic and logic operators.
-Because of their nature, which was based on giving low level commands to the processor, machine languages became the precursors of imperative programming.
-Building complex systems with machine code usually resulted in enormous code bases, which turned out to be painful to maintain.
+First programming languages were machine languages, which offered Application Programming Interface (API) consisting of register manipulations, jump instructions, basic arithmetics and logic operators.
+Machine languages API was therefore based on giving lowest level commands to the processor.
+Because of their nature, machine languages became the precursors of imperative programming.
+Building complex systems with machine code usually resulted in enormous code-bases, which turned out to be painful to maintain.
 
-That is why in the late 50s and in the beginning of 60s one level higher languages were introduced, such as FORTRAN, COBOL and BASIC, all of which can be considered imperative.
-They aimed to reduce the cost of code maintainability in comparison to machine languages by abstracting set of machine code instructions with more human-readable statements.
+That is why in the late 50s and in the beginning of 60s languages of higher level were introduced.
+Among them there was FORTRAN, COBOL and BASIC, all of which can be considered imperative.
+They aimed to reduce (comparing to the machine languages) cost of code maintainability, by abstracting certain sets of machine code instructions with statements and constructs better readable by a human.
 
-In 70s, languages like Pascal or C were created.
+In 70s, languages like Pascal and C were created.
 While Pascal served mainly for educational purposes, C language quickly became a mainstream programming language and at the time of the writing still remains one of the most popular in ranks {{{tiobeindex}}}.
 With its distinctive syntax, C originated a whole family of languages, commonly known as "C-based syntax" languages.
 Such constructs as `for` and `while` loops with their syntax proposed by C, are the most basic building blocks for an imperative program in majority of contemporary languages.
 
 Together with the 80s came a growing interest in object-oriented approach, which also has it roots in imperative approach.
-From the imperative category, Smalltalk and C++ were invented, the latter being "extension" to the C language with object concept among its new features.
+From the imperative category, Smalltalk and C++ were invented, the latter being "extension" to the C language with concept of objects among its new features.
 
-The imperative approach evolved since then, with languages like Python, Visual Basic, PHP, Java, Ruby developed in the 90s and C# after the Millennium.
-Despite some of these languages aimed to target multiple paradigms, the concept of building program's flow step by step, with the help of commands, remained ubiquitous.
+The imperative approach evolved since then, with languages like Python, Visual Basic, PHP, Java or Ruby developed in the 90s and C# after the Millennium.
+Despite some of these languages aimed to target multiple paradigms, the concept of building program's flow with help of mutating statements and other imperative constructs remained ubiquitous.
 
-### Object-Oriented
+### Object-oriented
 
 Majority of imperative programming languages that were developed till the 80s have procedural nature.
 This means that they focus on defining reusable procedures which invoke certain actions.
 Procedures are stateless, and as a result they cannot carry any kind of data with them.
-Object-Oriented approach was introduced in order to combine data with behavior inside an object, in order to enable relations between object, its internal state and applicable operations on that object.
-Object-Oriented follows imperative approach with regards to how behavior of an object is defined.
-The paradigm outlines a few principles for design of a program.
+Object-oriented approach was introduced in order to combine data with behavior inside an object, in order to relate object to its internal state and applicable operations.
+Object-oriented follows imperative approach with regards to how the behavior inside an object (in form of methods or members) is implemented.
+Following are enlisted a few design principles that the paradigm outlines.
 
-**Objects** are the basic building blocks of the program.
-In some Object-Oriented languages, every data structure (including primitive types) is an object.
-Instance of an object is usually shaped by the concept of class, which defines available members - fields and methods.
-Fields persist state of an object that methods can operate on.
+**Objects** are the basic building blocks of a program in object-oriented world.
+In some languages, every data structure including primitive types is an object (it is sometimes common to say that "Everything is an object").
+Instance of an object is usually shaped by the concept of a class, which defines available members - fields for storing data and methods for defining behavior.
 
-**Encapsulation** is an interesting principle of Object-Oriented software, that often gets misunderstood.
-It aims to hide information, that is to make the internals of an object invisible to the outside scope, but to provide a public interface that does not leak unnecessary data for other components interacting with that object.
+**Encapsulation** is an interesting principle of object-oriented software, that often gets misunderstood.
+It aims to hide information, that is to make the internals of an object invisible to the outside scope, but to provide a public interface that does not leak unnecessary state for other components interacting with that object.
 Encapsulation is fulfilled when the call site neither has to make any assumptions about nor be aware of existence of the internals of called object.
-The misconception occurs because developers treat encapsulation as a way of sharing internal state through trivial methods (known as getters and setters in Java and properties in C#).
+The misconception occurs because developers tend to treat encapsulation as a way of sharing internal state through trivial methods (known as getters and setters in Java and properties in C#).
 
 **Inheritance** allows a class to derive behavior as well as state from another class.
 The derived members can then be reused to implement more specific sub-class methods.
-Thanks to the mechanism, some implementation can be shared between multiple classes of objects and duplication of code avoided.
-Often languages allow for shadowing of derived members, that is overriding definition of a member, which can result in spoiled abstraction.
-Inheritance also leads to forming of class hierarchies which easily get big and complex.
+Thanks to the mechanism, some implementation can be shared between multiple classes of objects and thus duplication of code can be avoided.
+On the other hand, languages usually allow for shadowing of derived members, that is overriding definition of a member, which can result in spoiled abstraction.
+Inheritance also leads to forming class hierarchies which easily get big and complex.
+It turns out that the same effect that is achieved thanks to inheritance can also be achieved with help of composition, and indeed the latter is a recommendation given by these frequently cited words {{{gamma1994design}}}:
 
-**Polymorphism** is a concept known from functional programming, that in Object-Oriented approach relies on inheritance.
-"Poly" standing for "many" and "morphism" which can be thought of "form" describe the ability to treat objects of different classes in unified way.
-In Object-Oriented paradigm however this ability is forced by belonging to a specific class hierarchy.
+>> *"Favor object composition over class inheritance."*
+
+**Polymorphism** is a concept known from functional programming, that in object-oriented approach relies mainly on inheritance.
+"Poly" standing for "many" and "morphism", which can be thought of "form" ("morphism" has its formal definition in category theory, however it is not covered by the thesis), describe the ability to treat objects of different classes in unified way.
+In object-oriented paradigm this ability is enforced by specific class hierarchies.
 
 **Abstraction** is closely related to polymorphism, and allows to treat referenced objects as if they were of the most possible general type, while in runtime they appear to be an instance of a very specific class.
-Abstraction enables better testability of code, and late binding which can be used for inversion of control (IOC).
-As stated above, when not cautious, abstraction can be easily spoiled in Object-Oriented programming by overriding behavior or leaking internals of an object.
+Abstraction enables better testability of code, as well as late binding, which can be used for the purpose of inversion of control (IOC).
+As stated above, when not cautious, abstraction can be easily spoiled in object-oriented programming by overridden behavior or leaking internals of an object.
 
-Many other principles and design patterns apply to Object-Oriented programming.
-With the SOLID acronym, Bob C. Martin {{{martin2003agile}}} presents set of five principles that ensure software to be maintainable.
-Multiple design patterns described in the famous Design Patterns book {{{gamma1994design}}} demonstrate common approaches that address cross cutting concerns in Object-Oriented program.
-While it is certainly a good thing that such patterns are established for software engineers to follow, majority of them tend to be quite cumbersome and utilizing them cause complexity of software to grow exponentially.
-Many of the standardized patterns seem to **solve problems that the Object-Oriented programming introduced** itself.
+Many other principles and design patterns apply to object-oriented programming.
+With the SOLID acronym, Martin {{{martin2003agile}}} presents set of five principles to keep software maintainable.
+Multiple design patterns described in the famous Design Patterns book {{{gamma1994design}}} demonstrate common approaches that address cross cutting concerns in object-oriented software.
+While it is certainly a good thing that such patterns are established for software engineers to follow, majority of them tend to be quite cumbersome, hence utilizing them cause code complexity to grow exponentially.
+Many of the standardized object-oriented patterns seem to solve problems that the programming paradigm introduced itself in the first place.
 
 ### Referential opacity
 
-Both imperative and object-oriented paradigms suffer from referential opacity. 
-Referential opacity is an opposite of referential transparency property.
+Imperative and derivative paradigms suffer from referential opacity - an opposite of referential transparency property.
 Tennent in his work explains {{{tennent1976denotational}}}: 
 
 >> *"Main actions performed in imperative paradigm are updating statements, jumps and intermediate input / output, which spoil referential transparency by introducing the possibility of "side effects" or transfers of control during expression evaluations."*
@@ -242,8 +245,8 @@ The concept of function pointers introduced in C and C++ is closely related to h
 
 Higher-order functions is a powerful feature that enables to abstract away a common piece of logic and make it more reusable.
 It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with collections (for example filtering or mapping) or null-checking.
-In addition to that, higher-order functions can be used as a foundation for concept known in Object-Oriented programming as "Dependency Injection".
-Dependency Injection in Object-Oriented paradigm relies on passing abstract interfaces without implementation to consuming classes.
+In addition to that, higher-order functions can be used as a foundation for concept known in Object-oriented programming as "Dependency Injection".
+Dependency Injection in Object-oriented paradigm relies on passing abstract interfaces without implementation to consuming classes.
 The interfaces passed to dependent class contain only type signatures of methods to be invoked, hence such interface can be easily represented with traditional functions.
 
 Listing {{funhof}} shows example of using higher-order function `Array.Filter`.
