@@ -559,11 +559,25 @@ The application allowed anonymous users to add albums to their cart (without aut
 For that purpose, a unique identifier was assigned in a cookie and corresponding database table row.
 Thanks to that, users could add albums to cart without being logged on to the Store.
 Authentication was however required, when the user wanted to checkout with his albums in cart.
-If user was authenticated, session consisted of the user's name as well as role.
+If user was authenticated, session contained information about the name and role of the user.
 The first proved helpful for displaying a greeting at the very top of the page, and the second was used for authorization.
 From the database point of view both anonymous cart identifier and user's name were used for "cartId" database table row.
+In order to model possible session states, a few types were declared as per listing {{fsmusicsessiontype}}.
 
-In order to model possible session states, types from listing {{fsmusicsessiontype}} were declared.
+An F# Record type was declared in first line of listing {{fsmusicsessiontype}}.
+Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
+
+* records are immutable by default, 
+* record constructor enforces all fields to be initialized, which prevents from having any record field undefined,
+* records have structural equality by default, meaning that one does not have to override equality members as in C#,
+* records can appear in pattern matching constructs,
+* records provide a handy shortcut for copying (cloning) objects called copy expression, which allows to create new instance of record with some of the fields modified.
+
+Another F# type construct, called discriminated union was used in line 6.
+They allow for declaring a type with a set of applicable constructors and are specially designed to work with pattern matching.
+Following is a definition from Microsoft Developer Network (MSDN) on discriminated unions {{{msdn}}}:
+ 
+>> *"Discriminated unions provide support for values that can be one of a number of named cases, possibly each with different values and types."*
 
 ```xxx
 {FSharp]{Modelling session in Music Store}{fsmusicsessiontype}
@@ -577,29 +591,28 @@ type Session =
     | CartIdOnly of string
     | UserLoggedOn of UserLoggedOnSession```
 
-An F# Record type was declared in first line.
-Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
-
-* immutability by default,
-* structural equality by default,
-* pattern matching,
-* copy and update expressions.
-
-The `UserLoggedOnSession` record type has two properties: `Username` and `Role`, both of `string type.
+The `UserLoggedOnSession` record type has two properties: `Username` and `Role`, both of `string` type.
 This type was part of the discriminated union case (line 9).
-
-Discriminated unions in F# provide support for values that can be one of a number of named cases, possibly each with different values and types {{{msdn}}}.
-They allow for declaring a type with a set of applicable values and are designed to work with pattern matching.
-
-`Session` type (line 6) was declared as a discriminated union.
-It consisted of three possible cases:
+`Session` discriminated union type (line 6) consisted of three possible cases:
 
 * `NoSession` (line 7) - indicated that no session is attached to context request,
 * `CartIdOnly` (line 8) - reflected that user is adding albums to his cart without being authenticated,
-* `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (`UserLoggedOnSession` type).
+* `UserLoggedOn` (line 9) - determined authenticated requests with details of the user (inside `UserLoggedOnSession` type).
 
 Main reason for creating this type in Music Store was to achieve a unified way of determining user state.
 For the purpose of composing `Session` type with WebPart, a companion function `session` (lower case) was defined in listing {{fsmusicsessionfun}}.
+At its starting point (line 2), session invoked `statefulForSession` which is a WebPart from Suave library that initiates user's state to work with.
+The initialization was then bound to the `context` function (line 3) to allow browsing user's state.
+For browsing the state, `HttpContext.state` proved useful (line 4).
+Its return type is `SessionStore option` where `SessionStore` accumulates a reader `get` and a writer `set` functions, for fetching and modifying state respectively.
+A pattern matching on a triple (tuple with three values) of user's state keys matched following cases (lines 7-10): 
+
+* if a "cartid" key was present, but there was no "username" and no "role" keys, `CartIdOnly` would be returned,
+* if both "username" and "role" keys appeared in the session store, `UserLoggedOn` value applied,
+* as a fall-back, `NoSession` was chosen when none of those keys were present.
+
+Result of pattern matching block was applied (or colloquially "piped") to function `f` (line 11), which came as an argument to `session` and had a type of `Session -> WebPart`.
+Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner, with one example shown in listing {{fsmusicaddtocart}}.
 
 ```xxx
 {FSharp]{Determining session state in Music Store}{fsmusicsessionfun}
@@ -614,20 +627,6 @@ let session f =
             | _, Some username, Some role -> UserLoggedOn {Username = username; Role = role}
             | _ -> NoSession
             |> f )```
-
-At its starting point (line 2), session invoked `statefulForSession` which is a WebPart from Suave library that initiates user's state to work with.
-The initialization was then bound to the `context` function (line 3) to allow browsing user's state.
-For browsing the state, `HttpContext.state` proved useful (line 4).
-Its return type is `SessionStore option` where `SessionStore` accumulates a reader `get` and a writer `set` functions, for fetching and modifying state respectively.
-A pattern matching on a triple (tuple with three values) of user's state keys matched following cases (lines 7-10): 
-
-* if a "cartid" key was present, but there was no "username" and no "role" keys, `CartIdOnly` would be returned,
-* if both "username" and "role" keys appeared in the session store, `UserLoggedOn` value applied,
-* as a fall-back, `NoSession` was chosen when none of those keys were present.
-
-Result of pattern matching block was applied (or colloquially "piped") to function `f` (line 11), which came as an argument to `session` and had a type of `Session -> WebPart`. 
-
-Having such function in toolbox allowed to define new WebParts that depended on user's state in a convenient manner, with one example shown in listing {{fsmusicaddtocart}}.
 
 ```xxx
 {FSharp]{Session in Music Store - adding to cart}{fsmusicaddtocart}
@@ -644,17 +643,6 @@ let addToCart albumId =
                 succeed)
         >>= Redirection.FOUND Path.Cart.overview```
 
-As the `Session` type utilizes Discriminated Unions, pattern matching could be used again for handling different cases (lines 3-11).
-Whenever `addToCart` was invoked without any session (`NoSession`), a new Globally Unique Identifier (GUID) was generated.
-Using the new GUID value, proper database action was then invoked and the GUID got saved in session store.
-
-For the above `addToCart` function, the same piece of code was invoked when user was logged on to Music Store and when he was not but had already an anonymous cart identifier assigned to his session.
-In order to express such logic, a double-matching pattern was used (line 9).
-If that was the case, cartId was sufficient to perform the `Db.addToCart` action, and there was no need to generate new GUID.
-
-A syntactic sugar has been used for pattern matching construct, which comes handy when declaring a one-argument function that immediately pattern matches on this argument.
-Listing {{fspatternmatchsugar}} shows how the syntactic sugar can be used to make the code more concise.
-
 ```xxx
 {FSharp]{Syntactic sugar for pattern matching in FSharp}{fspatternmatchsugar}
 // standard syntax
@@ -666,7 +654,21 @@ let f x =
 let f = function 
     | ... -> ```
 
+As the `Session` type utilizes discriminated unions, pattern matching could be used again for handling different cases (listing {{fsmusicaddtocart}} lines 3-11).
+Whenever `addToCart` was invoked without any session (`NoSession`), a new Globally Unique Identifier (GUID) was generated (line 5).
+Using the new GUID value, proper database action was then invoked and the GUID got saved in session store.
+For the above `addToCart` function, the same piece of code was invoked when user was logged on to Music Store and when he was not but had already an anonymous cart identifier assigned to his session.
+In order to express such logic, a double-matching pattern was used (line 9).
+If that was the case, cartId was sufficient to perform the `Db.addToCart` action, and there was no need to generate new GUID.
+A syntactic sugar has been used for pattern matching construct, which comes handy when declaring a one-argument function that immediately pattern matches on this argument.
+Listing {{fspatternmatchsugar}} shows how the syntactic sugar can be used to make the code more concise.
+
 Another example on `Session` type usage is presented in listing {{fsmusicviewcart}}.
+In listing {{fsmusicviewcart}}, `cart` WebPart was declared.
+Its purpose was to display contents of the current user's cart.
+In case he did not have any session attached (and no albums in cart), the user was shown a `View.emptyCart` page.
+That page had to encourage the user to do the shopping.
+On the other hand, if user had already some albums in his cart, contents of the cart were displayed on `View.cart` page (line 6).
 
 ```xxx
 {FSharp]{Session in Music Store - viewing the cart}{fsmusicviewcart}
@@ -677,44 +679,33 @@ let cart =
         let ctx = Db.getContext()
         Db.getCartsDetails cartId ctx |> View.cart |> html)```
 
-In listing {{fsmusicviewcart}}, `cart` WebPart was declared.
-Its purpose was to display contents of the current user's cart.
-In case he did not have any session attached (and no albums in cart), the user was shown a `View.emptyCart` page.
-That page had to encourage the user to do the shopping.
-On the other hand, if user had already some albums in his cart, contents of the cart were displayed on `View.cart` page.
 
-#### Session in ASP.NET MVC
-
-Handling session concept in ASP.NET MVC is relatively similar to how it was achieved in Music Store with F# and Suave.
-There exists a `Session` property in Controller to serve values indexed by keys of type `string`.
-
-#### Summary
+Session handling concept in ASP.NET MVC is relatively similar to how it was achieved in Music Store with F# and Suave.
+A `Session` property in every Controller exists to serve session values indexed by keys of type `string`.
 
 State management mechanism in Music Store was implemented in akin manner when comparing to how it is usually dealt with in imperative, object-oriented frameworks.
-Thanks to Discriminated Unions and the great feature of pattern matching in F#, it was convenient to model all possible states and handle each of them separately.
+Thanks to discriminated unions, records and the great feature of pattern matching in F#, it was convenient to model all possible states and handle each of them separately.
 
 ### Authentication and Authorization
 
 Access to some contents of a WebSite is not always public these days anymore.
-Companies that make money on selling information across the web have certain limitations with regards to who and when can browse specific part of their site.
+Companies that make money on selling information across the web have certain limitations with regards to who and under what conditions can browse specific parts of their site.
 Web applications that use concept of accounts to tie data with users, must know the identity of a person that is performing certain actions.
 There are also web sites that tend to make profit on persisting in database and selling details about a significant amount of users and their emails.
 Such needs as in above examples led to forming the concepts of authentication and authorization.
 Both of them can be built on top of the state management mechanism by using cookies.
-Since authentication, authorization and session are rather orthogonal with regards to session, the first two are described here in a separate section.
+Since authentication, authorization and session are rather an orthogonal concept to session, they are described here in a separate section.
 
-#### Authentication
-
-Authentication is a process, in which a user of a system (be it a human or machine program) presents his credentials to the requested authority.
-In web browsing scenario it is often preceded by the web site (playing authority role) blocking access to a desired resource (for user).
+Authentication is a process, in which a user of a system (be it a human or machine program) presents his credential to the requested authority.
+In web browsing scenario it is often preceded by the web site (playing authority role) blocking access (for user) to a desired resource.
 The HTTP protocol defines a specific status code for that purpose.
 401 Unauthorized status code in HTTP response means that request requires user authentication {{{fielding1999hypertext}}}.
 It is a bit unfortunate that the HTTP standard defines the status code with "Unauthorized" keyword, which relates to authorization and is a different concept.
 
 In Music Store, form authentication approach was applied.
-Form authentication relies on passing users credentials in request body, encoded with `application/x-www-form-urlencoded` Content-Type header (or `multipart/form-data` in some cases).
-This mechanism should always be accompanied with SSL encryption, meaning that HTTPS scheme should be used, because form authentication does not provide ad hoc encryption and the request body is often sent in plain text.
-For the sake of simplicity, SSL encryption is not covered in Music Store application.
+Form authentication relies on passing users credentials in request body, with Content-Type header representing either URL or multi-part form data encoding.
+This mechanism should always be accompanied with Secure Socket Layer (SSL) encryption, meaning that HTTPS scheme should be used, because form authentication does not provide ad hoc encryption and the request body is often sent in plain text.
+For the sake of simplicity, SSL is not covered in Music Store application.
 Listing {{fsmusiclogon}} shows how basic form authentication was implemented in Music Store.
 
 ```xxx
@@ -744,17 +735,17 @@ let logon =
 
 The main handler for authentication `logon` (line 9) benefited from `choose` to distinguish between GET and POST methods.
 For GET requests (line 11), `logon` did respond with an HTML page with form to log in to the Music Store.
-What is interesting, is that `warbler` function was not crucial in this case.
-That is because the `View.logon` invoked like that was treated as a fixed HTML markup - it always took empty string as parameter (there is also another invocation in line 20, more on that later).
-Once this WebPart was evaluated, it did not need to be computed anymore.
+Interesting fact is that `warbler` function was not crucial in this case.
+That is because the result of `View.logon` was treated as a fixed HTML markup, as it always took empty string as parameter.
+Once the WebPart on the right-hand side of `>>=` in line 11 was evaluated, it did not need to be recomputed anymore.
+There is also another invocation of `View.logon` in line 20, which is discussed in the further course.
 
 POST requests to `logon` were treated as an authentication trial.
 As was the case with creating and editing albums, `bindToForm` took care (by returning Bad Request status code) of possible malformed requests that did not originate from the login page.
-When the data sent with POST matched `Form.logon` model, a database query (line 15) would be triggered to validate passed credentials.
+When the data sent with POST matched `Form.logon` model, a database query (line 15) was triggered to validate passed credentials.
 Written in-line, `passHash` was defined as a helper function that returned a hash from the password with help of 32-bit-word Secure Hash Algorithm (SHA-256).
-
-In case, the given credentials did not match (either such user's name did not exist or the password was incorrect), `View.logon` page would be displayed again this time with a validation error in red color to indicate the failure (line 20). 
-If however both user's name and password were correct, process of authentication would be started.
+In case, the given credentials did not match (either such user's name did not exist or the password was incorrect), `View.logon` page was displayed again this time with a validation error message in red color to indicate the failure (line 20). 
+If however both user's name and password were correct, authentication process was initiated.
 
 Suave framework ships with helper functions such as `Auth.authenticated` (line 17) that made working with authentication more convenient.
 Because it relies on cookies, first argument of `Auth.authenticated` describes lifetime of the cookie.
@@ -768,8 +759,6 @@ Having set the cookie, program flow was bound to `returnPathOrHome`.
 WebPart `returnPathOrHome` (line 1) had a look inside the incoming request to find out whether parameter called "returnPath" existed in URL query.
 If that was the case (line 5), then value of this parameter would determine to what location redirection should happen.
 Otherwise (line 6), the redirection would be made to the main page, `Path.home`.
-
-Functions from listing {{fsmusicisauthenticate}} were necessary to verify if incoming request is authenticated.
 
 ```xxx
 {FSharp]{Helper functions for authentication}{fsmusicisauthenticate}
@@ -786,9 +775,10 @@ let loggedOn f_success =
         (fun _ -> Choice2Of2 (BAD_REQUEST "Descryption error!"))
         f_success```
 
+Functions from listing {{fsmusicisauthenticate}} were necessary to verify if incoming request is authenticated.
 The first one, `redirectWithReturnPath` (line 1) did set the "returnPath" URL query parameter, used by `returnPathOrHome` WebPart which was defined earlier.
 It basically took a `redirection` URL as its argument, appended current absolute path as query parameter to `redirection`, and issued a redirection to the result URL.
-WebPart `loggedOn`, which was defined in line 6 can be thought of like a "guard" of the `f_success` WebPart.
+WebPart `loggedOn`, which was defined in line 6 can be thought of a "guard" of the `f_success` WebPart.
 `loggedOn` challenged the request with another built into Suave helper `Auth.authenticate`.
 The `Auth.authenticate` took 5 arguments:
 
@@ -803,16 +793,13 @@ This meant that when someone tried to get to a resource without being authentica
 Line 11, on the other hand, was used when the cookie could not be decrypted with secrete server key.
 That could potentially mean a malicious request, that is why 400 Bad Request status code was chosen as a response.
 One of the actions that required being logged on to the Music Store was checking out the cart with albums.
-To apply `loggedOn` validation on a `checkout` WebPart, those two could be composed like in lisiting {{fsmusiccomposeauthentication}}.
+To apply `loggedOn` validation on a `checkout` WebPart, those two were composed like in lisiting {{fsmusiccomposeauthentication}}.
 
 ```xxx
 {FSharp]{Composing authentication with other WebParts}{fsmusiccomposeauthentication}
 path "/cart/checkout" >>= loggedOn checkout```
 
-#### Authorization 
-
-Unlike authentication, authorization does not rely on providing credentials, but rather validating them against some kind of a "challenge".
-
+Unlike authentication, authorization does not rely on providing credential, but rather validating already present credential against some kind of a "challenge".
 Most popular challenge these days seems to be the concept of roles.
 A role describes the category of a user.
 As an example, in Music Store there were 2 simple roles defined:
@@ -822,7 +809,6 @@ As an example, in Music Store there were 2 simple roles defined:
 
 New users that would register to the Music Store, got automatically the "user" role assigned.
 There was only one predefined user with "admin" role and the same name.
-
 Function from listing {{fsmusicadminauth}} was implemented to allow only authorized users to a specific handler.
 
 ```xxx
@@ -836,17 +822,15 @@ let admin f_success =
 As was the case with `loggedOn`, `admin` function played a role of a guard over the `f_success` WebPart and allowed only "admin" roles in.
 In fact, it invoked the `loggedOn` (in line 2) to ensure that request was authenticated, because otherwise there would be no one to authorize.
 `session` function was utilized to determine the state of the user.
-Among three possible values, on of them was `UserLoggedOn` with `Name` and `Role` properties inside.
-The fact that record types such as `UserLoggedOnSession` can be subject of pattern matching was exploited to match on `Role` property.
+Among three possible values, one of them was `UserLoggedOn` with `Name` and `Role` properties inside.
+The fact that record types can be subject of pattern matching was exploited to match on `Role` property.
 Thanks to that, `f_success` got applied only when `Role` matched "admin" (line 3).
 If user was authenticated but his role was not "admin" (line 4), a 403 Forbidden status code was written to the HTTP response.
 Line 5 would return 401 Unauthorized status code in case the request was not authenticated.
-The last case behaved only like a safety net preventing compiler warnings, as the `loggedOn` guard would not allow authenticated requests to pass through.
+The last case served only as a safety net preventing compiler warnings, as the `loggedOn` guard would not allow authenticated requests to pass through.
 
 Once again, the HTTP status code names for 401 and 403 may sound confusing in context of this section.
 **401 Unauthorized** code in practice means that request is not **authenticated**, while **403 Forbidden** stands for being **authenticated**, but **unauthorized** to browse selected resource.
-
-Composing `admin` function with other WebParts looked like in listing {{fsmusiccomposingauthorization}}.
 
 ```xxx
 {FSharp]{Composing authorization with other WebParts}{fsmusiccomposingauthorization}
@@ -855,23 +839,20 @@ path "/admin/create" >>= admin createAlbum
 pathScan "/admin/edit/%d" (fun id -> admin (editAlbum id))
 pathScan "/admin/delete/%d" (fun id -> admin (deleteAlbum id))```
 
+Composing `admin` function with other WebParts was achieved thanks to code like in listing {{fsmusiccomposingauthorization}}.
 While for parameter-less WebParts like `manage` or `createAlbum`, it was only necessary to wrap them with `admin`, those WebParts that took an argument (`editAlbum` and `deleteAlbum`) had to be contained inside a lambda (anonymous) function.
-
-#### Authentication and Authorization in ASP.NET MVC
 
 Authentication and Authorization in ASP.NET MVC are usually handled with code annotations in form of attributes.
 Those attributes are attached to specific controllers / actions and allow to express the concept in declarative way.
-As an example, to mark that every action in a specific controller should be authorized and only "admin" can access these actions, the controller would be `[Authorize(Roles="Administrators")]` attribute.
+As an example, to mark that every action in a specific controller should be authorized and only "admin" role can access these actions, the controller would be decorated with `[Authorize(Roles="Administrators")]` attribute.
 While it is a convenient way of dealing with those cross-cutting concerns, such approach can also have its disadvantages.
 Using annotations is related to making the software engineer unaware of what is really happening under the hood.
 In contrast to that, an obligation to connect the authentication and authorization concepts with rest of the application's logic, results in easier reasoning about the implementation as well as discovering potential software defects.
 
-#### Summary
-
 It is getting more evident that aspects of web development follow similar pattern in Music Store application.
 To utilize both authentication and authorization, another building blocks were created.
 All those building blocks happened to reside near WebPart type, which made them reusable and suitable for composition.
-Implementation of the concepts in functional paradigm significantly differs form how they tend to be defined in object-oriented programming.
+Implementation of the concepts in functional paradigm significantly differs from how they tend to be defined in object-oriented programming.
 Declarative approach used in frameworks like ASP.NET MVC makes it extremely easy to employ authentication and authorization, but has a downside of being less aware of mechanism that drives the program flow.
 Solution that Suave takes advantage of requires the developer to get familiar with the underlying protocol and adapt existing functions into his code.
 Thanks to that, one gets better understanding on how different components are meant to work in integration.
@@ -1083,8 +1064,6 @@ Suave framework with its concise nature did not ship with a ready-to-use top-to-
 Thanks to Suave being highly composable, it was opportune to create a form utility module that could fit into the WebPart pipeline.
 With the help of a few features in F# language, the module managed to be reusable in declarative and succinct way.
 Also, it turned out to be a fascinating experience to be able to contribute to the Suave framework by sharing implementation of the module.
-
-### Rest of features?
 
 Conclusions
 -----------
