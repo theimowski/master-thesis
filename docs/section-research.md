@@ -194,20 +194,20 @@ While debate continues on whether "Convention over Configuration" is convenient 
 
 When developing Web applications that aim to be consumed by browsers, rendering HTML views is an important aspect to consider.
 Nowadays Internet applications happen to be rich on the client side.
-HTML markup with attached Cascade StyleSheets and JavaScripts are becoming more and more complex.
-Non-trivial logic and rules for displaying HTML pages lead to formation of multiple template engines, both those which render on client and server side.
-The problem of HTML rendering is complicated, and can be approached with various different solution.
-The thesis will only touch upon how it is possible to solve HTML rendering aspect in Suave framework.
-It will not however go into much details of HTML rendering or try to compare to different available possibilities.
+HTML markup with attached cascade style sheets (CSS) and Javascripts are becoming more and more complex.
+Non-trivial logic and rules for displaying HTML pages led to formation of multiple template engines, both those which render on client and server side.
+The problem of HTML rendering is complicated, and can be approached with various different solutions.
+This thesis will only touch upon how HTML rendering aspect was solved with Suave framework for the Music Store application.
+It will not however go into much details of HTML rendering topic or try to compare chosen approach to different available possibilities.
 
-#### Suave HTML DSL
-
-For the Music Store rendering engine, a simple to use and built into Suave **DSL** was chosen.
+For the Music Store rendering engine, a simple to use and built into Suave HTML DSL was chosen.
 The HTML DSL available in Suave could be categorized as a set of functions focused on building HTML markup. 
 HTML markup can be a valid XML markup, under the condition that all element tags are closed.
 Indeed the HTML DSL in Suave relies on creating XML tree and formatting it to plain text.
-
 Listing {{fssuaveindexpage}} shows how a basic HTML page for Music Store was defined.
+In result of evaluating code from listing {{fssuaveindexpage}}, HTML markup presented in listing {{htmlsuaveindexpage}} was returned.
+The DSL usage looks similar to how the actual markup is defined.
+Thanks to this fact it should be relatively easy for an HTML developer who is not familiar with F# syntax, to get started with designing views with this DSL.
 
 ```xxx
 {FSharp]{Rendering index page with Suave HTML DSL}{fssuaveindexpage}
@@ -231,8 +231,6 @@ let index =
         ]
     ]```
 
-In result of evaluating code from listing {{fssuaveindexpage}}, HTML markup presented in listing {{htmlsuaveindexpage}} is returned.
-
 ```xxx
 {HTML]{HTML markup for index page}{htmlsuaveindexpage}
 <html>
@@ -249,12 +247,9 @@ In result of evaluating code from listing {{fssuaveindexpage}}, HTML markup pres
     </body>
 </html>```
 
-The DSL usage looks similar to how the actual markup is defined.
-Thanks to that it should be relatively easy for an HTML developer who is not familiar with F# syntax, to get started with designing views with the DSL.
-
 As the example showed static content, no real benefits were gained from using a DSL instead of plain HTML.
 Such benefits arise when there is need to display some kind of data model in a view.
-In Music Store, this can be demonstrated by rendering page for list of genres, as shown in listing {{fssuavestoreview}}.
+In context of Music Store, this can be demonstrated by rendering page for list of genres, as shown in listing {{fssuavestoreview}}.
 
 ```xxx
 {FSharp]{Rendering page with a given data parameter}{fssuavestoreview}
@@ -272,21 +267,16 @@ let store genres = [
 
 The `store` function in listing {{fssuavestoreview}} returns a list of nodes, which can then be passed as an argument to the `index` function defined earlier and displayed in a container between header and footer.
 First node (line 2) is a standalone `h2` element with "Browse Genres" sign.
-
 The second node (lines 3-5) is a paragraph that displays number of all genres in the Store.
 F# core library function, `List.length` has been used to count the number of elements in `genres`.
 Thanks to the usage of this function, F# compiler is capable of inferring the type of `genres` value to be `'a list` (it does not specify the type parameter for the `list` though).
-
 The last node returned (lines 6-10) is `ul` which stands for "unordered list".
 Unordered list contains `li` "list items" elements, each of which has a hyper-link to the corresponding genre.
 Line 7 demonstrates "list comprehension" syntax, which binds each element of the `genres` list to `g` value and uses it to yield list items.
 With help of `Path` module, lines 8-9 generate a hyper-link with URL argument, similar to the one presented in Routing section (`/store/browse?genre=Disco`). 
-
 Because `text` function, which is invoked at the end of line 9 expect a `string` as its argument, `g` value is inferred to be of type `string`.
 Powerful type-inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
 Thanks to the type-inference, no explicit type annotations are required, and the code is more concise.
-
-#### Summary
 
 Two great benefits from using such a DSL for rendering HTML can be enlisted:
 
