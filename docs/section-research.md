@@ -866,29 +866,17 @@ Implementation of form communication consists of a number of steps:
 * rendering proper HTML markup with named inputs,
 * client-side validation of form fields values,
 * formatting the request body upon submitting (usually this is step is handled by browsers),
-* parsing of the body on the server side,
+* parsing the request body on the server side,
 * server-side validation of form fields values,
 * actual handler for request.
 
-Most rich and heavy-weight frameworks for Internet applications (including ASP.NET MVC) already include in their functionality suite modules and helpers for handling above scenario.
-Since Suave is very light-weight, it does not (at the time of writing) come out with ready to use functions for up-to-down form communication between client and server.
+Most rich and heavy-weight frameworks for Internet applications (including ASP.NET MVC) already include in their repertoire modules and helpers for handling above scenario end-to-end.
+Since Suave is very light-weight, it does not (at the time of writing) come out with ready to use functions for end-to-end form communication between client and server.
 Engaging part of the research was thus ability to create utility modules for working with forms in Suave.
 Even more inviting experience was that the written modules were accepted as part of the official Suave package (in its "Experimental" distribution), since Suave is an open-source software hosted at GitHub web site {{{suave}}}.
 
-#### Declaration
-
 The prepared functionality aimed to target all of the steps enlisted above.
 It was designed to do so in a declarative way, by providing strongly typed access to values of form fields, an example of which is shown in listing {{fsformfields}}.
-
-```xxx
-{FSharp]{Declaration of fields for registration form}{fsformfields}
-type Register = {
-    Username : string
-    Email : MailAddress
-    Password : Password
-    ConfirmPassword : Password
-    YearOfBirth : decimal option }```
-
 Form fields were to be enclosed in a record type.
 Supported types for the fields were: 
 
@@ -901,8 +889,7 @@ In addition to that, the module supported concept of required / optional fields.
 By default field was treated as required.
 If a field was to be marked as optional, it had to be of `option` type.
 Thanks to such solution, all values were type-safe (i.e. no null references would occur while reading a required field).
-
-`Register` type in the above snippet was declared for the sake of registering a new user.
+`Register` type in listing {{fsformfields}} was declared for the sake of registering a new user.
 It reflected a form with following fields:
 
 * `Username` - required field of type `string` being a unique name of the user of Music Store,
@@ -911,10 +898,14 @@ It reflected a form with following fields:
 * `ConfirmPassword` - the same as above, but used to prevent user from mistyping the passwords,
 * `YearOfBirth` - optional field of type `decimal option` that could be used for recommending appropriate albums.
 
-#### Validation
-
-Next thing that the module supported was declaring certain validation of the fields.
-For the `Register` form, validation rules were presented in listing {{fsformvalid}}.
+```xxx
+{FSharp]{Declaration of fields for registration form}{fsformfields}
+type Register = {
+    Username : string
+    Email : MailAddress
+    Password : Password
+    ConfirmPassword : Password
+    YearOfBirth : decimal option }```
 
 ```xxx
 {FSharp]{Validating field values in registration form}{fsformvalid}
@@ -929,6 +920,9 @@ let register : Form<Register> =
             PasswordProp ((fun f -> <@ f.ConfirmPassword @>), [ passwordRegex pattern ] )
             ],[ passwordsMatch ])```
 
+
+Next thing that the module supported was declaring certain validation of the fields.
+For the `Register` form, validation rules were presented in listing {{fsformvalid}}.
 Actual declaration of the `Register` form occurred in line 6.
 It consisted of single union case `Form` with two lists as its arguments: 
 
@@ -944,26 +938,27 @@ Indeed, in the above example it was impossible to compare two fields on client s
 Validation rules from the first list could be used both for client and server side, as they involved just a single field.
 Thanks to new `input` element attributes in HTML5 standard, such as `maxlength` or `pattern`, client-side validation could be achieved.
 The rules shown in above snippet were either `TextProp` or `PasswordProp` (property) meaning that they concerned text field or password fields respectively.
-
 First argument of the property was a function that made use of F# feature called **quotations**.
-Properties enclosed within the `<@ ... @>` operators were interpreted as quotations by the compiler.
-F# quotations allow the capture of type-checked expressions as structured terms (...) that can then be interpreted, analyzed and compiled to alternative languages {{{syme2006leveraging}}}.
+Properties enclosed within the `<@ ... @>` operators were interpreted by the compiler as quotations {{{syme2006leveraging}}}: 
+
+>> *"F# quotations allow the capture of type-checked expressions as structured terms (...) that can then be interpreted, analyzed and compiled to alternative languages."*
+
 For the form module utility, F# quotations allowed to extract name of a field to be used in HTML rendering, as well as parsing the request body on server side.
 Thanks to that, no annotations had to be used for the properties of `Register` record type.
-
 Second argument of the `TextProp` and `PasswordProp` were lists of duplex (client and server side) validations rules.
 Type definition of duplex rules was similar to server-side-only rules, except they required also a tuple of string (key and value) for to depict proper attribute of HTML `input` element:
 
 * `maxLength 30` determined a string for text input, no longer than 30 characters,
 * `passwordRegex pattern` specified a regular expression to be matched on password inputs.
 
-Regular expression `pattern` defined in first line, matches a string of alphanumeric characters (or underscore) which length is at least 6 and at most 20.
+Regular expression `pattern` defined in first line, matched a string of alphanumeric characters (or underscore) which length was at least 6 and at most 20.
 This regular expression designated possible passwords for newly coming users.
-
-#### Rendering HTML form
 
 Music Store application consisted of a few forms, and all of them followed similar layout.
 In order to unify way of structuring forms' layout and rendering the forms in HTML markup, specific types were defined as shown in listing {{fsformlayouttypes}}.
+`Xml` property of `Field<'a>` type was a function from `Form<'a>` to `Suave.Html.Xml` type, which represented object model for HTML markup.
+Rest of record type properties are rather self-explanatory.
+With help of the `FormLayout` type, the `Register` form as defined earlier could be then used to render a corresponding HTML markup, which was shown in listing {{fsformrenderhtml}}.
 
 ```xxx
 {FSharp]{Declaration of form layout types}{fsformlayouttypes}
@@ -982,11 +977,6 @@ type FormLayout<'a> = {
     SubmitText : string
     Form : Form<'a>
 }```
-
-`Xml` property of `Field<'a>` type was a function from `Form<'a>` to `Suave.Html.Xml` type, which represented object model for HTML markup.
-Rest of record type properties are rather self-explanatory.
-
-With help of the `FormLayout` type, the `Register` form as defined earlier could be then used to render a corresponding HTML markup, which was shown in listing {{fsformrenderhtml}}.
 
 ```xxx
 {FSharp]{Rendering HTML markup from form layout}{fsformrenderhtml}
@@ -1012,16 +1002,22 @@ Partial application mechanism proved to be useful with regard to defining `Xml` 
 `input` function took following arguments (in order):
 
 * `'a -> Expr<'b>` - function for pointing out a proper field from the record type,
-* `(string * string) list` - additional attributes to be used for HTML `input` element (not used in above snippet),
+* `(string * string) list` - additional attributes to be used for HTML `input` element (not used in listing {{fsformrenderhtml}}),
 * `Form<'a>` - definition of the form of type `'a`.
 
 Because the `input` function was being invoked with only 2 parameters, the last `Form<'a>` argument got curried.
 As a result of partial application on `input` function, the return type was `Form<'a> -> Suave.Html.Xml`, which turned out to match exactly the expected type for `Xml` property.
 
-#### Processing form on server
-
 Having served proper HTML markup, an actual handler for registering users could be defined.
 Registration WebPart was presented in listing {{fsmusicregister}}.
+Handler for POST requests to "/user/register" route was defined in line 4.
+It employed the `bindToForm` function, which was part of the created form utility module.
+Intent of `bindToForm` was to parse the request body, encoded in standard form's way, into a corresponding type determined by the first argument of `bindToForm`.
+In this case the argument was `Form.register` which meant that the parser looked for field names such as `Username`, `Email` or `Password`.
+After successful extraction of values for those fields, the parser would try to parse the values to proper types.
+At the end of the day, if request body was not malformed, instance of `Register` type would be created and passed (`form` in line 4) into function which was second argument of `bindToForm`.
+The function's type was `'a -> WebPart` where `'a` was the type of form.
+In case of parsing failures, `bindToForm` would return 400 Bad Request status code with an informative message on which part could not be processed.
 
 ```xxx
 {FSharp]{Implementation of register WebPart in Music Store}{fsmusicregister}
@@ -1041,29 +1037,16 @@ let register =
         )
     ]```
 
-Handler for POST requests to "/user/register" route was defined in line 4.
-It employed the `bindToForm` function, which was part of the created form utility module.
-Intent of `bindToForm` was to parse the request body, encoded in standard form's way, into a corresponding type determined by the first argument of `bindToForm`.
-In this case the argument was `Form.register` which meant that the parser looked for field names such as `Username`, `Email` or `Password`.
-After successful extraction of values for those fields, the parser would try to parse the values to proper types.
-At the end of the day, if request body was not malformed, instance of `Register` type would be created and passed (`form` in line 4) into function which was second argument of `bindToForm`.
-The function's type was `'a -> WebPart` where `'a` was the type of form.
-In case of parsing failures, `bindToForm` would return 400 Bad Request status code with an informative message on which part could not be processed.
-
-#### Forms in ASP.NET MVC
-
-End to end form data handling with validation in ASP.NET MVC framework works in declarative fashion as well.
+End-to-end form data handling with validation in ASP.NET MVC framework works in declarative fashion as well.
 It usually does so with the help of appropriate annotations on members of a class.
 For the client-side validation rules it makes use of quite complex JavaScript code.
 In addition to that, it utilizes concept of "scaffolding", which automatically generates corresponding forms for creating and editing an entity.
 While quite extensive and heavy-weight, the mechanism of creating forms with ASP.NET MVC framework meets the challenge.
 
-#### Summary
-
 Suave framework with its concise nature did not ship with a ready-to-use top-to-bottom form handling features.
 Thanks to Suave being highly composable, it was opportune to create a form utility module that could fit into the WebPart pipeline.
 With the help of a few features in F# language, the module managed to be reusable in declarative and succinct way.
-Also, it turned out to be a fascinating experience to be able to contribute to the Suave framework by sharing implementation of the module.
+Also, it turned out to be a fascinating experience to be able to contribute to the Suave framework by sharing implementation of that module.
 
 Conclusions
 -----------
@@ -1079,7 +1062,6 @@ Throughout the research, comparisons were made with ASP.NET MVC framework, which
 One interesting finding was that ASP.NET MVC, despite being much larger and offering much more features than Suave, does not guarantee such type-safety as the latter.
 F# plus Suave combination, and any statically typed functional language in general, prevent a huge amount of issues yet in compile time.
 Such behavior could cause frustration for a new-comer to functional world, but is an enormous time saver for more experienced programmer, who is familiar with functional techniques and compiler requirements.
-
 Following are some of the main benefits that functional programming may bring for building and maintaining business applications:
 
 * **immutability** - data does not have any behavior which can mutate its internal state - it is hence thread-safe by definition, allowing to scale out easily,
