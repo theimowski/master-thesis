@@ -411,23 +411,17 @@ In conjunction with Intellisense feature of Integrated Development Environment (
 
 ### Create, Update and Delete operations
 
-Features in software products, from an engineer's point of view, consists of **queries** and **commands**.
+From a programmer's point of view, majority of features in any software can be marked as either a *query* or a *command*.
 Such generalization refers to concept known as Command and Query Separation.
-Queries do not change state, but only fetch certain portion of data from a system, while commands have side effects by modifying the internal state of the system {{{meyer1988object}}}.
-Previous section showed how queries can be implemented in a functional programming language.
-In this section implementation of commands is shown.
-
-#### Management module
-
+The term defines queries as something that does not change state, but only fetch certain portion of data from a system.
+On the other hand, commands are actions that have side effects because of modifying the internal state of the system {{{meyer1988object}}}.
+Previous section showed how queries were implemented to fetch basic sets of data regarding music albums or genres.
+In this section commands that alter state of Music Store are shown.
 As a part of administration management module, following features were implemented in Music Store application:
 
 * Creating a new album from scratch by assigning a title, price, artist and genre (the last two being restricted to discrete subset of possible values),
 * Editing an existing album by modifying any of the properties,
-* Deleting an album from the Music Store, making it impossible for users to buy.
-
-#### Creating album
-
-For the sake of new album feature, listing {{fsmusiccreatealbum}} was utilized.
+* Deleting an album from the Music Store, and therefore making it impossible for users to buy.
 
 ```xxx
 {FSharp]{Music Store - creating album}{fsmusiccreatealbum}
@@ -448,32 +442,27 @@ let createAlbum =
             Redirection.FOUND Path.Admin.manage)
     ]```
 
+For the sake of new album feature, code presented in listing {{fsmusiccreatealbum}} was written.
 The `createAlbum`, together with its own route was composed into the main WebPart of the Music Store application.
 Two HTTP methods were defined as acceptable within `createAlbum`: GET and POST (lines 4 and 13).
-The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI and POST is used to request that the origin server accept the entity enclosed in the request {{{fielding1999hypertext}}}.
+The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI, while POST method is used to indicate that the server should accept the entity enclosed in the request body {{{fielding1999hypertext}}}.
 In context of `createAlbum` WebPart, GET method was used to retrieve HTML form for creating new album.
-POST method was used to send the album in request body to the origin server for the purpose of persisting in the database.
+POST method was further used to send the album in request body to the origin server for the purpose of saving in the database.
 
-Because the right-hand side of `>>=` operator is evaluated eagerly, it was wrapped with a `warbler` function in line 4.
+Because the right-hand side of `>>=` operator is evaluated eagerly, GET WebPart was wrapped with a `warbler` function in line 4.
 This was done to delay the logic execution inside WebPart (in that case fetching list of `genres` and `albums` from the database) until the request method is recognized as GET.
 The `warbler` turned out to be mandatory in this case, otherwise unnecessary calls would be performed against the database if the request method had been POST.
-
 In the body of WebPart applied in the `warbler`, two queries were made to the database to fetch all `genres` and `albums` in the Music Store.
 With the help of `|>` (pipe operator) those two lists were then mapped to lists of a pair (tuple) of `decimal` and `string` (`decimal * string`).
 The resulting lists of tuples became arguments for the `View.createAlbum` function to populate the drop-down inputs in produced HTML form.
 
 For the POST case, after the `>>=` operator, `bindToForm` function was used.
 `bindToForm` tries to parse the request body into a given model, in this case `Form.album`.
-If the parsing failed (the request could be malformed), `bindToForm` took care of responding with 400 Bad Request status code, describing why it was unable to parse the entity.
+If the parsing failed (the request could be malformed), `bindToForm` took care of responding with 400 Bad Request status code, describing why it was unable to parse the entity (`bindToFrom` is described in details in the further course of the research section).
 On the other hand, if the entity could be parsed as `Form.album`, the anonymous function (second argument of `bindToForm`) was applied.
 The anonymous function takes the form model as its parameter, invokes `Db.createAlbum` action with proper arguments, and finally redirects to the main administration management page.
 Redirection was achieved by calling the `Redirection.FOUND` function, which writes 302 Found status code to the response and "Location" header with an URL.
 Browsers treat 302 status code as a signal to issue another request to the URL defined by the "Location" header of the response.
-
-#### Editing album
-
-Next feature implemented in the administration management module was editing an existing album.
-WebPart for this functionality was placed in listing {{fsmusiceditalbum}}.
 
 ```xxx
 {FSharp]{Music Store - editing album}{fsmusiceditalbum}
@@ -498,32 +487,24 @@ let editAlbum id =
     | None -> 
         never```
 
-Similar set of steps as in listing {{fsmusiccreatealbum}} were followed in listing {{fsmusiceditalbum}}:
-
-* instantiation the database context,
-* distinction between two allowed HTTP methods: GET and POST,
-* in case of GET, creation of edit album form,
-* in case of POST, update action performed on the database and redirection to main management page.
-
-In addition to that, `editAlbum` took a parameter `id` of type `int` to identify a proper album.
-
-Because there is no guarantee that an album with a given `id` exists, `Db.getAlbum` (line 3) in listing {{fsmusiceditalbum}} had to be invoked, and two cases handled.
-The `Db.getAlbum` was designed to return `Album option`, that's why a pattern matching could be employed in the example.
-In case the `id` was correct and album was found (`Some album`), `choose` WebPart (line 5) would apply
-Otherwise, if `Db.getAlbum` turned out to return `None` (album was not found) then `never` (line 20) WebPart would have been used.
-WebPart `never` always "fails" (returns `None`), causing the composed typed route to return `None` as well and mark the WebPart as not applicable for such request.
-
-It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easily and gracefully with a typed route WebPart, as presented in listing {{fssuavetypedroute}}.
-
 ```xxx
 {FSharp]{Composing typed route in Suave - edit album}{fssuavetypedroute}
 pathScan "/admin/edit/%d" editAlbum```
 
-#### Deleting album
+Next feature implemented in the administration management module was editing an existing album.
+WebPart for this functionality was placed in listing {{fsmusiceditalbum}}.
+Because there is no guarantee that an album with a given `id` exists, `Db.getAlbum` (line 3) in listing {{fsmusiceditalbum}} had to be invoked, and two cases handled.
+The `Db.getAlbum` was designed to return `Album option`, that's why a pattern matching could be employed in the example.
+In case the `id` was correct and album was found (`Some album`), `choose` WebPart (line 5) applied.
+Otherwise, if `Db.getAlbum` turned out to return `None` (album was not found) then `never` (line 20) WebPart was used.
+WebPart `never` always "fails" (returns `None`), causing the composed typed route to return `None` as well and marking the WebPart as not applicable for the request.
+Besides `editAlbum` took an additional `id` parameter of type `int` to identify a proper album, similar logic was followed as in listing {{fsmusiccreatealbum}} (in case the album was found):
 
-Last functionality added to the administration management module was deleting an album.
-After an album is deleted, it is no longer available in the Music Store for users to buy.
-Implementation of this action required code from listing {{fsmusicdeletealbum}}.
+* distinction between two allowed HTTP methods GET and POST was made,
+* in case of GET, edit album form was created,
+* in case of POST, update action was performed on the database and redirection to main management page was issued.
+
+It is worth noting that because `editAlbum` signature was inferred to be `int -> WebPart`, it composed extremely easily and gracefully with a typed route WebPart, as presented in listing {{fssuavetypedroute}}.
 
 ```xxx
 {FSharp]{Music Store - deleting album}{fsmusicdeletealbum}
@@ -541,6 +522,13 @@ let deleteAlbum id =
     | None ->
         never```
 
+```xxx
+{FSharp]{Composing typed route in Suave - delete album}{fssuavetypedroute2}
+pathScan "/admin/delete/%d" deleteAlbum```
+
+Last functionality added to the administration management module was deleting an album.
+After an album is deleted, it is no longer available in the Music Store for users to buy.
+Implementation of this action required code as in listing {{fsmusicdeletealbum}}.
 The `deleteAlbum` function consisted of similar steps as `editAlbum`.
 First, verification happened that checked whether an album with given `id` existed.
 Secondly, pattern matching was applied to the result of invocation of `Db.getAlbum` function.
@@ -553,15 +541,9 @@ Logic for POST WebPart invoked proper action on `Db` module, and returned redire
 Both POST and GET WebParts had to be surrounded with `warbler`s, because eager evaluation would cause unwanted effects.
 Again, as was the case with editing album, the `deleteAlbum` composed nicely with the typed route (listing {{fssuavetypedroute2}}).
 
-```xxx
-{FSharp]{Composing typed route in Suave - delete album}{fssuavetypedroute2}
-pathScan "/admin/delete/%d" deleteAlbum```
-
-#### Summary
-
 The 3 actions described in this section are sometimes associated with "CRUD" acronym (Create - Update - Delete).
 With their uniform logic, they tend to be used for the purpose of demonstrating a library or tool capabilities.
-Snippets above proved that one can cope with this common programming challenge in functional-first language such as F#.
+Above listings proved that one can cope with this common programming challenge in functional-first language such as F#.
 Typed routes feature from Suave confirmed to be highly composable, and thus the WebParts that were built could be matched together in a transparent manner.
 
 ### Session
