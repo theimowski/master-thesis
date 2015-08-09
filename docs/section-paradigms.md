@@ -209,6 +209,15 @@ let x = 5      // value x is immutable
 let y = x + 3  // value y is immutable
 x = 6          // this expression evaluates to false```
 
+### Pattern matching
+
+Lines 3-5 present construct which is called pattern matching.
+The construct is part of syntax of several programming languages, both imperative and declarative.
+For developers familiar with C# language, pattern matching could be explained as a switch statement in conjunction with an assignment to a symbol in each branch.
+However, there is more than that to pattern matching.
+In F# pattern matching issues a warning in compile-time, if not all possible branches of execution are defined.
+As an example, if line 5 from the above snippet was missing, the compiler would warn about possible unmatched case (`Choice2Of2`).
+
 ### Purity
 
 Purity property allows to associate a programming language functions with real functions in mathematical sense.

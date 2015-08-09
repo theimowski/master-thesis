@@ -1,26 +1,26 @@
 RESEARCH
 ========
 
-Previous section described how Functional Programming managed to be successfully applied in many projects.
-In this section focus will be laid on creating software that uses functional techniques.
-For that purpose, process of developing such application will be shown.
-In the course of this section, multiple comparisons will be made between Object-Oriented and Functional approaches.
-F# programming language will be used for implementing the sample application.
+Previous section described how functional programming managed to be successfully applied in many projects.
+In this section focus is laid on creating software that uses functional techniques.
+For that purpose, process of developing such application is shown.
+In the course of this section, multiple comparisons are made between object-oriented and functional approaches.
+F# programming language is used for implementing the sample application.
 
 Domain choice
 -------------
 
-Functional Programming is already present in a significant amount of areas. 
-There are however fields, where it is still not widely adopted. One of such fields is **Web Development**. 
-Here, Object-Oriented programming seems to be a strong leader with regards to number of existing frameworks, libraries and tools as well as popularity among software engineers. 
-In order to verify whether Functional Programming could potentially be applied to software from arbitrary domain, decision has been made to discover how it would fit this relatively foreign area - Web Development.
+Functional programming is already present in a significant amount of areas. 
+There are however fields, where it is still not widely adopted. One of such fields is **web development**. 
+Here, object-oriented programming seems to be a strong leader with regards to number of existing frameworks, libraries and tools as well as popularity among software engineers. 
+In order to verify whether functional programming could potentially be applied to software from arbitrary domain, decision was made to discover how it would fit into this relatively foreign area of web development.
 
-Another reason why Web Development domain has been chosen was a will to contribute to the F# community.
-As the F# language is getting more and more interest, the language community is doing its best to encourage developers to give F# a try.
-On one of mailing groups there appeared a suggestion to prepare a tutorial on how to create Web applications with F#.
+Another reason for which web development domain was chosen, was a will to contribute to the F# community.
+In order to attract more and more attention to F# language, the language community leaded by F# organization {{{fsharpwebsite}}} is doing its best to encourage developers to give F# a try.
+On one of mailing groups there appeared a suggestion to prepare a tutorial on how to create web applications with F#.
 The tutorial would guide step by step on how to build an E-commerce website called "Music Store".
 In the "Music Store" user could browse music albums by genres, add his favorite to cart and buy.
-Apart from that, the application would show a plenty of other common aspects of Web Development, such as:
+Apart from that, the application would show a plenty of other common aspects of web development, such as:
 
 * Data access,
 * Create, Update, Delete operations,
@@ -28,23 +28,22 @@ Apart from that, the application would show a plenty of other common aspects of 
 * Managing user's state in cookies,
 * HTML rendering.
 
-Implementing such application and preparing tutorial turned out to be a great candidate for research part of this thesis.
+Implementing such application and preparing a tutorial turned out to be a great candidate for research part of this thesis.
 The detailed tutorial has been published and is available on-line {{{suavemusicstoretutorial}}}.
 
 Functional Web
 --------------
 
-Even though Web Development is usually associated with using imperative techniques, it's not completely uncommon to follow functional principles while creating Internet applications.
+Even though web development is usually associated with using imperative techniques only, it's not completely uncommon to follow functional principles while creating Internet applications.
 Majority of web applications are built on top of the Hypertext Transformation Protocol (HTTP) protocol.
 From a software engineer point of view, the HTTP protocol boils down to requests and responses.
-One could even think of a Web application as a general function of type `HTTPRequest -> HTTPResponse`.
+A functional programmer could even think of a web application as a general function of type `HTTPRequest -> HTTPResponse`.
 
-### Async
+### Asynchrony
 
 When dealing with Internet applications in practice, it turns out that aspect of asynchrony plays a crucial role.
-Operations that require reading / writing from the input / output are extremely ineffective if performed synchronously.
-Synchronous execution of tasks that require input / output communication results in blocking threads.
-In return, when a thread is blocked, next incoming request will have to engage more threads.
+IO operations are extremely ineffective if performed synchronously, as synchronous execution of such tasks results in thread blocking.
+When threads are blocked, incoming requests that follow have to engage more threads, because the blocked ones are in use.
 As a result, having a significant number of blocked threads results in high memory consumption and ineffective usage of resources.
 
 Writing software in asynchronous fashion does not come for free.
@@ -52,11 +51,11 @@ Callback-passing style is one of the most popular techniques for writing asynchr
 While the technique may be a sufficient solution for smaller problems, when applied to large and complex systems, code very easily gets hard to maintain.
 
 Among various approaches to asynchronous programming, there is one that abstracts away the concept of asynchrony from the actual flow of program.
-It is called **future**, also known as **promise** or **asynchronous workflow** in different programming languages.
+In F# it is called **asynchronous workflow** and is represented with generic `Async` type, but the term is also known as **future** or **promise** in different programming languages.
 This approach bypasses callbacks in a clever way, resulting in code that is easier to read and reason about.
-Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software {{{eriksen2013your}}}.
-All those concepts originate from the functional paradigm and that is why utilizing functions can be helpful for developing client-server architecture.
-In F# language there is a type called `Async`, which represents **asynchronous workflow**.
+It originates from the functional paradigm, and can prove helpful when developing client-server architecture {{{eriksen2013your}}}:
+
+>> *"Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software."*
 
 ### Parametric polymorphism
 
@@ -72,83 +71,63 @@ It can be said that `map` function is polymorphic of parametric type `(a -> b, a
 Music Store Tutorial
 --------------------
 
-The example application is built on top of the Suave.IO (Suave) {{{suave}}} framework, which allows to write functional server software in a composable fashion.
+The example application was built on top of the Suave.IO (Suave) {{{suave}}} framework, which allows to write functional server software in a composable fashion.
 Here, composable means that very granular functions / components can be easily joined to create more robust functions.
-The resulting functions can be then again glued together.
+The resulting functions can be then again glued together to create even bigger functions.
 Following this pattern, one can get eventually end up with a complex function (built from composing smaller ones) which can serve as a complete software.
 
 ### WebPart
 
 The most important building block in Suave is **WebPart**.
 It is a basic unit of composition in the framework - when combining two smaller WebParts together, another WebPart gets created.
-WebPart is a **type alias** defined in listing {{fswebpartalias}}: 
+Technically, WebPart is a **type alias** for a function (functions as first-class citizens can be represented by types) presented in listing {{fswebpartalias}}. 
 
-```xxx
-{FSharp]{Type alias for WebPart}{fswebpartalias}
-HttpContext -> Async<HttpContext option>```
-
-The above notation describes a function from `HttpContext` to `Async<HttpContext option>`.
+The notation used in listing {{fswebpartalias}} describes a function from `HttpContext` to `Async<HttpContext option>`.
 The `HttpContext` is a type that contains all relevant information regarding HTTP request, HTTP response, server environment and user state.
 The return type is `Async` with type parameter of `HttpContext option`.
 `Option` is also a generic type - here the type parameter for `Option` is `HttpContext`.
 F# syntactic sugar has been used for `Option` in type declaration: `HttpContext option` is equivalent to `Option<HttpContext>`. 
 The same syntactic sugar can also be used for sequences (`'a seq`) or lists (`'a list`).
 
-#### Option
+```xxx
+{FSharp]{Type alias for WebPart}{fswebpartalias}
+type WebPart = HttpContext -> Async<HttpContext option>```
 
-The `Option` type (also known as `Maybe` in different functional languages) is a better alternative to the infamous `null` concept, which is ubiquitous in Object-Oriented world.
+The `Option` type (also known as `Maybe` in different functional languages) is a better alternative to the infamous `null` concept, which is ubiquitous in object-oriented world.
 In C# for example, every reference type can have a legal value of `null`.
-This is the cause of what is known as "The Billion Dollar Mistake" - Null References.
-Null References are exceptions thrown at runtime because of referencing a symbol which was not assigned any real value (was `null`).
+This is the cause of what is known as "The Billion Dollar Mistake" - null references.
+Null references are exceptions thrown at runtime because of referencing a symbol which was not assigned any real value (was `null`).
 In F#, one cannot explicitly bind `null` to any symbol or pass `null` to a function invocation.
 The compiler prevents from doing that by issuing a compile-time error.
-Thanks to that, it is hardly possible to get a Null Reference exception in F# code (when no interoperability or reflection is used).
-
-`Option` type is commonly in F# used to model a property that may or may not have a value.
-If a property has value, then it is `Some`, like shown in listing {{fsoptionsome}}.
-
-```xxx
-{FSharp]{FSharp Option type - Some value}{fsoptionsome}
-let x: int option = Some 28 (* there is value 28 *)```
-
-As opposed, listing {{fsoptionnone}} presents the `None` value.
-
-```xxx
-{FSharp]{FSharp Option type - None}{fsoptionnone}
-let x: int option = None (* there is no value *)```
-
+Thanks to this feature, it is hardly possible to get a null reference exception in F# code (unless heavily relying on interoperability or reflection).
+`Option` type is commonly used in F# to model a property that may or may not have a value.
+If a property has value, then it is `Some`, and otherwise it is `None`, as shown in listing {{fsoption}}.
 In context of WebPart, `Option` determines whether a result should be applied.
-Usually if a WebPart can return `None`, this WebPart is composed with another which always returns `Some`.
+Usually if a WebPart can return `None`, this WebPart is composed with another which eventually returns `Some`.
 
-To summarize the WebPart type, it can be defined as a function that for a given `HttpContext` may or may not apply a specific, updated `HttpContext`.
-In addition to that, the return value is surrounded with asynchronous computation (`Async`) making the WebPart function asynchronous-friendly.
+```xxx
+{FSharp]{FSharp Option type}{fsoption}
+let x: int option = Some 28 (* there is value 28 *)
+let y: int option = None (* there is no value *)```
 
-#### Example
-
-The simplest possible WebPart can be defined as in listing {{fswebparthello}}.
+The simplest possible WebPart can be defined as in line 1 of listing {{fswebparthello}}.
+The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response 200 OK status code, as well as "Hello World!" response body content.
+Such WebPart can be used to start an HTTP server using a default configuration (line 2 of listing {{fswebparthello}}).
+From the listing {{fswebparthello}}, it is evident that Suave allows to build Web applications in a very succinct way and does not require too much ceremony.
 
 ```xxx
 {FSharp]{WebPart - hello world example}{fswebparthello}
-let webPart = OK "Hello World!"```
-
-The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response:
-
-* 200 OK status code,
-* "Hello World!" response body content.
-
-Such WebPart can now be used to start an HTTP server using default configuration (listing {{fssuavebootstrap}}).
-
-```xxx
-{FSharp]{Bootstrap code for Suave}{fssuavebootstrap}
+let webPart = OK "Hello World!"
 startWebServer defaultConfig webPart```
 
-From the above snippets it is evident that Suave allows to build Web applications in a very succinct way and does not require too much ceremony.
+To summarize the WebPart type, it can be defined as a function that for a given `HttpContext` may or may not apply a specific, updated `HttpContext`.
+In addition to that, the return value is surrounded with asynchronous computation (`Async`) making the WebPart function asynchrony-friendly.
 
 ### Routing
 
-Routing is a basic concept of Web Development.
+Routing is a basic concept of web development.
 It allows to delegate request handling to a specific component based on the request URL path.
-Listing {{fssuaverouting}} shows how routing for the Music Store can be implemented in Suave.
+Listing {{fssuaverouting}} shows how routing for the Music Store was implemented in Suave.
 
 ```xxx
 {FSharp]{Routing in Suave}{fssuaverouting}
@@ -169,17 +148,12 @@ let webPart =
 Lines 8-13 show how 4 different WebParts are composed together with `choose` function.
 `choose` is of type `WebPart list -> WebPart`.
 It tries to apply each WebPart from the list in order until it finds one that returns `Some`.
-If none element returns `Some`, the `choose` function itself will also return `None`.
-
-To detect if the incoming request URL path matches specific route, `path` function can be used.
-Type of `path` function is `string -> WebPart`.
+If none element returns `Some`, the `choose` function itself also returns `None`.
+To detect if the incoming request URL path matches specific route, `path` function of type `string -> WebPart` can be used (line 9, 10, 11).
 The function returns `Some` if URL path matches the `string` parameter.
-
-In lines 9-11, there is a `>>=` operator (commonly known as "bind" operator in functional jargon).
+Result of `path` function is applied to "bind" operator, denoted by `>>=`.
 It applies the right-hand side operand only if the left-hand side operand evaluates to `Some`.
 This means, that for example `(OK "Home")` will be applied if `path "/"` returns `Some`.
-
-#### Query parameters
 
 Query parameters in URL are often used to pass arguments to an HTTP call.
 Defined in lines 1-5, `browse` WebPart enables to extract name of a genre from URL.
@@ -191,8 +165,6 @@ The patterns used to determine if "genre" key is present, `Choice1Of2` and `Choi
 The `Choice` type is generic with two type parameters.
 It is often used to model computations that may succeed or fail.
 In this example, the `Choice` drags along the genre name in case of success, and a failure message otherwise.
-
-#### URL parameters
 
 Another popular way of passing arguments to an HTTP call is encoding them into the URL itself.
 To handle this scenario, Suave comes with a powerful feature called **Typed Routes**.
@@ -206,29 +178,15 @@ That is yet another example of the power of strong static typing in F#.
 
 It is worth noting, that `sprintf` function (lines 4 and 12) makes use of the same compiler feature.
 In line 4, the `genre` value is of type `string`, so the string literal for `sprintf` contains `%s`.
-On the other hand, in line 12, the `id` value is of type `int` - here the string literal contains `%d`.
-
-#### Pattern matching
-
-Lines 3-5 present construct which is called pattern matching.
-The construct is part of syntax of several programming languages, both imperative and declarative.
-For developers familiar with C# language, pattern matching could be explained as a switch statement in conjunction with an assignment to a symbol in each branch.
-However, there is more than that to pattern matching.
-In F# pattern matching issues a warning in compile-time, if not all possible branches of execution are defined.
-As an example, if line 5 from the above snippet was missing, the compiler would warn about possible unmatched case (`Choice2Of2`).
-
-#### Routing in ASP.NET MVC
+Similarly in line 12, the `id` value is of type `int`, hence the string literal here contains `%d`.
 
 Routing in ASP.NET MVC framework is handled with what is known as "Convention over Configuration".
-The term here means, that instead of declaring handlers in code, some convention is adopted.
+The term here means, that instead of declaring handlers in code, some kind of convention is adopted.
 ASP.NET MVC convention for routing works by prefixing type name of a Controller with the corresponding name of the route.
 As an example, `HomeController` will match requests to "/Home" resource.
-
 Passing arguments to Controllers in ASP.NET MVC is based on the "Model Binding" concept.
 The concept usually relies on attribute annotations or reflection.
-It does does not deliver such type-safety as Suave does, which means that variety of type mismatch errors could be thrown at runtime.
-
-#### Summary
+It does does not provide such type-safety as Suave does, which means that variety of type mismatch errors could be thrown at runtime.
 
 While debate continues on whether "Convention over Configuration" is convenient to use, WebPart composition in Suave together with benefits of Typed Routes seem to be a competitive alternative to ASP.NET MVC with regards to the Routing concept.
 
@@ -337,7 +295,7 @@ Two great benefits from using such a DSL for rendering HTML can be enlisted:
 
 ### Data Access
 
-Data Access is yet another important aspect of software development in any domain, including Web Development.
+Data Access is yet another important aspect of software development in any domain, including web development.
 There is a wide variety of options, when it comes to choose how to persist data.
 Common classification of the options consists of two main classes: 
 
@@ -473,7 +431,7 @@ There may be no album with a given `id`, hence the function's return type is `Al
 #### Summary
 
 Data Access Layer implementation is easily achievable in F#.
-As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the Object-Oriented or imperative world.
+As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the object-oriented or imperative world.
 Type Providers in F#, together with its type-safe nature allow for convenient data access logic.
 In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is blazingly fast and little error-prone.
 
@@ -954,7 +912,7 @@ In contrast to that, an obligation to connect the authentication and authorizati
 
 #### Summary
 
-It is getting more evident that aspects of Web Development follow similar pattern in Music Store application.
+It is getting more evident that aspects of web development follow similar pattern in Music Store application.
 To utilize both authentication and authorization, another building blocks were created.
 All those building blocks happened to reside near WebPart type, which made them reusable and suitable for composition.
 Implementation of the concepts in functional paradigm significantly differs form how they tend to be defined in object-oriented programming.
@@ -1176,7 +1134,7 @@ Conclusions
 -----------
 
 The research part of this thesis focused on building a real-world application in functional programming language.
-As the domain of the problem, Web Development was chosen to prove that functional paradigm does not have to restrict to a specific set of fields.
+As the domain of the problem, web development was chosen to prove that functional paradigm does not have to restrict to a specific set of fields.
 F# language in conjunction with Suave web framework made it possible to implement server concise in size, but with load of features.
 With the help of a number of functional techniques, an e-commerce Music Store website was created.
 The guide through the code covered a significant amount of cross-cutting concerns of web development.

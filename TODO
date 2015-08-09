@@ -9,8 +9,13 @@ TODO:
 * Declarative - the introductory description is quite poor
 * Functional - describe connection to declarative more clearly
 * Purity - distinction between pure functions and purity in general (language level) ?
-* functional - describe Pattern matching?
+* functional - describe Pattern matching - extract from routing subsection
 * Dominated areas - good word?
+
+* Mention ASP.NET MVC because you make a lot of comparisons!
+* Web development - well there are already examples of FP here... - a few more words to Functional Web
+* Asynchrony - Futures - a few more words? read eriksen
+* Parametric polymorphism - to the functional section ! rewording!
 
 * Paradimgs and code quality -> move to Application of functional programming???
 
@@ -23,6 +28,12 @@ TODO:
 * Are bolds appropriate?
 * comments in paranthesis - maybe footnotes?
 * use FP acronym for Functional Programming
+* Listing - space before and after as per figures?
+* No level 4 sections
+
+### Conventions ?
+
+* 'a or 't for generic type parameters
 
 ## Optional
 * logic, constraint programming - examples?
