@@ -195,14 +195,14 @@ While debate continues on whether "Convention over Configuration" is convenient 
 When developing Web applications that aim to be consumed by browsers, rendering HTML views is an important aspect to consider.
 Nowadays Internet applications happen to be rich on the client side.
 HTML markup with attached cascade style sheets (CSS) and Javascripts are becoming more and more complex.
-Non-trivial logic and rules for displaying HTML pages led to formation of multiple template engines, both those which render on client and server side.
-The problem of HTML rendering is complicated, and can be approached with various different solutions.
+Non-trivial logic and rules for displaying HTML pages led to formation of multiple template engines, both those which render on client side and those that do the processing on server side.
+The problem of HTML rendering is complicated, and can be approached in many different ways.
 This thesis will only touch upon how HTML rendering aspect was solved with Suave framework for the Music Store application.
-It will not however go into much details of HTML rendering topic or try to compare chosen approach to different available possibilities.
+It will not however go into much details of HTML rendering topic itself nor try to compare chosen approach with different available possibilities.
 
 For the Music Store rendering engine, a simple to use and built into Suave HTML DSL was chosen.
 The HTML DSL available in Suave could be categorized as a set of functions focused on building HTML markup. 
-HTML markup can be a valid XML markup, under the condition that all element tags are closed.
+HTML markup can be a valid XML markup, under the condition that all element tags are closed (actually not all valid XML documents are proper HTML documents, due to the self-closing tag concept, which is forbidden in HTML markup).
 Indeed the HTML DSL in Suave relies on creating XML tree and formatting it to plain text.
 Listing {{fssuaveindexpage}} shows how a basic HTML page for Music Store was defined.
 In result of evaluating code from listing {{fssuaveindexpage}}, HTML markup presented in listing {{htmlsuaveindexpage}} was returned.
@@ -247,7 +247,7 @@ let index =
     </body>
 </html>```
 
-As the example showed static content, no real benefits were gained from using a DSL instead of plain HTML.
+As the example showed static content, no real benefits were gained from using a DSL as opposed to plain HTML.
 Such benefits arise when there is need to display some kind of data model in a view.
 In context of Music Store, this can be demonstrated by rendering page for list of genres, as shown in listing {{fssuavestoreview}}.
 
@@ -278,16 +278,17 @@ Because `text` function, which is invoked at the end of line 9 expect a `string`
 Powerful type-inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
 Thanks to the type-inference, no explicit type annotations are required, and the code is more concise.
 
-Two great benefits from using such a DSL for rendering HTML can be enlisted:
+While a disadvantage of this approach is that the productivity suffers during development because any change to the view has to be recompiled, 
+two great benefits from using such a DSL for rendering HTML can be enlisted:
 
-* Type system can prevent common bugs in compile-time,
-* Every language syntax construct can be used in the DSL, making it easier to express complex logic.
+* Type system can catch common type mismatch issues in compile-time,
+* Every language syntax construct can be used in conjunction with the DSL (as seen with the list comprehension), making it easier to express complex logic.
 
 ### Data Access
 
 Data Access is yet another important aspect of software development in any domain, including web development.
 There is a wide variety of options, when it comes to choose how to persist data.
-Common classification of the options consists of two main classes: 
+One common classification of these options boils down to two alternatives: 
 
 * Relational databases,
 * No-SQL databases: graph databases, key-value stores, document databases, etc.
@@ -296,14 +297,9 @@ Among plethora of No-SQL solutions, there is one approach that can be especially
 It relies on persisting **immutable** events (records) in a store.
 Immutability is one of the major concept of functional programming itself, that is why Event Sourcing feels like a good fit for functional paradigm.
 In order to obtain certain state in Event Sourcing, **fold** operation is performed on the stored events.
-Folding comes also from the functional background.
+Folding comes also from the functional background {{{hughes1989functional}}}.
 In fact, every functional programming defines `fold` in its core library function suite.
-Type signature for the one in F# is presented in listing {{fsfoldsignature}}:
-
-```xxx
-{FSharp]{Fold function signature in FSharp}{fsfoldsignature}
-List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
-
+Type signature for the one in F# is presented in listing {{fsfoldsignature}}.
 `List.fold` calculates result `'State` from the initial `'State` and list of `'T` elements.
 It takes 3 arguments (enlisted in reverse order):
 
@@ -311,36 +307,33 @@ It takes 3 arguments (enlisted in reverse order):
 * `'State` - initial state,
 * `('State -> 'T -> 'State)` - "folder" function which is applied on each `'T` element of the list, and based on the value of the element and the intermediate `'State` it produces new `'State.
 
-While the Event Sourcing could be a good candidate for persistence mechanism in application written in functional language, it was not used for the Music Store.
-That's because despite recent peak in interest in the No-SQL movement, a relational database still seems to be most popular for most of the software engineers.
-For that reason MS SQL Server has been chosen as a persistence mechanism for Music Store application.
+```xxx
+{FSharp]{Fold function signature in FSharp}{fsfoldsignature}
+List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
 
-#### F# Type Providers
+While the Event Sourcing could be a good candidate for persistence mechanism in application written in functional language, it was not used for the Music Store.
+That is because despite recent peak in interest in the No-SQL movement, a relational database still seems to be most popular for majority of software engineers.
+In order for the tutorial not to distract attention with different concepts, MS SQL Server was chosen as a persistence mechanism for Music Store application.
 
 During the computer era, a number of data serialization formats have evolved, some of which became standard in the industry.
 XML, Json, CSV are just the beginning of the long list.
-Majority of software, no matter the domain, processes some kind of data from different sources.
+Majority of software, no matter from which domain, processes some kind of data from different sources.
 It is therefore a very common task in a development process to parse structured input into an in-memory object model.
 This task requires proper type hierarchy and parsing logic to be implemented.
 In addition to the fact that such task can be time consuming, it may also be error-prone when the format changes.
-
 To meet the challenge, F# comes with another powerful feature, called **Type Providers**.
 Type Providers automatically generate (provide) a set of types and parsing logic for a given schema.
 For example, given a literal XML string, F# type provider will generate in compile-time a separate type for each corresponding element from the XML.
-With the types in place, another literal XML string that fulfills the schema, can be loaded and parsed into the object model within one line of code.
+With the types in place, another literal XML string that fulfills the schema, can be loaded and parsed into the object model within a single line of code.
 
 Type Provider libraries for the most popular standards are ready to use.
 The mechanism is extensible which means that Type Providers can be created for arbitrary data source.
-
-The feature is quite unique - apart from Idris, no other programming language has Type Providers
-(In fact, Type Providers in Idris are even more rich in functionality than those in F# {{{christiansen2013dependent}}}).
-
-#### SQL Provider
-
+The feature is quite unique - apart from Idris, no other programming language has Type Providers (in fact, Type Providers in Idris are even more rich in functionality than those in F# {{{christiansen2013dependent}}}).
 Among various Type Provider libraries there is one called **SQL Provider**. 
 As the name suggests, it provides types for a relational database schema.
-This means that no Object-Relational Mapping libraries or hand-rolled models are needed to implement Data Access Layer.
-To use SQL Provider in Music Store, it is only necessary to deliver a SQL connection string to the Type Provider (listing {{fssqlproviderdef}}).
+This means that no object-relational mapping libraries or hand-rolled models are needed to implement data access layer.
+To use SQL Provider in Music Store, it was only necessary to deliver a SQL connection string to the Type Provider, as shown in listing {{fssqlproviderdef}}.
+Code in listing {{fssqlproviderdef}} executes proper queries against the given connection and generates necessary types in the background.
 
 ```xxx
 {FSharp]{Providing types for SQL connection in FSharp}{fssqlproviderdef}
@@ -349,10 +342,10 @@ type Sql =
         "Server=(LocalDb)\\v11.0;Database=SuaveMusicStore;Trusted_Connection=True", 
         DatabaseVendor=Common.DatabaseProviderTypes.MSSQLSERVER >```
 
-This code in listing {{fssqlproviderdef}} executes proper queries against the given connection and generates necessary types in the background.
-In Music Store, types for both database tables and views will be used.
-
-Listing {{fssqlprovideraliases}} defines type aliases for the generated (provided) types.
+In Music Store, types for both database tables and views were used.
+Listing {{fssqlprovideraliases}} presents definition of type aliases for the generated (provided) types.
+Type aliases such as `Album`, `Artist`, `Genre` are defined for corresponding database tables (lines 5-9).
+The last 3 type aliases (lines 12-14) represent database views which proved useful in Music Store.
 
 ```xxx
 {FSharp]{Defining type aliases for SQL Provider}{fssqlprovideraliases}
@@ -371,12 +364,21 @@ type AlbumDetails   = DbContext.``[dbo].[AlbumDetails]Entity``
 type CartDetails    = DbContext.``[dbo].[CartDetails]Entity``
 type BestSeller     = DbContext.``[dbo].[BestSellers]Entity```
 
-Type aliases such as `Album`, `Artist`, `Genre` are defined for corresponding database tables (lines 5-9).
-The last 3 type aliases (lines 12-14) represent database views which will be used in Music Store.
+Database queries can be constructed with SQL Provider like shown in listing {{fssqlproviderqueries}}.
+Function defined in line 1 `firstOrNone` is of type `'t seq -> 't option`.
+It returns `Some` with the value of first element if any in the given sequence.
+If the sequence is empty, `firstOrNone` returns `None`.
+`getGenres` (line 3) is a simple query that fetches all `Genre`s from the database and returns them as a `Genre list` type.
+Lines 7-12 and 16-20 show usage of `query` expression.
+The concept is known as LINQ (Language Integrated Query) and can be explained with following Syme's citation {{{syme2006leveraging}}}:
 
-#### Database queries
+>> *"The (approximate) intended semantics of the LINQ-SQL libraries is that the execution of the meta-programs should be the same as if the programs were converted to equivalent programs over in-memory lists, where the database table is treated as an in-memory enumerable data structure."*
 
-Queries can be constructed with SQL Provider like shown in listing {{fssqlproviderqueries}}.
+Indeed, the semantics of query expressions in listing {{fssqlproviderqueries}} look very similar to a standard SQL query.
+`getAlbumsForGenre` function returns a list of all `Album`s that are associated with the given `Genre`.
+The `Genre` is identified here by its name (`string` type).
+The last function, `getAlbumDetails` tries to find an `Album` with given `id` in context of the `AlbumDetails` view - the database view performs a join with two other tables to obtain the details for the album.
+There may be no album with a given `id`, hence the function's return type is `AlbumDetails option`
 
 ```xxx
 {FSharp]{Constructing queries with SQL Provider}{fssqlproviderqueries}
@@ -402,28 +404,10 @@ let getAlbumDetails id (ctx : DbContext) : AlbumDetails option =
     } 
     |> firstOrNone```
 
-Function defined in line 1 `firstOrNone` is of type `'t seq -> 't option`.
-It returns `Some` with the value of first element if any in the given sequence.
-If the sequence is empty, `firstOrNone` returns `None`.
-
-`getGenres` (line 3) is a simple query that fetches all `Genre`s from the database and returns them as a `Genre list` type.
-
-Lines 7-12 and 16-20 show usage of `query` expression.
-The concept is known as LINQ (Language Integrated Query).
-The (approximate) intended semantics of the LINQ-SQL libraries is that the execution of the meta-programs should be the same as if the programs were converted to equivalent programs over in-memory lists, where the database table is treated as an in-memory enumerable data structure {{{syme2006leveraging}}}.
-Indeed, the semantics of above snippet looks very similar to a standard SQL query.
-
-`getAlbumsForGenre` function returns a list of all `Album`s that are associated with the given `Genre`.
-The `Genre` is identified here by its name (`string` type).
-The last function, `getAlbumDetails` tries to find an `Album` with given `id` in context of the `AlbumDetails` view - the database view performs a join with two other tables to obtain the details for the album.
-There may be no album with a given `id`, hence the function's return type is `AlbumDetails option`
-
-#### Summary
-
 Data Access Layer implementation is easily achievable in F#.
 As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the object-oriented or imperative world.
 Type Providers in F#, together with its type-safe nature allow for convenient data access logic.
-In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is blazingly fast and little error-prone.
+In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is highly productive and little error-prone.
 
 ### Create, Update and Delete operations
 
