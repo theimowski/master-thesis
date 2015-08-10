@@ -4,7 +4,7 @@ RESEARCH
 Previous section described how functional programming managed to be successfully applied in many projects.
 In this section focus is laid on creating software that uses functional techniques.
 For that purpose, process of developing such application is shown.
-In the course of this section, multiple comparisons are made between object-oriented and functional approaches.
+In the course of this section, multiple comparisons are made between functional and object-oriented approaches.
 F# programming language is used for implementing the sample application.
 
 Domain choice
@@ -30,6 +30,11 @@ Apart from that, the application would show a plenty of other common aspects of 
 
 Implementing such application and preparing a tutorial turned out to be a great candidate for research part of this thesis.
 The detailed tutorial has been published and is available on-line {{{suavemusicstoretutorial}}}.
+Credit also goes to the ASP.NET MVC team, which prepared the original tutorial {{{aspnetmvctutorial}}} that largely influenced the variation.
+ASP.NET MVC is a C#-based, heavy-weight framework for creating web applications in .NET ecosystem.
+MVC acronym stands for Model-View-Controller pattern, which aims to separate components for layout rendering, data objects behavior and handling user's interaction.
+Because both F# and C# reside in the .NET platform, and because ASP.NET MVC is considered an object-oriented framework, this section continuously relates to how a similar functionality could be achieved in the counterpart.
+Thanks to the initial work, it was easier to compare certain aspects and draw conclusions.
 
 Functional Web
 --------------

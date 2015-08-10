@@ -211,12 +211,28 @@ x = 6          // this expression evaluates to false```
 
 ### Pattern matching
 
-Lines 3-5 present construct which is called pattern matching.
-The construct is part of syntax of several programming languages, both imperative and declarative.
-For developers familiar with C# language, pattern matching could be explained as a switch statement in conjunction with an assignment to a symbol in each branch.
-However, there is more than that to pattern matching.
-In F# pattern matching issues a warning in compile-time, if not all possible branches of execution are defined.
-As an example, if line 5 from the above snippet was missing, the compiler would warn about possible unmatched case (`Choice2Of2`).
+For developers coming from object-oriented background, familiar with languages like C# or Java, pattern matching (in its most primitive form) could be explained as a switch statement in conjunction with an assignment to a symbol for each branch.
+Pattern matching does not always have to concern multiple cases - sometimes it proves useful with a single case, when such case always applies (for example when unwrapping a value from a data structure, or processing an infinite list).
+The construct is part of syntax of several programming languages, both imperative and declarative, but is specially popular among functional programmers.
+
+There is more to pattern matching than just an ordinary switch statement.
+Besides the fact that it combines logic branching with assignments (which in practice turns out really convenient), it relies on the concept of Algebraic Data Types (ADT), ubiquitous in functional world.
+In context of pattern matching, it is enough to say that ADT allows to express all possible variants for a value of a certain type, which in turn can result in features such as:
+
+* compile warning (in statically typed languages) when not every case is covered,
+* nested pattern matching that allows to dissect a recursive structure.
+
+Listing {{funpatternmatching}} shows a basic pattern matching construct applied to a list.
+Function `printIsEmpty` tries to match the `list` parameter with patterns: `[]` which corresponds to an empty list, and `h :: t` where `::` is a binary operator of type `'a -> 'a list -> 'a list`, that prepends to the list from second argument an element from the first argument.
+In other words, pattern matching construct seen in listing {{funpatternmatching}} recognizes two cases: in first case the list is empty, and in the second case there is at least one element in the list (`h`).
+If the second case was omitted, the compiler would issue a warning in compile-time.
+
+```xxx
+{FSharp]{Pattern matching}{funpatternmatching}
+function printIsEmpty list =
+    match list with
+    | [] -> "list is empty"
+    | h :: t -> "list is not empty"```
 
 ### Purity
 
