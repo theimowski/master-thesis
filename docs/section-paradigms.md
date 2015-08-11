@@ -75,7 +75,7 @@ It turns out that the same effect that is achieved thanks to inheritance can als
 
 **Polymorphism** is a concept known from functional programming, that in object-oriented approach relies mainly on inheritance.
 "Poly" standing for "many" and "morphism", which can be thought of "form" ("morphism" has its formal definition in category theory, however it is not covered by the thesis), describe the ability to treat objects of different classes in unified way.
-In object-oriented paradigm this ability is enforced by specific class hierarchies.
+In object-oriented paradigm this ability is enforced by specific class hierarchies (this is known as ad hoc polymorphism {{{strachey2000fundamental}}}, further section mentions also parametric polymorphism which is to some extent available in some object-oriented languages).
 
 **Abstraction** is closely related to polymorphism, and allows to treat referenced objects as if they were of the most possible general type, while in runtime they appear to be an instance of a very specific class.
 Abstraction enables better testability of code, as well as late binding, which can be used for the purpose of inversion of control (IOC).
@@ -341,6 +341,33 @@ let rec product elements =
     match elements with 
     | [] -> 1
     | (h::t) -> h * product t```
+
+### Parametric polymorphism
+
+Parametric polymorphism is a very important concept in functional programming.
+It enables to treat functions as general-purpose components that can operate on arbitrary type of data.
+First description of parametric polymorphism was made by Strachey in {{{strachey2000fundamental}}}, where the author also described related concept of ad hoc polymorphism.
+In contrast to parametric polymorphism, ad hoc polymorphism relies on application of a function to a restricted set of types, such as addition `(+)` operation can be applied to integers or real numbers.
+Another example of ad hoc polymorphism is, ubiquitous in object-oriented world, overloading of members which allows to invoke a certain member on a number of applicable types.
+In the further course of the thesis `generic` term is also used to describe parametric polymorphism concept.
+
+With this kind of abstraction that parametric polymorphism provides, functions get highly reusable as opposed to if they were restricted to single type only.
+Parametric polymorphism is often combined with higher-order functions, resulting in yet one higher level abstraction, example of which can be seen in listing {{funparampoly}}.
+
+Function `map` in listing {{funparampoly}} aims to produce a list of elements from an initial list with a help of a function that is applied to each element from the original list.
+It takes two arguments: function `f` of type `'a -> 'b` and `list` value of type `'a list`.
+Then it pattern matches on the `list` value to distinguish case when the input list is empty and when there is at least one element.
+If the list is not empty, the `f` function is applied to the first element of list (`h` for head) and `map` function is recursively invoked with the rest of elements (`t` for tail).
+The values are then glued to form a list with `::` operator (the same that was used for pattern matching case).
+It is said that the `map` function is polymorphic, and its parametric type is `'a - 'b` -> `'a list` -> `'b list`.
+(Again, it should be noted that for the sake of simplicity the function is not tail-recursive.)
+
+```xxx
+{FSharp]{Parametric polymorphism}{funparampoly}
+let rec map f list =
+    match list with
+    | [] -> []
+    | h :: t -> f h :: map f t```
 
 ### Lazy evaluation
 

@@ -62,17 +62,6 @@ It originates from the functional paradigm, and can prove helpful when developin
 
 >> *"Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software."*
 
-### Parametric polymorphism
-
-It is worth noting that `Async` in F# is a generic type.
-This means that any arbitrary type can be applied to `Async`.
-The concept is also known as parametric polymorphism and is very important in functional programming.
-First description of parametric polymorphism was made by Strachey by following example {{{strachey2000fundamental}}}:
-
-Let `f` be a function of type `a -> b` and `l` be a list of type `a list` (`l` has only elements of type `a`).
-A function `map` can be constructed that applies `f` on each element of `l` returning a `b list`.
-It can be said that `map` function is polymorphic of parametric type `(a -> b, a list) -> b list`.
-
 Music Store Tutorial
 --------------------
 
