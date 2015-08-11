@@ -16,7 +16,7 @@ Here, object-oriented programming seems to be a strong leader with regards to nu
 In order to verify whether functional programming could potentially be applied to software from arbitrary domain, decision was made to discover how it would fit into this relatively foreign area of web development.
 
 Another reason for which web development domain was chosen, was a will to contribute to the F# community.
-In order to attract more and more attention to F# language, the language community leaded by F# organization {{{fsharpwebsite}}} is doing its best to encourage developers to give F# a try.
+In order to attract more and more attention to F# language, the language community leaded by F# Software Foundation {{{fsharpwebsite}}} is doing its best to encourage developers to give F# a try.
 On one of mailing groups there appeared a suggestion to prepare a tutorial on how to create web applications with F#.
 The tutorial would guide step by step on how to build an E-commerce website called "Music Store".
 In the "Music Store" user could browse music albums by genres, add his favorite to cart and buy.
@@ -30,6 +30,7 @@ Apart from that, the application would show a plenty of other common aspects of 
 
 Implementing such application and preparing a tutorial turned out to be a great candidate for research part of this thesis.
 The detailed tutorial has been published and is available on-line {{{suavemusicstoretutorial}}}.
+In addition to that the tutorial is included in the list of tutorials for web development on F# Software Foundation website {{{fsharpwebsite}}}.
 Credit also goes to the ASP.NET MVC team, which prepared the original tutorial {{{aspnetmvctutorial}}} that largely influenced the variation.
 ASP.NET MVC is a C#-based, heavy-weight framework for creating web applications in .NET ecosystem.
 MVC acronym stands for Model-View-Controller pattern, which aims to separate components for layout rendering, data objects behavior and handling user's interaction.

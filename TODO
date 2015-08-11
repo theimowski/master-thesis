@@ -5,9 +5,9 @@ TODO:
 ## Content
 
 * Imperative history - origins? genesis of term?
-* OO - Polymorphism - do I get it right?
 * Declarative - the introductory description is quite poor
 * Functional - describe connection to declarative more clearly
+
 * Purity - distinction between pure functions and purity in general (language level) ?
 * Dominated areas - good word?
 
@@ -18,16 +18,17 @@ TODO:
 
 ## Formatting
 
-* Listing - space before and after as per figures?
+* Listing - space before and after as per figures
 * Referencing different sections ?
-* Listing nr - by sections?
+
+* References styling
+* List of listings styling
 * Are bolds appropriate?
 * use FP acronym for Functional Programming
 * use OOP acronym for Object oriented
 
 * Bullets - bolded or what?
 * Bullets - end with comma or semicolon?
-* comments in paranthesis - maybe footnotes?
 
 ### Conventions ?
 

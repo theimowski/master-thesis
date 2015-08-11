@@ -140,12 +140,18 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
         numbers=left,
         columns=fullflexible,
         caption=#2,
+        captionpos=b,
+        aboveskip=0pt,
+        belowskip=0pt,
+        abovecaptionskip=6pt,
+        belowcaptionskip=12pt,
         label=#3}
   }
   {\endminipage}
 
 
 \begin{document}
+\counterwithin{lstlisting}{section}
 
 \includepdf[pages={1}]{StronaTytulowa_131517.pdf}
 \includepdf[pages={1}]{Oswiadczenie_131517.pdf}
