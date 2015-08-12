@@ -77,7 +77,7 @@ It turns out that the same effect that is achieved thanks to inheritance can als
 "Poly" standing for "many" and "morphism", which can be thought of "form" ("morphism" has its formal definition in category theory, however it is not covered by the thesis), describe the ability to treat objects of different classes in unified way.
 In object-oriented paradigm this ability is enforced by specific class hierarchies.
 The polymorphism concept relying on class hierarchies is known as ad hoc polymorphism {{{strachey2000fundamental}}}.
-Section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} mentions also parametric polymorphism which is to some extent available in some object-oriented languages.
+Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} mentions also parametric polymorphism which is to some extent available in some object-oriented languages.
 
 **Abstraction** is closely related to polymorphism, and allows to treat referenced objects as if they were of the most possible general type, while in runtime they appear to be an instance of a very specific class.
 Abstraction enables better testability of code, as well as late binding, which can be used for the purpose of inversion of control (IOC).
@@ -172,7 +172,7 @@ Most popular DSLs include {{{van2000domain, bentley1986programming}}}:
 * YACC - for parsing source code,
 * MAKE - for defining software build scripts,
 * SQL - for manipulating relational databases,
-* HTML (further discussed in section {{RESEARCH}}) - for generating markup that web browsers can render,
+* HTML (further discussed in section {{APPLICATION OF FUNCTIONAL PROGRAMMING}}) - for generating markup that web browsers can render,
 * XSLT - for transforming XML documents.
 
 Functional
@@ -423,7 +423,7 @@ Apart from describing relation with general programming paradigm taken under con
 >> *"Defect types are strongly associated with languages; Some defect type like memory error, concurrency errors also depend on language primitives. Language matters more for specific categories than it does for defects overall."*
 
 A language that combines functional programming paradigm with the properties of static typing, memory management and concurrency support can be therefore considered safer than competitive languages with regards to expected number of software defects. 
-Among languages that fit into this category there is Haskell, F#, Scala and OCaml, all of which are further discussed in section {{APPLICATION OF FUNCTIONAL PROGRAMMING}}.
+Among languages that fit into this category there is Haskell, F#, Scala and OCaml, all of which are further discussed in section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}}.
 It must be however emphasized that besides holding described properties, there are many other, obvious factors that affect the software quality, like engineers' skills, productivity or work organization.
 What is more, additional language features usually come with extra cost in respect to performance and memory consumption.
 That is why a language that meets above criteria cannot be treated as a "silver-bullet" for solving every possible problem in the universe.

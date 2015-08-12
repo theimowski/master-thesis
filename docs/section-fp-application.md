@@ -1,4 +1,4 @@
-APPLICATION OF FUNCTIONAL PROGRAMMING
+FUNCTIONAL PROGRAMMING IN INDUSTRY
 ======================================
 
 Many associate functional programming with academic environment only.

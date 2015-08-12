@@ -1,7 +1,7 @@
-RESEARCH
+APPLICATION OF FUNCTIONAL PROGRAMMING
 ========
 
-Section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} described how functional programming managed to be successfully applied in many projects.
+Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} described how functional programming managed to be successfully applied in many projects.
 In this section focus is laid on creating software that uses functional techniques.
 For that purpose, process of developing such application is shown.
 In the course of this section, multiple comparisons are made between functional and object-oriented approaches.
