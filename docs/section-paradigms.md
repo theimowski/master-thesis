@@ -62,7 +62,10 @@ Instance of an object is usually shaped by the concept of a class, which defines
 **Encapsulation** is an interesting principle of object-oriented software, that often gets misunderstood.
 It aims to hide information, that is to make the internals of an object invisible to the outside scope, but to provide a public interface that does not leak unnecessary state for other components interacting with that object.
 Encapsulation is fulfilled when the call site neither has to make any assumptions about nor be aware of existence of the internals of called object.
-The misconception occurs because developers tend to treat encapsulation as a way of sharing internal state through trivial methods (known as getters and setters in Java and properties in C#).
+Another consequence of proper encapsulation is the effect that a referenced object should never go into invalid state which makes it unusable.
+The misconception occurs because developers tend to treat encapsulation as a way of sharing internal state through trivial methods, known as getters and setters in Java and properties in C#.
+Getters and setters allow to query for or alter (respectively) data that often should be available only inside the referenced object itself.
+Exposing internals of an object (private fields) to the outside world with the help of those methods not only refrains proper encapsulation, but also denies it by making the call-site aware of referenced object's implementation details.
 
 **Inheritance** allows a class to derive behavior as well as state from another class.
 The derived members can then be reused to implement more specific sub-class methods.
@@ -73,11 +76,12 @@ It turns out that the same effect that is achieved thanks to inheritance can als
 
 >> *"Favor object composition over class inheritance."*
 
-**Polymorphism** is a concept known from functional programming, that in object-oriented approach relies mainly on inheritance.
+**Polymorphism** is a concept that in object-oriented approach relies mainly on inheritance.
 "Poly" standing for "many" and "morphism", which can be thought of "form" ("morphism" has its formal definition in category theory, however it is not covered by the thesis), describe the ability to treat objects of different classes in unified way.
-In object-oriented paradigm this ability is enforced by specific class hierarchies.
+In object-oriented software this is usually achieved by deriving behavior (and data) from a base class, which enables to refer to an object of specific type with more general, base class type.
+The ability of polymorphism is therefore enforced by specific class hierarchies.
 The polymorphism concept relying on class hierarchies is known as ad hoc polymorphism {{{strachey2000fundamental}}}.
-Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} mentions also parametric polymorphism which is to some extent available in some object-oriented languages.
+Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} mentions also parametric polymorphism which is to some extent available in a few object-oriented languages.
 
 **Abstraction** is closely related to polymorphism, and allows to treat referenced objects as if they were of the most possible general type, while in runtime they appear to be an instance of a very specific class.
 Abstraction enables better testability of code, as well as late binding, which can be used for the purpose of inversion of control (IOC).
@@ -86,7 +90,7 @@ As stated above, when not cautious, abstraction can be easily spoiled in object-
 Many other principles and design patterns apply to object-oriented programming.
 With the SOLID acronym, Martin {{{martin2003agile}}} presents set of five principles to keep software maintainable.
 Multiple design patterns described in the famous Design Patterns book {{{gamma1994design}}} demonstrate common approaches that address cross cutting concerns in object-oriented software.
-While it is certainly a good thing that such patterns are established for software engineers to follow, majority of them tend to be quite cumbersome, hence utilizing them cause code complexity to grow exponentially.
+While it is certainly a good thing that such patterns are established for software engineers to follow, majority of them tend to be quite cumbersome, hence utilizing them cause code complexity to grow rapidly.
 Many of the standardized object-oriented patterns seem to solve problems that the programming paradigm introduced itself in the first place.
 
 ### Referential opacity
