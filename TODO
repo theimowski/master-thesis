@@ -4,6 +4,13 @@ TODO:
 
 ## Content
 
+* Polymorphism in OO - don't mention FP upfront
+* OO Encapsulation - say more bout getters setters - exposing internal state to the outside world
+* Exponential
+* Rename sections:
+    * APPLICATION OF FUNCTIONAL PROGRAMMING -> FUNCTIONAL PROGRAMMING IN INDUSTRY
+    * RESARCH -> APPLICATION OF FUNCTIONAL PROGRAMMING
+
 * Imperative history - origins? genesis of term?
 * Declarative - the introductory description is quite poor
 * Functional - describe connection to declarative more clearly
@@ -17,8 +24,6 @@ TODO:
 * Paradimgs and code quality -> move to Application of functional programming???
 
 ## Formatting
-
-* Referencing different sections ?
 
 * References styling
 * List of listings styling
