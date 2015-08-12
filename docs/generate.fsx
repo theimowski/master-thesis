@@ -45,7 +45,7 @@ let createPDF fileName =
 
 let numberSections filePath =
     let contents = File.ReadAllText(filePath)
-    let replaced = contents.Replace(@"section*{", @"section{")
+    let replaced = Regex.Replace(contents, "section\*{(.+)}", "section{$1} \\label{$1}")
     let replaced = Regex.Replace(replaced, " \\\{\\\{\\\{([\w+, ]+)\\\}\\\}\\\}", "~\cite{$1}")
 //    let replaced = Regex.Replace(replaced, "---([\w+ ]+)---", "\\begin{table}[h]\\caption{$1}\\centering\\setlength\\extrarowheight{2pt}")
 //    let replaced = replaced.Replace("\end{tabular}", "\end{tabular}\end{table}")

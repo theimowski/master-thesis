@@ -36,7 +36,7 @@ Haskell is the most prominent functional languages among all with regards to fun
 The language does not allow any type of side effects to be performed, meaning that **every** function must be pure.
 Another intriguing property of the language is that it does not evaluate any expressions eagerly.
 Every expression in Haskell is deferred until it has to be evaluated, and never before.
-This property, commonly known as "lazy evaluation" was described in previous section.
+This property, commonly known as "lazy evaluation" was described in section {{PROGRAMING PARADIGMS}}.
 Haskell is s statically typed language, with its type system being one of the most strict in this category.
 Following are some of the type constructs baked into Haskell type system:
 
@@ -77,7 +77,7 @@ OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}
     * *Hack* - a programming language with its compiler written in OCaml, as an extension to PHP with static typing,
     * *pfff* - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
 
-### F#
+### FSharp
 
 FSharp (F#) is a language that was born in Microsoft Research department with its first version released in 2005 together with Microsoft Visual Studio 2005.
 With great help of the language designer Don Syme, the F# language evolved and newer versions got delivered, with the most recent 4.0 version released in parallel to the time of writing.
@@ -255,5 +255,5 @@ The model is ubiquitous in context of Erlang, as it is emphasized in {{{cesarini
 Practice has shown that message passing concurrency model is extremely reliable and profitable, as systems relying on this technique achieve one of the highest system up-time indicators, as well as allow to process impressive amount of messages per unit of time.
 
 Above approaches are just examples of how functional paradigm influenced development of concurrent algorithms.
-Success stories demonstrated in previous section prove that employing functional programming in distributed and concurrent systems made them more scalable, stable and efficient.
+Success stories demonstrated in section {{PROGRAMING PARADIGMS}} prove that employing functional programming in distributed and concurrent systems made them more scalable, stable and efficient.
 This is the main reason, for which more and more companies show interest in incorporating this philosophy into their business applications.

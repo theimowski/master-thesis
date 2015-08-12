@@ -1,7 +1,7 @@
 RESEARCH
 ========
 
-Previous section described how functional programming managed to be successfully applied in many projects.
+Section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} described how functional programming managed to be successfully applied in many projects.
 In this section focus is laid on creating software that uses functional techniques.
 For that purpose, process of developing such application is shown.
 In the course of this section, multiple comparisons are made between functional and object-oriented approaches.
@@ -268,7 +268,7 @@ Thanks to the usage of this function, F# compiler is capable of inferring the ty
 The last node returned (lines 6-10) is `ul` which stands for "unordered list".
 Unordered list contains `li` "list items" elements, each of which has a hyper-link to the corresponding genre.
 Line 7 demonstrates "list comprehension" syntax, which binds each element of the `genres` list to `g` value and uses it to yield list items.
-With help of `Path` module, lines 8-9 generate a hyper-link with URL argument, similar to the one presented in Routing section (`/store/browse?genre=Disco`). 
+With help of `Path` module, lines 8-9 generate a hyper-link with URL argument, similar to the one presented in {{Routing}} (`/store/browse?genre=Disco`). 
 Because `text` function, which is invoked at the end of line 9 expect a `string` as its argument, `g` value is inferred to be of type `string`.
 Powerful type-inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
 Thanks to the type-inference, no explicit type annotations are required, and the code is more concise.
@@ -410,7 +410,7 @@ From a programmer's point of view, majority of features in any software can be m
 Such generalization refers to concept known as Command and Query Separation.
 The term defines queries as something that does not change state, but only fetch certain portion of data from a system.
 On the other hand, commands are actions that have side effects because of modifying the internal state of the system {{{meyer1988object}}}.
-Previous section showed how queries were implemented to fetch basic sets of data regarding music albums or genres.
+In {{Data Access}} queries were implemented to fetch basic sets of data regarding music albums or genres.
 In this section commands that alter state of Music Store are shown.
 As a part of administration management module, following features were implemented in Music Store application:
 
@@ -453,7 +453,7 @@ The resulting lists of tuples became arguments for the `View.createAlbum` functi
 
 For the POST case, after the `>>=` operator, `bindToForm` function was used.
 `bindToForm` tries to parse the request body into a given model, in this case `Form.album`.
-If the parsing failed (the request could be malformed), `bindToForm` took care of responding with 400 Bad Request status code, describing why it was unable to parse the entity (`bindToFrom` is described in details in the further course of the research section).
+If the parsing failed (the request could be malformed), `bindToForm` took care of responding with 400 Bad Request status code, describing why it was unable to parse the entity (`bindToFrom` is described in details in {{Forms}}).
 On the other hand, if the entity could be parsed as `Form.album`, the anonymous function (second argument of `bindToForm`) was applied.
 The anonymous function takes the form model as its parameter, invokes `Db.createAlbum` action with proper arguments, and finally redirects to the main administration management page.
 Redirection was achieved by calling the `Redirection.FOUND` function, which writes 302 Found status code to the response and "Location" header with an URL.
@@ -689,7 +689,7 @@ Web applications that use concept of accounts to tie data with users, must know 
 There are also web sites that tend to make profit on persisting in database and selling details about a significant amount of users and their emails.
 Such needs as in above examples led to forming the concepts of authentication and authorization.
 Both of them can be built on top of the state management mechanism by using cookies.
-Since authentication, authorization and session are rather an orthogonal concept to session, they are described here in a separate section.
+Since authentication, authorization and session are rather an orthogonal concept to session, they are described separately.
 
 Authentication is a process, in which a user of a system (be it a human or machine program) presents his credential to the requested authority.
 In web browsing scenario it is often preceded by the web site (playing authority role) blocking access (for user) to a desired resource.
