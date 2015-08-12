@@ -246,7 +246,7 @@ Again, as was the case with immutability, the purity properties might seem impos
 Every software needs to communicate with components outside its process, for example by invoking IO operations or accessing computer's clock.
 Haskell, which happens to be purely functional, is used in real systems and in still preserves purity property.
 This is achievable with concept called "Monads" {{{mcbride2008applicative}}}, which also has its formal mathematical definition. 
-Monads are quite complicated topic itself, therefore they are not addressed by this thesis (explicitly, but they are being used in the research part anyway).
+Monads are quite complicated topic itself, therefore they are not addressed by this thesis (explicitly, but they are being used in the section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} anyway).
 
 Listing {{funpurity}} demonstrates two functions, `pureSalary` and `impureSalary`.
 Both functions have the same type signature (`decimal -> decimal -> decimal`), which means that they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.

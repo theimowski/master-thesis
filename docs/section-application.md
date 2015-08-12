@@ -1046,7 +1046,7 @@ Also, it turned out to be a fascinating experience to be able to contribute to t
 Conclusions
 -----------
 
-The research part of this thesis focused on building a real-world application in functional programming language.
+Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} of this thesis focused on building a real-world application in functional programming language.
 As the domain of the problem, web development was chosen to prove that functional paradigm does not have to restrict to a specific set of fields.
 F# language in conjunction with Suave web framework made it possible to implement server concise in size, but with load of features.
 With the help of a number of functional techniques, an e-commerce Music Store website was created.
