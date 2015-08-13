@@ -52,15 +52,15 @@ Despite some of these languages aimed to target multiple paradigms, the concept 
 Majority of imperative programming languages that were developed till the 80s have procedural nature.
 This means that they focus on defining reusable procedures which invoke certain actions.
 Procedures are stateless, and as a result they cannot carry any kind of data with them.
-Object-oriented approach was introduced in order to combine data with behavior inside an object, in order to relate object to its internal state and applicable operations.
-Object-oriented follows imperative approach with regards to how the behavior inside an object (in form of methods or members) is implemented.
+Object-oriented programming (OOP) was introduced in order to combine data with behavior inside an object, in order to relate object to its internal state and applicable operations.
+OOP follows imperative approach with regards to how the behavior inside an object (in form of methods or members) is implemented.
 Following are enlisted a few design principles that the paradigm outlines.
 
-**Objects** are the basic building blocks of a program in object-oriented world.
+**Objects** are the basic building blocks of a program in OOP world.
 In some languages, every data structure including primitive types is an object (it is sometimes common to say that "Everything is an object").
 Instance of an object is usually shaped by the concept of a class, which defines available members - fields for storing data and methods for defining behavior.
 
-**Encapsulation** is an interesting principle of object-oriented software, that often gets misunderstood.
+**Encapsulation** is an interesting principle of OOP software, that often gets misunderstood.
 It aims to hide information, that is to make the internals of an object invisible to the outside scope, but to provide a public interface that does not leak unnecessary state for other components interacting with that object.
 Encapsulation is fulfilled when the call site neither has to make any assumptions about nor be aware of existence of the internals of called object.
 Another consequence of proper encapsulation is the effect that a referenced object should never go into invalid state which makes it unusable.
@@ -77,22 +77,22 @@ It turns out that the same effect that is achieved thanks to inheritance can als
 
 >> *"Favor object composition over class inheritance."*
 
-**Polymorphism** is a concept that in object-oriented approach relies mainly on inheritance.
+**Polymorphism** is a concept that in OOP approach relies mainly on inheritance.
 "Poly" standing for "many" and "morphism", which can be thought of "form" ("morphism" has its formal definition in category theory, however it is not covered by the thesis), describe the ability to treat objects of different classes in unified way.
-In object-oriented software this is usually achieved by deriving behavior (and data) from a base class, which enables to refer to an object of specific type with more general, base class type.
+In OOP software this is usually achieved by deriving behavior (and data) from a base class, which enables to refer to an object of specific type with more general, base class type.
 The ability of polymorphism is therefore enforced by specific class hierarchies.
 The polymorphism concept relying on class hierarchies is known as ad hoc polymorphism {{{strachey2000fundamental}}}.
-Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} mentions also parametric polymorphism which is to some extent available in a few object-oriented languages.
+Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} mentions also parametric polymorphism which is to some extent available in a few OOP languages.
 
 **Abstraction** is closely related to polymorphism, and allows to treat referenced objects as if they were of the most possible general type, while in runtime they appear to be an instance of a very specific class.
 Abstraction enables better testability of code, as well as late binding, which can be used for the purpose of inversion of control (IOC).
-As stated above, when not cautious, abstraction can be easily spoiled in object-oriented programming by overridden behavior or leaking internals of an object.
+As stated above, when not cautious, abstraction can be easily spoiled in OOP by overridden behavior or leaking internals of an object.
 
-Many other principles and design patterns apply to object-oriented programming.
+Many other principles and design patterns apply to OOP.
 With the SOLID acronym, Martin {{{martin2003agile}}} presents set of five principles to keep software maintainable.
-Multiple design patterns described in the famous Design Patterns book {{{gamma1994design}}} demonstrate common approaches that address cross cutting concerns in object-oriented software.
+Multiple design patterns described in the famous Design Patterns book {{{gamma1994design}}} demonstrate common approaches that address cross cutting concerns in OOP software.
 While it is certainly a good thing that such patterns are established for software engineers to follow, majority of them tend to be quite cumbersome, hence utilizing them cause code complexity to grow rapidly.
-Many of the standardized object-oriented patterns seem to solve problems that the programming paradigm introduced itself in the first place.
+Many of the standardized OOP patterns seem to solve problems that the programming paradigm introduced itself in the first place.
 
 ### Referential opacity
 
@@ -225,7 +225,7 @@ x = 6          // this expression evaluates to false```
 
 ### Pattern matching
 
-For developers coming from object-oriented background, familiar with languages like C# or Java, pattern matching (in its most primitive form) could be explained as a switch statement in conjunction with an assignment to a symbol for each branch.
+For developers coming from OOP background, familiar with languages like C# or Java, pattern matching (in its most primitive form) could be explained as a switch statement in conjunction with an assignment to a symbol for each branch.
 Pattern matching does not always have to concern multiple cases - sometimes it proves useful with a single case, when such case always applies (for example when unwrapping a value from a data structure, or processing an infinite list).
 The construct is part of syntax of several programming languages, both imperative and declarative, but is specially popular among functional programmers.
 
@@ -286,8 +286,8 @@ The concept of function pointers introduced in C and C++ is closely related to h
 
 Higher-order functions is a powerful feature that enables to abstract away a common piece of logic and make it more reusable.
 It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with lists (for example filtering or mapping) or null-checking.
-In addition to that, higher-order functions can be used as a foundation for concept known in object-oriented programming as "Dependency Injection".
-Dependency Injection in object-oriented paradigm relies on passing abstract interfaces without implementation to consuming classes.
+In addition to that, higher-order functions can be used as a foundation for concept known in OOP as "Dependency Injection".
+Dependency Injection in OOP paradigm relies on passing abstract interfaces without implementation to consuming classes.
 The interfaces passed to dependent class contain only type signatures of methods to be invoked, hence such interface can be easily represented with traditional functions.
 
 Listing {{funhof}} shows example of using higher-order function `List.Filter`.
@@ -362,7 +362,7 @@ Parametric polymorphism is a very important concept in FP.
 It enables to treat functions as general-purpose components that can operate on arbitrary type of data.
 First description of parametric polymorphism was made by Strachey in {{{strachey2000fundamental}}}, where the author also described related concept of ad hoc polymorphism.
 In contrast to parametric polymorphism, ad hoc polymorphism relies on application of a function to a restricted set of types, such as addition `(+)` operation can be applied to integers or real numbers.
-Another example of ad hoc polymorphism is, ubiquitous in object-oriented world, overloading of members which allows to invoke a certain member on a number of applicable types.
+Another example of ad hoc polymorphism is, ubiquitous in OOP world, overloading of members which allows to invoke a certain member on a number of applicable types.
 In the further course of the thesis `generic` term is also used to describe parametric polymorphism concept.
 
 With this kind of abstraction that parametric polymorphism provides, functions get highly reusable as opposed to if they were restricted to single type only.
@@ -441,7 +441,7 @@ What is more, additional language features usually come with extra cost in respe
 That is why a language that meets above criteria cannot be treated as a "silver-bullet" for solving every possible problem in the universe.
 
 Primarily appearing functional language in the thesis is F#.
-As F# is built on top of the .NET platform, where the dominating language is (coming from the object-oriented family) C#, the thesis makes a number of comparisons between these two.
+As F# is built on top of the .NET platform, where the dominating language is (coming from the OOP family) C#, the thesis makes a number of comparisons between these two.
 Such comparisons have also been made by the F# community, from which a significant number of members do have solid experience with C# language.
 Partially thanks to to the succinct language syntax, but also thanks to its functional nature, F# is usually considered easier to comprehend and more maintainable than C#.
 One of the observation concerns modules' dependencies complexity in both languages {{{eve2014networks}}}:
@@ -461,7 +461,7 @@ Such code-bases when implemented in imperative fashion, lacking of referential t
 
 Listing {{csparadigmimperative}} demonstrates how flow of a strictly imperative program usually looks like.
 Language used in listing {{csparadigmimperative}} is C#.
-C# was born with object-oriented paradigm in mind, that is why it allows to write in imperative style, and the below code can feel idiomatic for C#.
+C# was born with OOP paradigm in mind, that is why it allows to write in imperative style, and the below code can feel idiomatic for C#.
 The code reads a log file and extracts 10 first error entries from the file (lines that start with \[ERROR\] prefix).
 Original idea comes from a tweet {{{imperativevsfunctional}}} where Java language was used.
 Here, the program was adjusted to C# syntax.
@@ -509,7 +509,7 @@ A few concerns are targeted:
 Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
 As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one would have to read 10 last lines of file, the whole algorithm would have to be redesigned).
 
-On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques (despite it originated as a standard, object-oriented language, a few functional techniques got introduced into C# to make the language more powerful).
+On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques (despite it originated as a standard, OOP language, a few functional techniques got introduced into C# to make the language more powerful).
 C# has been chosen for both examples deliberately, to emphasize that programming language is just a tool, and that it is programming style and paradigm used that really matter when considering code quality. 
 
 ```xxx

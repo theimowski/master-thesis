@@ -66,7 +66,7 @@ The development of the language is led by a company called *Inria*.
 Coming from the statically typed languages family, OCaml ships with a rich type system offering type inference, as well as various data types, such as records or sums {{{ocamlwebsite}}}.
 Similar to Haskell, OCaml enables interoperability with languages like C, thanks to the foreign function interface feature.
 In addition to that, OCaml provides ability to compile efficient machine code, which boosts its attractiveness.
-The language is a valuable example of hybrid, multi-paradigm movement, combining approaches from both declarative (functional) and imperative (object-oriented) worlds.
+The language is a valuable example of hybrid, multi-paradigm movement, combining approaches from both declarative (functional) and imperative (OOP) worlds.
 With its distinctive syntax, OCaml became an inspiration for a few modern languages like F#, Scala or Rust.
 
 OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}}}:
@@ -92,7 +92,7 @@ F# design was influenced by a set of other languages, most notably:
 * **Erlang**, in respect to the message passing model and asynchrony support.
 
 F# is statically typed and its type system is considered to be very strict (almost as Haskell).
-Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows also for both imperative and object-oriented constructs.
+Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows also for both imperative and OOP constructs.
 Being built on top of .NET, it enables interoperability with all languages from this platform.
 Code written in F# is succinct and readable, making the language an attractive candidate for fast prototyping and reducing time-to-market factor {{{fsharp2014deep}}}.
 
@@ -118,7 +118,7 @@ Just as Haskell, OCaml and F#, Scala is a statically typed language.
 Again, the type system ships with type inference mechanism which minimizes need of type annotating members and functions, making the code shorter.
 Scala provides a feature called "Traits", which enables to mix multiple interfaces and their behavior within a single class.
 The Traits feature can be compared to concept of Typeclasses in Haskell, however the foundations differ.
-With its full interoperability with JVM and Java, Scala is a multi-paradigm language that allows to write code in functional as well as object-oriented manner.
+With its full interoperability with JVM and Java, Scala is a multi-paradigm language that allows to write code in functional as well as OOP manner.
 Inspired by other languages from functional family, Scala comes with well-known to functional community features, such as pattern matching or higher-order functions.
 Language designers made their best to fit Scala to systems that require distribution and concurrency by adapting actor-based processing model and making it easier to write asynchronous code with Futures.
 
@@ -190,7 +190,7 @@ Dominated areas
 
 FP is getting more and more popular in the software industry.
 Not only the languages that were designed with functional approach in mind are being used, but also those languages that originate from a different paradigm branch incorporate functional techniques.
-Good examples of such languages are C# and Java, which initially supported only object-oriented and imperative style of programming, but new versions of these two introduce concepts well known to functional programmers, such as higher-order functions, lambda expressions or type polymorphism.
+Good examples of such languages are C# and Java, which initially supported only OOP and imperative style of programming, but new versions of these two introduce concepts well known to functional programmers, such as higher-order functions, lambda expressions or type polymorphism.
 
 While there are a lot of fields in software industry where FP is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm **dominates** and leaves other behind.
 This domination manifests with impact of institutions that achieved success with the paradigm on other players that have not yet tried different approach than imperative.
@@ -212,7 +212,7 @@ Below are excerpts from these works that point out main reasons why financial in
 
 * **Maintainability** - thanks to the code being more succinct and readable, it is much easier for a developer to reason about a specific piece (especially since financial models can be really complex) and thus it makes the system more maintainable {{{minsky2008caml,fsharp2014deep}}}, moreover such properties as immutability or referential transparency cause a less number of software defects;
 * **Performance** - compiled code turns out to be really fast when certain optimization techniques are used {{{minsky2008caml}}}, plus the interoperability with libraries built from different languages (with help of foreign function interface) allows to natively execute chunks that are performance critical for the business;
-* **Generalization** - higher order functions and currying abstract away the behavior from data, making it possible to implement simulation algorithms applicable to various pricing derivatives {{{fsharp2014deep}}}, type polymorphism done this way leads to less amount of code compared to what it would require with only object-oriented techniques used;
+* **Generalization** - higher order functions and currying abstract away the behavior from data, making it possible to implement simulation algorithms applicable to various pricing derivatives {{{fsharp2014deep}}}, type polymorphism done this way leads to less amount of code compared to what it would require with only OOP techniques used;
 * **Parallelization** - immutable data structures that are used in FP encourage to process data in parallel, as there is a lower risk of any kind of concurrency issue, resulting in vertical processing scalability and allowing to consume larger volumes of data for financial analysis {{{berthold2012functional}}};
 * **Hiring better engineers** - it is noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that are familiar with FP languages (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
 
@@ -242,7 +242,7 @@ That said, software from arbitrary domain, be it social network or shopping indu
 
 An obvious advantage that applies to parallelization is that data structures are immutable.
 The immutability is enforced in pure languages, whereas in functional-first languages it is the default behavior that can be overridden, i.e data structures can be made mutable (usually for performance reasons).
-Vast majority of concurrency issues appear in object-oriented software due to the fact that objects are stateful, thus accessing an object in multi-threaded environment may lead to unexpected results when certain precautions are not taken.
+Vast majority of concurrency issues appear in OOP software due to the fact that objects are stateful, thus accessing an object in multi-threaded environment may lead to unexpected results when certain precautions are not taken.
 In functional paradigm on the other hand, such danger goes away when immutable data structures are being used, releasing the engineer from non-trivial task of context synchronization and preventing whole class of defects.
 
 One approach to write concurrent programs is described in article by Jones {{{jones2007beautiful}}}, where the author outlines benefits of Software Transactional Memory (STM) mechanism embedded into Haskell.

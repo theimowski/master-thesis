@@ -4,7 +4,7 @@ APPLICATION OF FUNCTIONAL PROGRAMMING
 Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} described how FP managed to be successfully applied in many projects.
 In this section focus is laid on creating software that uses functional techniques.
 For that purpose, process of developing such application is shown.
-In the course of this section, multiple comparisons are made between functional and object-oriented approaches.
+In the course of this section, multiple comparisons are made between functional and OOP approaches.
 F# programming language is used for implementing the sample application.
 
 Domain choice
@@ -12,7 +12,7 @@ Domain choice
 
 FP is already present in a significant amount of areas. 
 There are however fields, where it is still not widely adopted. One of such fields is **web development**. 
-Here, object-oriented programming seems to be a strong leader with regards to number of existing frameworks, libraries and tools as well as popularity among software engineers. 
+Here, OOP seems to be a strong leader with regards to number of existing frameworks, libraries and tools as well as popularity among software engineers. 
 In order to verify whether FP could potentially be applied to software from arbitrary domain, decision was made to discover how it would fit into this relatively foreign area of web development.
 
 Another reason for which web development domain was chosen, was a will to contribute to the F# community.
@@ -34,7 +34,7 @@ In addition to that the tutorial is included in the list of tutorials for web de
 Credit also goes to the ASP.NET MVC team, which prepared the original tutorial {{{aspnetmvctutorial}}} that largely influenced the variation.
 ASP.NET MVC is a C#-based, heavy-weight framework for creating web applications in .NET ecosystem.
 MVC acronym stands for Model-View-Controller pattern, which aims to separate components for layout rendering, data objects behavior and handling user's interaction.
-Because both F# and C# reside in the .NET platform, and because ASP.NET MVC is considered an object-oriented framework, this section continuously relates to how a similar functionality could be achieved in the counterpart.
+Because both F# and C# reside in the .NET platform, and because ASP.NET MVC is considered an OOP framework, this section continuously relates to how a similar functionality could be achieved in the counterpart.
 Thanks to the initial work, it was easier to compare certain aspects and draw conclusions.
 
 Functional Web
@@ -88,7 +88,7 @@ The same syntactic sugar can also be used for sequences (`'a seq`) or lists (`'a
 {FSharp]{Type alias for WebPart}{fswebpartalias}
 type WebPart = HttpContext -> Async<HttpContext option>```
 
-The `Option` type (also known as `Maybe` in different functional languages) is a better alternative to the infamous `null` concept, which is ubiquitous in object-oriented world.
+The `Option` type (also known as `Maybe` in different functional languages) is a better alternative to the infamous `null` concept, which is ubiquitous in OOP world.
 In C# for example, every reference type can have a legal value of `null`.
 This is the cause of what is known as "The Billion Dollar Mistake" - null references.
 Null references are exceptions thrown at runtime because of referencing a symbol which was not assigned any real value (was `null`).
@@ -400,7 +400,7 @@ let getAlbumDetails id (ctx : DbContext) : AlbumDetails option =
     |> firstOrNone```
 
 Data Access Layer implementation is easily achievable in F#.
-As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the object-oriented or imperative world.
+As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the OOP or imperative world.
 Type Providers in F#, together with its type-safe nature allow for convenient data access logic.
 In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is highly productive and little error-prone.
 
@@ -678,7 +678,7 @@ let cart =
 Session handling concept in ASP.NET MVC is relatively similar to how it was achieved in Music Store with F# and Suave.
 A `Session` property in every Controller exists to serve session values indexed by keys of type `string`.
 
-State management mechanism in Music Store was implemented in akin manner when comparing to how it is usually dealt with in imperative, object-oriented frameworks.
+State management mechanism in Music Store was implemented in akin manner when comparing to how it is usually dealt with in imperative, OOP frameworks.
 Thanks to discriminated unions, records and the great feature of pattern matching in F#, it was convenient to model all possible states and handle each of them separately.
 
 ### Authentication and Authorization
@@ -847,7 +847,7 @@ In contrast to that, an obligation to connect the authentication and authorizati
 It is getting more evident that aspects of web development follow similar pattern in Music Store application.
 To utilize both authentication and authorization, another building blocks were created.
 All those building blocks happened to reside near WebPart type, which made them reusable and suitable for composition.
-Implementation of the concepts in functional paradigm significantly differs from how they tend to be defined in object-oriented programming.
+Implementation of the concepts in functional paradigm significantly differs from how they tend to be defined in OOP.
 Declarative approach used in frameworks like ASP.NET MVC makes it extremely easy to employ authentication and authorization, but has a downside of being less aware of mechanism that drives the program flow.
 Solution that Suave takes advantage of requires the developer to get familiar with the underlying protocol and adapt existing functions into his code.
 Thanks to that, one gets better understanding on how different components are meant to work in integration.
@@ -1053,7 +1053,7 @@ With the help of a number of functional techniques, an e-commerce Music Store we
 The guide through the code covered a significant amount of cross-cutting concerns of web development.
 Every single concept extended the WebPart idea, which allowed to match all the building blocks into one consistent whole, in a natural for FP manner.
 
-Throughout the research, comparisons were made with ASP.NET MVC framework, which comes from object-oriented world.
+Throughout the research, comparisons were made with ASP.NET MVC framework, which comes from OOP world.
 One interesting finding was that ASP.NET MVC, despite being much larger and offering much more features than Suave, does not guarantee such type-safety as the latter.
 F# plus Suave combination, and any statically typed functional language in general, prevent a huge amount of issues yet in compile time.
 Such behavior could cause frustration for a new-comer to functional world, but is an enormous time saver for more experienced programmer, who is familiar with functional techniques and compiler requirements.
