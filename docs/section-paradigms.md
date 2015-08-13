@@ -19,10 +19,11 @@ The paradigms are not thus mutually exclusive in context of a specific language.
 Imperative
 ----------
 
-Imperative word looked up in a dictionary means "giving a command".
+Imperative word looked up in a dictionary means *"giving an authoritative command"* {{{oxforddic}}}.
 That definition summarizes what really imperative programming is all about.
 When writing software in imperative manner, the programmer gives commands to a computer and tells it what to do, step by step.
 Imperative relies on explicit modification of state in a program with use of statements, in order to achieve a desired goal.
+The term does also relate to linguistics, where it denotes mood of a verb to express a command or exhortation {{{oxforddic}}}.
 
 ### History
 
@@ -114,11 +115,14 @@ Declarative
 
 Declarative paradigm is different than imperative, with regards to how programs are built.
 Program written in declarative style focuses on **what** is the desired goal rather than **how** this goal has to be achieved {{{petricek2009real}}}.
-This means that code does not specify in details, how low level instructions are to be executed in what order, but rather synthesizes a set of constructs that are capable of being glued (combined) together.
-Term declarative refers to the code, which is written by **declaring** how such constructs relate to themselves, but it also has its roots in linguistics, where *"a declarative sentence is a complete expression of natural language which is either true or false"* {{{nilsson1990logic}}}.
-In his work, Padawitz {{{padawitz2006deductive}}} describes the term declarative as *"a combination of functional (or applicative) and relational (or logic) programming"*.
-Both functional and logic programming can be thought of sub-paradigms of declarative paradigm.
-Following are enumerated some examples of more specific, based on declarative approach, sub-paradigms.
+This means that code does not give a recipe for how low level instructions are to be executed in what order, but rather synthesizes a set of constructs that are capable of being glued (combined) together.
+Term declarative refers to the code, which is written by **declaring** how such constructs relate to themselves, but it also has its roots in linguistics {{{nilsson1990logic}}}:
+
+>> *"A declarative sentence is a complete expression of natural language which is either true or false, as opposed to imperative (...) sentences."*
+
+In his work, Padawitz {{{padawitz2006deductive}}} describes the declarative programming term as *"a combination of functional (or applicative) and relational (or logic) programming"*.
+As it turns out, both functional and logic programming can be thought of sub-paradigms of declarative programming paradigm.
+Before functional programming is discussed in details, other examples of specific and based on declarative approach sub-paradigms (including logic programming) are enlisted together with brief description.
 
 ### Logic programming
 
@@ -182,14 +186,18 @@ Most popular DSLs include {{{van2000domain, bentley1986programming}}}:
 Functional
 ----------
 
-Functional programming is strongly connected with declarative paradigm, and has its roots in mathematics.
-Among concepts from mathematics which are the foundations for functional paradigm, there are:
+Functional programming is strongly connected with declarative paradigm, and the connection manifests with the way functional programs are built. 
+The most basic building block in functional programming is a function, which follows a number of properties.
+Among the properties, there is function composition, which gives a great ability to compose (combine) functions with help of special constructs.
+Thanks to function composition, full programs can be developed by simply composing granular functions together, hence the relation to declarative paradigm.
+Functional programming has also its roots in mathematics.
+Among concepts known from mathematics, which are the foundations for functional paradigm, there are:
 
 * **Lambda calculus** - formal mathematical system which became the base of functional paradigm,
 * **Functions** - treated as first-class citizens in functional programming; their purity as seen by mathematicians allows to use powerful programming techniques,
 * **Category theory** - this very abstract field of mathematics is reflected in type system of statically typed functional languages.
 
-In this section focus is laid on pointing out functional programming properties (or features), which differentiate the paradigm from other.
+In this section focus is laid on pointing out functional programming properties (or features), which differentiate the paradigm from others.
 Each property comes with a brief description followed by a rationale on why it is useful and a listing demonstrating the property and its usage in practice.
 All example listings are in F# language.
 
