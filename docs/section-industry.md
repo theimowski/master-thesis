@@ -1,21 +1,21 @@
 FUNCTIONAL PROGRAMMING IN INDUSTRY
 ======================================
 
-Many associate functional programming with academic environment only.
-People tend to think of functional programming as an experimental area which is not used in practice in software industry.
-This might be because functional programming relies on mathematical foundations, thus is surely more popular among scholars.
+Many associate FP with academic environment only.
+People tend to think of FP as an experimental area which is not used in practice in software industry.
+This might be because FP relies on mathematical foundations, thus is surely more popular among scholars.
 Despite the fact that functional paradigm has indeed academic background, it is being widely adopted in business cases.
-This observation turns out to be specially true at the time of writing, as more and more companies show interest in using functional programming.
+This observation turns out to be specially true at the time of writing, as more and more companies show interest in using FP.
 This section goes through the most popular functional languages, describing how they got created and what are their main premises.
-Real-world applications that achieved success in the industry are pointed out together with substantiation of why functional programming proved helpful.
+Real-world applications that achieved success in the industry are pointed out together with substantiation of why FP proved helpful.
 The success stories presented in this section are largely cited from a number of websites.
 After that, three areas where the paradigm really shines and leaves other approaches behind, are enlisted.
 
 Popular languages
 -----------------
 
-Six functional programming languages which seem to be the most popular nowadays in software industry, are briefly described.
-This list is equivalent to the one present at Functional Works website {{{functionalworks}}}, which contains languages that the biggest (at the time of this writing) functional programming recruitment agency around the globe is seeking employees for.
+Six FP languages which seem to be the most popular nowadays in software industry, are briefly described.
+This list is equivalent to the one present at Functional Works website {{{functionalworks}}}, which contains languages that the biggest (at the time of this writing) FP recruitment agency around the globe is seeking employees for.
 Description for each language sticks to the following structure:
 
 * **short history** is first presented, when a particular language was built and under what circumstances,
@@ -28,7 +28,7 @@ It is however important to remember that those languages became inspiration for 
 ### Haskell
 
 First version of Haskell was developed in 1990, but it awaited newer releases, of which Haskell 2010 is the latest one.
-It was named after a mathematician, Haskell Curry, famous for work in combinatory logic, as well as the "currying" concept which is ubiquitous in functional programming.
+It was named after a mathematician, Haskell Curry, famous for work in combinatory logic, as well as the "currying" concept which is ubiquitous in FP.
 Glasgow Haskell Compiler (GHC) is the best known compiler of the language.
 Written almost entirely in Haskell, GHC is *"a freely available, robust and portable compiler for Haskell that generates good quality code"* {{{jones1993glasgow}}}.
 
@@ -188,13 +188,13 @@ Besides Ericsson, Erlang contributed to plenty of success stories for world-clas
 Dominated areas
 ---------------
 
-Functional programming is getting more and more popular in the software industry.
+FP is getting more and more popular in the software industry.
 Not only the languages that were designed with functional approach in mind are being used, but also those languages that originate from a different paradigm branch incorporate functional techniques.
 Good examples of such languages are C# and Java, which initially supported only object-oriented and imperative style of programming, but new versions of these two introduce concepts well known to functional programmers, such as higher-order functions, lambda expressions or type polymorphism.
 
-While there are a lot of fields in software industry where functional programming is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm **dominates** and leaves other behind.
+While there are a lot of fields in software industry where FP is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm **dominates** and leaves other behind.
 This domination manifests with impact of institutions that achieved success with the paradigm on other players that have not yet tried different approach than imperative.
-Such areas, where functional seems to take the lead are described in this section, together with a rationale on why functional programming is more promising in specific case.
+Such areas, where functional seems to take the lead are described in this section, together with a rationale on why FP is more promising in specific case.
 As a disclaimer, it is important to note, that the domination does not necessarily mean more job openings in the market (as non-functional paradigms are in general still more popular), but rather that there is a visible trend of growing employments in these areas.
 
 ### Financial industry
@@ -205,22 +205,22 @@ Stochastic simulations of mathematical models used in financial software can pot
 Those models in turn happen to be very complicated and require tough logic implementation.
 In addition to that, volumes of data to be processed reach unbelievable sizes, and the trend seems to grow {{{berthold2012functional}}}.
 Those challenges squeeze huge amounts of money invested in financial software, but as this industry does not suffer from poverty, funds are still allocated to improve the overall quality and performance of systems.
-Functional programming turns out to address most of these problems and that is why it settled down for good in the financial industry.
+FP turns out to address most of these problems and that is why it settled down for good in the financial industry.
 
-Several works describe role of functional programming in software development for financial sector and explain why the paradigm proved helpful {{{minsky2008caml,berthold2012functional,fsharp2014deep}}}.
-Below are excerpts from these works that point out main reasons why financial industry benefits from application of functional programming:
+Several works describe role of FP in software development for financial sector and explain why the paradigm proved helpful {{{minsky2008caml,berthold2012functional,fsharp2014deep}}}.
+Below are excerpts from these works that point out main reasons why financial industry benefits from application of FP:
 
 * **Maintainability** - thanks to the code being more succinct and readable, it is much easier for a developer to reason about a specific piece (especially since financial models can be really complex) and thus it makes the system more maintainable {{{minsky2008caml,fsharp2014deep}}}, moreover such properties as immutability or referential transparency cause a less number of software defects;
 * **Performance** - compiled code turns out to be really fast when certain optimization techniques are used {{{minsky2008caml}}}, plus the interoperability with libraries built from different languages (with help of foreign function interface) allows to natively execute chunks that are performance critical for the business;
 * **Generalization** - higher order functions and currying abstract away the behavior from data, making it possible to implement simulation algorithms applicable to various pricing derivatives {{{fsharp2014deep}}}, type polymorphism done this way leads to less amount of code compared to what it would require with only object-oriented techniques used;
-* **Parallelization** - immutable data structures that are used in functional programming encourage to process data in parallel, as there is a lower risk of any kind of concurrency issue, resulting in vertical processing scalability and allowing to consume larger volumes of data for financial analysis {{{berthold2012functional}}};
-* **Hiring better engineers** - it is noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that are familiar with functional programming languages (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
+* **Parallelization** - immutable data structures that are used in FP encourage to process data in parallel, as there is a lower risk of any kind of concurrency issue, resulting in vertical processing scalability and allowing to consume larger volumes of data for financial analysis {{{berthold2012functional}}};
+* **Hiring better engineers** - it is noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that are familiar with FP languages (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
 
 ### Data science
 
-Another area where functional programming seems to start taking lead is data science.
+Another area where FP seems to start taking lead is data science.
 Data science is a very broad field which concerns multiple computer science topics, such as artificial intelligence, machine learning or data mining.
-Because these topics use extensively various numerical methods, functional programming feels like a natural candidate when it comes to choosing a proper paradigm for solving particular problem.
+Because these topics use extensively various numerical methods, FP feels like a natural candidate when it comes to choosing a proper paradigm for solving particular problem.
 
 In his work {{{hughes1989functional}}}, Hughes describes how functional properties make it convenient to implement an artificial intelligence heuristic.
 The example heuristic in the work is an alpha-beta method of determining best move for computer opponent in a logic game that can be represented by a game state tree.
@@ -236,9 +236,9 @@ The latter concept despite standing for hard to express in pure functional appro
 
 ### Concurrent systems
 
-The survey would not be complete without mentioning concurrent systems, which benefit a lot from functional programming.
+The survey would not be complete without mentioning concurrent systems, which benefit a lot from FP.
 Although they are not really a separate domain like financial industry or data science, concurrent systems made it to this list, because of the great impact of functional paradigm on concurrency aspect.
-That said, software from arbitrary domain, be it social network or shopping industry, which relies on processing parallelization might potentially gain from employing functional programming.
+That said, software from arbitrary domain, be it social network or shopping industry, which relies on processing parallelization might potentially gain from employing FP.
 
 An obvious advantage that applies to parallelization is that data structures are immutable.
 The immutability is enforced in pure languages, whereas in functional-first languages it is the default behavior that can be overridden, i.e data structures can be made mutable (usually for performance reasons).
@@ -255,5 +255,5 @@ The model is ubiquitous in context of Erlang, as it is emphasized in {{{cesarini
 Practice has shown that message passing concurrency model is extremely reliable and profitable, as systems relying on this technique achieve one of the highest system up-time indicators, as well as allow to process impressive amount of messages per unit of time.
 
 Above approaches are just examples of how functional paradigm influenced development of concurrent algorithms.
-Success stories demonstrated in section {{PROGRAMING PARADIGMS}} prove that employing functional programming in distributed and concurrent systems made them more scalable, stable and efficient.
+Success stories demonstrated in section {{PROGRAMING PARADIGMS}} prove that employing FP in distributed and concurrent systems made them more scalable, stable and efficient.
 This is the main reason, for which more and more companies show interest in incorporating this philosophy into their business applications.

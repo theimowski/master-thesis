@@ -186,24 +186,24 @@ Most popular DSLs include {{{van2000domain, bentley1986programming}}}:
 Functional
 ----------
 
-Functional programming is strongly connected with declarative paradigm, and the connection manifests with the way functional programs are built. 
-The most basic building block in functional programming is a function, which follows a number of properties.
+Functional programming (FP) is strongly connected with declarative paradigm, and the connection manifests with the way functional programs are built. 
+The most basic building block in FP is a function, which follows a number of properties.
 Among the properties, there is function composition, which gives a great ability to compose (combine) functions with help of special constructs.
 Thanks to function composition, full programs can be developed by simply composing granular functions together, hence the relation to declarative paradigm.
-Functional programming has also its roots in mathematics.
+FP has also its roots in mathematics.
 Among concepts known from mathematics, which are the foundations for functional paradigm, there are:
 
 * **Lambda calculus** - formal mathematical system which became the base of functional paradigm,
-* **Functions** - treated as first-class citizens in functional programming; their purity as seen by mathematicians allows to use powerful programming techniques,
+* **Functions** - treated as first-class citizens in FP; their purity as seen by mathematicians allows to use powerful programming techniques,
 * **Category theory** - this very abstract field of mathematics is reflected in type system of statically typed functional languages.
 
-In this section focus is laid on pointing out functional programming properties (or features), which differentiate the paradigm from others.
+In this section focus is laid on pointing out FP properties (or features), which differentiate the paradigm from others.
 Each property comes with a brief description followed by a rationale on why it is useful and a listing demonstrating the property and its usage in practice.
 All example listings are in F# language.
 
 ### Immutability
 
-Immutability is one of the most basic properties of functional programming.
+Immutability is one of the most basic properties of FP.
 In imperative paradigm, assignments are made to variables which, as the name suggests, can vary (be mutated) during run-time.
 In functional world on the other hand, to emphasize that values are immutable, it is said that there is a binding of a value to a symbol. 
 Immutability enforces that all values which are evaluated during program execution, once bound to a symbol, cannot be mutated.
@@ -279,7 +279,7 @@ let impureSalary (hours: decimal) (rate: decimal) =
 
 ### Higher-order functions
 
-Functions in functional programming languages are often referred to as "first-class citizens".
+Functions in FP languages are often referred to as "first-class citizens".
 This usually means that functions are treated just as any other ordinary value and are allowed to be combined together.
 A function is called higher-order when it returns or takes as a parameter another function.
 The concept of function pointers introduced in C and C++ is closely related to higher-order functions, though it does not guarantee type safety like in statically typed functional languages.
@@ -329,7 +329,7 @@ add5 8 // evaluates to 13```
 
 ### Recursion
 
-Recursion is a computational approach that is known in imperative world, but employed much more frequently in functional programming.
+Recursion is a computational approach that is known in imperative world, but employed much more frequently in FP.
 It relies on solving a given problem by decomposing it and retrying on a smaller instance (in context of a function or method it is typically achieved by calling itself with arguments that are smaller in some way).
 A recursive function or method must hold the stop property, meaning that there must exist an instance of a problem, for which the function or method is not going to make a recursive call yet again.
 Exception from the above is a recursive function that does not hold the stop property in order to produce an infinite (lazy) chain of values.
@@ -358,7 +358,7 @@ let rec product elements =
 
 ### Parametric polymorphism
 
-Parametric polymorphism is a very important concept in functional programming.
+Parametric polymorphism is a very important concept in FP.
 It enables to treat functions as general-purpose components that can operate on arbitrary type of data.
 First description of parametric polymorphism was made by Strachey in {{{strachey2000fundamental}}}, where the author also described related concept of ad hoc polymorphism.
 In contrast to parametric polymorphism, ad hoc polymorphism relies on application of a function to a restricted set of types, such as addition `(+)` operation can be applied to integers or real numbers.
@@ -426,7 +426,7 @@ This section will target a matter of what is the relation between a programming 
 
 Studies on how a programming language class can relate to a potential number of software defects show interesting outcomes.
 In their work, Ray et al. {{{ray2014large}}} measure (by empirical study, using mixed-methods approach) number of defects in open-source software and group the results by programming language classes (paradigms).
-One of the conclusions is that using functional programming languages leads to less software defects in comparison to procedural (imperative) languages:
+One of the conclusions is that using FP languages leads to less software defects in comparison to procedural (imperative) languages:
 
 >> *"There is a small but significant relationship between language class and defects. Functional languages have a smaller relationship to defects than either procedural or scripting languages."*
 
@@ -434,7 +434,7 @@ Apart from describing relation with general programming paradigm taken under con
 
 >> *"Defect types are strongly associated with languages; Some defect type like memory error, concurrency errors also depend on language primitives. Language matters more for specific categories than it does for defects overall."*
 
-A language that combines functional programming paradigm with the properties of static typing, memory management and concurrency support can be therefore considered safer than competitive languages with regards to expected number of software defects. 
+A language that combines FP paradigm with the properties of static typing, memory management and concurrency support can be therefore considered safer than competitive languages with regards to expected number of software defects. 
 Among languages that fit into this category there is Haskell, F#, Scala and OCaml, all of which are further discussed in section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}}.
 It must be however emphasized that besides holding described properties, there are many other, obvious factors that affect the software quality, like engineers' skills, productivity or work organization.
 What is more, additional language features usually come with extra cost in respect to performance and memory consumption.

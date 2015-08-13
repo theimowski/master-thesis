@@ -4,18 +4,16 @@ TODO:
 
 ## Content
 
-* Purity - distinction between pure functions and purity in general (language level) ?
-* Dominated areas - good word?
-
 * Web development - well there are already examples of FP here... - a few more words to Functional Web
 * Asynchrony - Futures - a few more words? read eriksen
+
+* Purity - distinction between pure functions and purity in general (language level) ?
+* Dominated areas - good word?
 
 * Paradimgs and code quality -> move to Application of functional programming???
 
 ## Formatting
 
-* References styling
-* List of listings styling
 * Are bolds appropriate?
 * use FP acronym for Functional Programming
 * use OOP acronym for Object oriented
