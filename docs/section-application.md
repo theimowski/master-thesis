@@ -11,9 +11,11 @@ Domain choice
 -------------
 
 FP is already present in a significant amount of areas. 
-There are however fields, where it is still not widely adopted. One of such fields is **web development**. 
+There are however fields, where it is still not widely adopted, and one of such fields is **web development**. 
 Here, OOP seems to be a strong leader with regards to number of existing frameworks, libraries and tools as well as popularity among software engineers. 
-In order to verify whether FP could potentially be applied to software from arbitrary domain, decision was made to discover how it would fit into this relatively foreign area of web development.
+While some FP languages together with corresponding libraries / frameworks are starting to settle down in the area, like Clojure with Compojure, Scala with Play or Erlang with Webmachine {{{github}}}, F# does not yet go out of line in this regard. 
+At the moment of writing, there are three *notable* web libraries / frameworks written completely in F# {{{fsharpwebsite}}}: WebSharper, Suave.IO and Freya, but none of them is prominent in respect to popularity.
+In order to verify whether FP and F# language in particular could potentially be applied to software from arbitrary domain, decision was made to discover how it would fit into this relatively foreign area of web development.
 
 Another reason for which web development domain was chosen, was a will to contribute to the F# community.
 In order to attract more and more attention to F# language, the language community leaded by F# Software Foundation {{{fsharpwebsite}}} is doing its best to encourage developers to give F# a try.

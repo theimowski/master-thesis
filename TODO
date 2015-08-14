@@ -4,7 +4,6 @@ TODO:
 
 ## Content
 
-* Web development - well there are already examples of FP here... - a few more words to Functional Web
 * Asynchrony - Futures - a few more words? read eriksen
 
 * Purity - distinction between pure functions and purity in general (language level) ?
