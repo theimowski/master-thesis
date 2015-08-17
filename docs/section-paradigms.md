@@ -2,7 +2,7 @@ PROGRAMING PARADIGMS
 ====================
 
 There is a lot of programming languages in use nowadays.
-TIOBE Index web site, which examines popularity of programming languages, keeps track of more than 150 programming languages {{{tiobeindex}}}, while the total number of all *notable* programming languages exceeds a thousand {{{wikilistpl}}}.
+TIOBE Index web site, which examines popularity of programming languages, keeps track of more than 150 programming languages {{{tiobeindex}}}, while the total number of all notable programming languages exceeds a thousand {{{wikilistpl}}}.
 
 The most common classification of programming languages relies on programming paradigms. 
 Paradigm determines some kind of abstract pattern that is followed by a family of languages.
@@ -128,14 +128,14 @@ Before functional programming is discussed in details, other examples of specifi
 
 Logic programming builds on top of logic formulas, which describe relations between objects in an isolated world.
 In order to be processable, logic formulas have to obey a specific formalized syntax.
-Language constructs associated with the syntax are referred to as *predicate logic*, and include {{{nilsson1990logic}}}:
+Language constructs associated with the syntax are referred to as **predicate logic**, and include {{{nilsson1990logic}}}:
 
-* *variables* and *constants*, which stand for individuals (objects) in the isolated world,
-* *functors*, for representing composites (such as family) of individuals; they denote functions over objects in the domain and build up *compound terms*,
-* *predicate symbols*, that describe relations between the objects,
-* *logical connectives*, among which there is $\wedge$ (conjunction), $\lor$ (disjunction), $\to$ (implication), $\lnot$ (negation) or $\leftrightarrow$ (logical equivalence),
-* *quantifiers*, like universal $\forall$ (for all) or existential $\exists$ (exists),
-* *auxiliary* symbols, such as parentheses or comma.
+* **variables** and **constants**, which stand for individuals (objects) in the isolated world,
+* **functors**, for representing composites (such as family) of individuals; they denote functions over objects in the domain and build up **compound terms**,
+* **predicate symbols**, that describe relations between the objects,
+* **logical connectives**, among which there is $\wedge$ (conjunction), $\lor$ (disjunction), $\to$ (implication), $\lnot$ (negation) or $\leftrightarrow$ (logical equivalence),
+* **quantifiers**, like universal $\forall$ (for all) or existential $\exists$ (exists),
+* **auxiliary** symbols, such as parentheses or comma.
 
 When relations on objects are described in formalized syntax, programming system can apply reasoning for given facts and draw certain conclusions.
 That is exactly how Prolog, the most popular logic programming language, works.
@@ -150,15 +150,15 @@ Citing the very first sentence of Apt's book {{{apt2003principles}}}:
 
 This method can be applied to plenty of specific problems that are representable in terms of abstract areas, such as:
 
-* Linear and integer programming, where given a set of constraints, certain variable has to be maximized or minimized;
-* Linear algebra, in which the available vector spaces are browsed to find a consistent solution to a problem;
-* Global optimization, that examines all inputs to determine global extrema, as opposed to local optimization.
+* **Linear and integer programming**, where given a set of constraints, certain variable has to be maximized or minimized;
+* **Linear algebra**, in which the available vector spaces are browsed to find a consistent solution to a problem;
+* **Global optimization**, that examines all inputs to determine global extrema, as opposed to local optimization.
 
 Standard approach to solving problems using Constraint programming is constructed in following way {{{apt2003principles}}}:
 
-* first, the problem instance has to be defined as a Constraint satisfaction problem (CSP) with distinction of all variables, their domains and constraints that apply for those variables;
-* next, in a loop, a number of operation is performed including preprocessing the CSP instance to syntactic form, propagating constraints in order to simplify the CSP, and unless terminating condition is not met, the problem is divided into smaller ones, each of which is being processed recursively;
-* finally, the output of the algorithm, built from combination of sub-solutions, determines the result.
+* **first**, the problem instance has to be defined as a **Constraint satisfaction problem** (CSP) with distinction of all variables, their domains and constraints that apply for those variables;
+* **next**, in a loop, a number of operation is performed including preprocessing the CSP instance to syntactic form, propagating constraints in order to simplify the CSP, and unless terminating condition is not met, the problem is divided into smaller ones, each of which is being processed recursively;
+* **finally**, the output of the algorithm, built from combination of sub-solutions, determines the result.
 
 ### Domain specific languages
 
@@ -176,12 +176,12 @@ Alternatively, a DSL might also be a stand-alone programming language not associ
 
 Most popular DSLs include {{{van2000domain, bentley1986programming}}}:
 
-* PIC - for drawing graphs,
-* YACC - for parsing source code,
-* MAKE - for defining software build scripts,
-* SQL - for manipulating relational databases,
-* HTML (further discussed in section {{APPLICATION OF FUNCTIONAL PROGRAMMING}}) - for generating markup that web browsers can render,
-* XSLT - for transforming XML documents.
+* **PIC** - for drawing graphs,
+* **YACC** - for parsing source code,
+* **MAKE** - for defining software build scripts,
+* **SQL** - for manipulating relational databases,
+* **HTML** (further discussed in section {{APPLICATION OF FUNCTIONAL PROGRAMMING}}) - for generating markup that web browsers can render,
+* **XSLT** - for transforming XML documents.
 
 Functional
 ----------
@@ -231,10 +231,12 @@ The construct is part of syntax of several programming languages, both imperativ
 
 There is more to pattern matching than just an ordinary switch statement.
 Besides the fact that it combines logic branching with assignments (which in practice turns out really convenient), it relies on the concept of Algebraic Data Types (ADT), ubiquitous in functional world.
-In context of pattern matching, it is enough to say that ADT allows to express all possible variants for a value of a certain type, which in turn can result in features such as:
+ADT concerns such concepts as sum and product types, first of which describes types that can have a restricted set of applicable values, and the latter which describes "tuples", a cartesian product of sub-types.
+Without going into too much details, it is enough to say that ADT in context of pattern matching allows to express all possible variants for a value of a certain type.
+This in turn results in features such as:
 
-* compile warning (in statically typed languages) when not every case is covered,
-* nested pattern matching that allows to dissect a recursive structure.
+* **compile warning** (in statically typed languages) when not every case is covered,
+* **nested pattern matching** that allows to dissect a recursive structure.
 
 Listing {{funpatternmatching}} shows a basic pattern matching construct applied to a list.
 Function `printIsEmpty` tries to match the `list` parameter with patterns: `[]` which corresponds to an empty list, and `h :: t` where `::` is a binary operator of type `'a -> 'a list -> 'a list`, that prepends to the list from second argument an element from the first argument.
@@ -248,17 +250,23 @@ function printIsEmpty list =
     | [] -> "list is empty"
     | h :: t -> "list is not empty"```
 
-### Purity
+### Pure functions
 
-Purity property allows to associate a programming language functions with real functions in mathematical sense.
+Pure functions allow to associate programming language functions with the mathematical definition.
 A function is pure in mathematical sense, when for a given set of arguments it always returns the same value.
 In context of programming languages, one can say that a result of pure function does not depend on anything, but the arguments this function takes.
 
-Again, as was the case with immutability, the purity properties might seem impossible to achieve in a real world application.
+Again, as was the case with immutability, function purity property might seem impossible to achieve in a real world application.
 Every software needs to communicate with components outside its process, for example by invoking IO operations or accessing computer's clock.
-Haskell, which happens to be purely functional, is used in real systems and in still preserves purity property.
+Haskell, which happens to be purely functional, is used in real systems while preserving function purity property.
 This is achievable with concept called "Monads" {{{mcbride2008applicative}}}, which also has its formal mathematical definition. 
-Monads are quite complicated topic itself, therefore they are not addressed by this thesis (explicitly, but they are being used in the section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} anyway).
+Monads are quite complicated topic itself, therefore they are not addressed by this thesis (explicitly, but they are being used in section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} anyway).
+Thanks to the function purity property, a number of benefits are gained, including:
+
+* **memoization** technique can be used. It allows to store results of function invocation in a hash array for the purpose of later, constant in time retrieval;
+* **lazy evaluation** (discussed in further course) is possible, because functions do not depend on the order of execution or any values apart from the function parameters;
+* **easier comprehension** - a reader can focus entirely on input parameters to deduce function behavior;
+* **testability** - as long as a function depends only on its arguments, it is straightforward to write automatic tests for that function in isolation.
 
 Listing {{funpurity}} demonstrates two functions, `pureSalary` and `impureSalary`.
 Both functions have the same type signature (`decimal -> decimal -> decimal`), which means that they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.
@@ -304,7 +312,7 @@ let evenNumbers =
 
 Currying is a concept that strongly relies on higher-order functions, or more closely the property that a function can return another function.
 It makes use of that property to apply arguments to a function partially.
-Partial application allows to "invoke" a function with a *strict subset* of arguments that the function can take.
+Partial application allows to "invoke" a function with a strict subset of arguments that the function can take.
 When a function is partially applied, it does not return the "final" value, but rather another function which takes as its input these arguments, that were not applied in the first place.
 The above might sound cryptic, but hopefully example shown in listing {{funcurrying}} can explain this interesting feature better.
 
@@ -527,7 +535,7 @@ At first glance, it is obvious that the implementation in listing {{csparadigmfu
 * the predicate function in form of anonymous function (lambda expression) passed to the `Where` function is of generic type `'T -> bool`, where `'T` type parameter has been expanded and inferred by C# type system to be of type `string`;
 * `Take` function (line 4) instructs to limit number of items in the sequence to the specified value (all items are returned if the value is larger than number of items);
 * `ToList` function (line 5) collects the items from the lazy sequence into a `List` type. This function forces the sequence to be evaluated;
-* the result of expression is assigned to variable `errors`.
+* `errors` variable is being assigned the result of expression.
 
 The same concerns apply as in the previous example, however they are separated in much clearer fashion:
 

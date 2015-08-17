@@ -49,8 +49,8 @@ While it makes harder for a software engineer to compile code in strongly static
 
 Because of its nature, Haskell still struggles to be visible in enterprise architectures, although big players do use it for their tools (often as part of their research department) {{{haskellindustry}}}:
 
-* **Facebook** internally makes use of *HaXL* - a tool that simplifies access to remote data, such as databases or web-based services,
-* **Microsoft** uses Haskell for its production serialization system named *Bond*, which proves useful in high scale services,
+* **Facebook** internally makes use of HaXL - a tool that simplifies access to remote data, such as databases or web-based services,
+* **Microsoft** uses Haskell for its production serialization system named Bond, which proves useful in high scale services,
 * Haskell was also adopted by a plenty of financial institutions including:
     * Bank of America Merril Lynch,
     * Barclays Capital Quantitative Analytics Group,
@@ -61,7 +61,7 @@ Because of its nature, Haskell still struggles to be visible in enterprise archi
 ### OCaml
 
 First OCaml version was released in 1996 as an extension to the Caml (Categorical Abstract Machine Language) programming language, which in turn comes from the family of ML (Metalanguage) dialects.
-The development of the language is led by a company called *Inria*.
+The development of the language is led by a company called Inria.
 
 Coming from the statically typed languages family, OCaml ships with a rich type system offering type inference, as well as various data types, such as records or sums {{{ocamlwebsite}}}.
 Similar to Haskell, OCaml enables interoperability with languages like C, thanks to the foreign function interface feature.
@@ -74,8 +74,8 @@ OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}
 * **Jane Street** - a proprietary trading firm that uses OCaml as its primary development platform {{{minsky2008caml}}},
 * **LexiFi** - company that used OCaml to develop the Modeling Language for Finance (MLFi), which is the first formal language that accurately describes the most sophisticated capital market, credit, and investment products,
 * **Facebook** - which does not need any introduction, uses OCaml for the following:
-    * *Hack* - a programming language with its compiler written in OCaml, as an extension to PHP with static typing,
-    * *pfff* - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
+    * Hack - a programming language with its compiler written in OCaml, as an extension to PHP with static typing,
+    * pfff - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
 
 ### FSharp
 
@@ -151,7 +151,7 @@ Clojure also comes with a great deal of models for concurrent processing, each o
 
 With its distinctive nature, Clojure settled down in code-bases in a number of companies, including {{{clojurestories}}}:
 
-* **Puppet Labs**, that used Clojure for building *Trapperkeeper* - an open source framework for hosting services which are supposed to run for a long period,
+* **Puppet Labs**, that used Clojure for building Trapperkeeper - an open source framework for hosting services which are supposed to run for a long period,
 * **Beanstalk**, which after switching to Clojure for its continuous integration application gained a multiply of 20 boost in performance for the caching component,
 * **ThoughtWorks**, a consulting company, which gave Clojure a try to rewrite their CMS solution, found out that the language helped them to deliver the software before deadline and under designated budget,
 * **Sonian**, that deals with archiving emails in cloud, employs Clojure for its core back-end components and claims that thanks to such solution is able to ship new features very quickly,
@@ -192,7 +192,7 @@ FP is getting more and more popular in the software industry.
 Not only the languages that were designed with functional approach in mind are being used, but also those languages that originate from a different paradigm branch incorporate functional techniques.
 Good examples of such languages are C# and Java, which initially supported only OOP and imperative style of programming, but new versions of these two introduce concepts well known to functional programmers, such as higher-order functions, lambda expressions or type polymorphism.
 
-While there are a lot of fields in software industry where FP is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm **dominates** and leaves other behind.
+While there are a lot of fields in software industry where FP is employed to only a specific sub-domain, like processing or analytics components, there are areas where functional paradigm dominates and leaves other behind.
 This domination manifests with impact of institutions that achieved success with the paradigm on other players that have not yet tried different approach than imperative.
 Such areas, where functional seems to take the lead are described in this section, together with a rationale on why FP is more promising in specific case.
 As a disclaimer, it is important to note, that the domination does not necessarily mean more job openings in the market (as non-functional paradigms are in general still more popular), but rather that there is a visible trend of growing employments in these areas.
@@ -214,13 +214,13 @@ Below are excerpts from these works that point out main reasons why financial in
 * **Performance** - compiled code turns out to be really fast when certain optimization techniques are used {{{minsky2008caml}}}, plus the interoperability with libraries built from different languages (with help of foreign function interface) allows to natively execute chunks that are performance critical for the business;
 * **Generalization** - higher order functions and currying abstract away the behavior from data, making it possible to implement simulation algorithms applicable to various pricing derivatives {{{fsharp2014deep}}}, type polymorphism done this way leads to less amount of code compared to what it would require with only OOP techniques used;
 * **Parallelization** - immutable data structures that are used in FP encourage to process data in parallel, as there is a lower risk of any kind of concurrency issue, resulting in vertical processing scalability and allowing to consume larger volumes of data for financial analysis {{{berthold2012functional}}};
-* **Hiring better engineers** - it is noticed that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that are familiar with FP languages (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
+* **Hiring better engineers** - it is noted that job openings related to functional languages like OCaml {{{minsky2008caml}}} attract more talented engineers (financial institutions can afford higher salaries implied), even though there is a minority of developers that are familiar with FP languages (such phenomenon is known as "the python paradox" {{{pythonparadox}}});
 
 ### Data science
 
 Another area where FP seems to start taking lead is data science.
 Data science is a very broad field which concerns multiple computer science topics, such as artificial intelligence, machine learning or data mining.
-Because these topics use extensively various numerical methods, FP feels like a natural candidate when it comes to choosing a proper paradigm for solving particular problem.
+Because these topics use extensively various numerical methods, FP feels like a natural candidate when it comes to choosing a proper paradigm for solving problem within this area.
 
 In his work {{{hughes1989functional}}}, Hughes describes how functional properties make it convenient to implement an artificial intelligence heuristic.
 The example heuristic in the work is an alpha-beta method of determining best move for computer opponent in a logic game that can be represented by a game state tree.
@@ -229,7 +229,7 @@ As a game tree in logic game can be potentially infinite, the functional propert
 
 Machine learning is yet another perfectly suitable field for functional paradigm, what is shown in Brandewinder's book {{{brandewinder2015ml}}}.
 The book presents examples in F# language of addressing concerns feasible for machine learning such as spam filter, optical character recognition, regression models and logical games.
-Interesting aspect of F# in context of machine learning is the interoperability (using F# Type Providers feature) with R language, which is famous for its comprehensive suite of ready functions and tools for data processing.
+Interesting aspect of F# in context of machine learning is the interoperability (using F# Type Providers feature) with R language, which is famous for its comprehensive suite of accessible functions and tools for data processing.
 
 Proof for growing interest in using functional techniques for data mining are books like Haskell Data Analysis Cookbook {{{shukla2014haskell}}}, where the author illustrates in details a variety of concepts including advanced data analysis and processing as well as input and output operations for consuming the data from and to outside world.
 The latter concept despite standing for hard to express in pure functional approach is clearly explained in the book, which confirms that even purely functional languages can be treated as general-purpose programming languages.
@@ -246,8 +246,8 @@ Vast majority of concurrency issues appear in OOP software due to the fact that 
 In functional paradigm on the other hand, such danger goes away when immutable data structures are being used, releasing the engineer from non-trivial task of context synchronization and preventing whole class of defects.
 
 One approach to write concurrent programs is described in article by Jones {{{jones2007beautiful}}}, where the author outlines benefits of Software Transactional Memory (STM) mechanism embedded into Haskell.
-The STM prevents issues related to *locks* as well as *condition variables*, therefore allowing the code to be more modular (composable).
-Thanks to the fact that STM bases on the Haskell type system, the compiler disallows illegal (from the concurrency point of view) read / write operations in code blocks that are meant to be executed *atomically*.
+The STM prevents issues related to locks as well as condition variables, therefore allowing the code to be more modular (composable).
+Thanks to the fact that STM bases on the Haskell type system, the compiler disallows illegal (from the concurrency point of view) read / write operations in code blocks that are meant to be executed atomically.
 It is worth noting, that the mechanism can also be potentially employed into imperative programming languages, however sophisticated language features and ease of modularity, present in functional languages, allow STM to be fully efficient.
 
 Another concurrent programming model associated with functional paradigm is, already described together with Erlang, message passing.

@@ -14,7 +14,7 @@ FP is already present in a significant amount of areas.
 There are however fields, where it is still not widely adopted, and one of such fields is **web development**. 
 Here, OOP seems to be a strong leader with regards to number of existing frameworks, libraries and tools as well as popularity among software engineers. 
 While some FP languages together with corresponding libraries / frameworks are starting to settle down in the area, like Clojure with Compojure, Scala with Play or Erlang with Webmachine {{{github}}}, F# does not yet go out of line in this regard. 
-At the moment of writing, there are three *notable* web libraries / frameworks written completely in F# {{{fsharpwebsite}}}: WebSharper, Suave.IO and Freya, but none of them is prominent in respect to popularity.
+At the moment of writing, there are three notable web libraries / frameworks written completely in F# {{{fsharpwebsite}}}: WebSharper, Suave.IO and Freya, but none of them is prominent in respect to popularity.
 In order to verify whether FP and F# language in particular could potentially be applied to software from arbitrary domain, decision was made to discover how it would fit into this relatively foreign area of web development.
 
 Another reason for which web development domain was chosen, was a will to contribute to the F# community.
@@ -416,7 +416,7 @@ In conjunction with Intellisense feature of Integrated Development Environment (
 
 ### Create, Update and Delete operations
 
-From a programmer's point of view, majority of features in any software can be marked as either a *query* or a *command*.
+From a programmer's point of view, majority of features in any software can be marked as either a **query** or a **command**.
 Such generalization refers to concept known as Command and Query Separation.
 The term defines queries as something that does not change state, but only fetch certain portion of data from a system.
 On the other hand, commands are actions that have side effects because of modifying the internal state of the system {{{meyer1988object}}}.
@@ -424,9 +424,9 @@ In {{Data Access}} queries were implemented to fetch basic sets of data regardin
 In this section commands that alter state of Music Store are shown.
 As a part of administration management module, following features were implemented in Music Store application:
 
-* Creating a new album from scratch by assigning a title, price, artist and genre (the last two being restricted to discrete subset of possible values),
-* Editing an existing album by modifying any of the properties,
-* Deleting an album from the Music Store, and therefore making it impossible for users to buy.
+* **Creating** a new album from scratch by assigning a title, price, artist and genre (the last two being restricted to discrete subset of possible values),
+* **Editing** an existing album by modifying any of the properties,
+* **Deleting** an album from the Music Store, and therefore making it impossible for users to buy.
 
 ```xxx
 {FSharp]{Music Store - creating album}{fsmusiccreatealbum}
@@ -571,11 +571,11 @@ In order to model possible session states, a few types were declared as per list
 An F# Record type was declared in first line of listing {{fsmusicsessiontype}}.
 Records behave similarly to standard C# classes, however there is a number of advantages for records, such as:
 
-* records are immutable by default, 
-* record constructor enforces all fields to be initialized, which prevents from having any record field undefined,
-* records have structural equality by default, meaning that one does not have to override equality members as in C#,
-* records can appear in pattern matching constructs,
-* records provide a handy shortcut for copying (cloning) objects called copy expression, which allows to create new instance of record with some of the fields modified.
+* they are immutable by default, 
+* constructor enforces all fields to be initialized, which prevents from having any record field undefined,
+* they have structural equality by default, meaning that one does not have to override equality members as in C#,
+* they can appear in pattern matching constructs,
+* they provide a handy shortcut for copying (cloning) objects called copy expression, which allows to create new instance of record with some of the fields modified.
 
 Another F# type construct, called discriminated union was used in line 6.
 They allow for declaring a type with a set of applicable constructors and are specially designed to work with pattern matching.
