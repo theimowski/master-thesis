@@ -44,8 +44,9 @@ Functional Web
 
 Even though web development is usually associated with using imperative techniques only, it's not completely uncommon to follow functional principles while creating Internet applications.
 Majority of web applications are built on top of the Hypertext Transformation Protocol (HTTP) protocol.
-From a software engineer point of view, the HTTP protocol boils down to requests and responses.
-A functional programmer could even think of a web application as a general function of type `HTTPRequest -> HTTPResponse`.
+From a software engineer point of view, the HTTP protocol boils down to requests and responses and accompanied details, such as paths, status codes, headers or content body.
+The HTTP protocol is stateless, meaning that details about requests are not retained by the protocol and thus there is no ad hoc relation between two requests.
+Because of the stateless nature of the underlying protocol, HTTP response should only depend on the issued request, and therefore a functional programmer could even think of a web application as a general function of type `HTTPRequest -> HTTPResponse`.
 
 ### Asynchrony
 
@@ -59,9 +60,16 @@ Callback-passing style is one of the most popular techniques for writing asynchr
 While the technique may be a sufficient solution for smaller problems, when applied to large and complex systems, code very easily gets hard to maintain.
 
 Among various approaches to asynchronous programming, there is one that abstracts away the concept of asynchrony from the actual flow of program.
-In F# it is called **asynchronous workflow** and is represented with generic `Async` type, but the term is also known as **future** or **promise** in different programming languages.
+In F# it is called **asynchronous workflow** and is represented with generic `Async` type.
+The term is also known as **future**, **promise** or **delay** in other programming languages.
 This approach bypasses callbacks in a clever way, resulting in code that is easier to read and reason about.
-It originates from the functional paradigm, and can prove helpful when developing client-server architecture {{{eriksen2013your}}}:
+Thanks to abstracting time-consuming calls within the `Async` objects, they can be easily combined together.
+As a result, multiple actions can be implemented without the need of callbacks, but still with the availability of utilizing asynchrony.
+Asynchronous workflow represents a computation that is supposed to evaluate to a value of the type parameter of `Async`.
+Value inside the `Async` type can happen to be available at once, but usually the deferred execution of `Async` leads to evaluating the inner value.
+From the developer's perspective, extracting the internal state of `Async` object is transparent, as it is always necessary to eventually invoke a blocking call to "unwrap" the value from `Async`.
+The general concept of "wrapping" a value with a cross-cutting structure originates from the functional paradigm.
+Asynchronous workflows or futures and can prove helpful when developing client-server architecture {{{eriksen2013your}}}:
 
 >> *"Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software."*
 
@@ -546,8 +554,7 @@ Typed routes feature from Suave confirmed to be highly composable, and thus the 
 ### Session
 
 Another interesting concern with regards to Internet applications development is State Management Mechanism, also known as Session in software engineers' dialect.
-The HTTP protocol is stateless, meaning that details about requests are not retained by the protocol and thus there is no ad hoc relation between two requests.
-Still, majority of web applications keep track of the requests coming from the same initiator.
+Despite the HTTP protocol being stateless, majority of web applications still keep track of the requests coming from the same initiator.
 To do that, they have to attach specific meta-data in request and responses such as cookies or other headers, arguments in URL paths, contents of the body.
 In addition to that, those application have to persist the state on the server side for later retrieval.
 

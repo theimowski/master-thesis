@@ -4,8 +4,6 @@ TODO:
 
 ## Content
 
-* Asynchrony - Futures - a few more words? read eriksen
-
 * Purity - distinction between pure functions and purity in general (language level) ?
 * Dominated areas - good word?
 
@@ -16,13 +14,6 @@ TODO:
 * Are bolds appropriate?
 * Bullets - bolded or what?
 * Bullets - end with comma or semicolon?
-
-### Conventions ?
-
-* 'a or 't for generic type parameters
-
-## Optional
-* logic, constraint programming - examples?
 
 -----------------
 
