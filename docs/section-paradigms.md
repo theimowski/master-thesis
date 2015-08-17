@@ -52,7 +52,7 @@ Despite some of these languages aimed to target multiple paradigms, the concept 
 Majority of imperative programming languages that were developed till the 80s have procedural nature.
 This means that they focus on defining reusable procedures which invoke certain actions.
 Procedures are stateless, and as a result they cannot carry any kind of data with them.
-Object-oriented programming (OOP) was introduced in order to combine data with behavior inside an object, in order to relate object to its internal state and applicable operations.
+OOP was introduced in order to combine data with behavior inside an object, in order to relate object to its internal state and applicable operations.
 OOP follows imperative approach with regards to how the behavior inside an object (in form of methods or members) is implemented.
 Following are enlisted a few design principles that the paradigm outlines.
 
@@ -186,7 +186,7 @@ Most popular DSLs include {{{van2000domain, bentley1986programming}}}:
 Functional
 ----------
 
-Functional programming (FP) is strongly connected with declarative paradigm, and the connection manifests with the way functional programs are built. 
+Functional programming is strongly connected with declarative paradigm, and the connection manifests with the way functional programs are built. 
 The most basic building block in FP is a function, which follows a number of properties.
 Among the properties, there is function composition, which gives a great ability to compose (combine) functions with help of special constructs.
 Thanks to function composition, full programs can be developed by simply composing granular functions together, hence the relation to declarative paradigm.
