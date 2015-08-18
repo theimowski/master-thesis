@@ -19,8 +19,19 @@ Section {{PROGRAMING PARADIGMS}} considers programming paradigms.
 It first discusses imperative programming origins and its history.
 Then it identifies how OOP was invented, together with its premises and design principles that establish the philosophy.
 A few drawbacks are presented in order to emphasize what issues occur within this approach.
-Next, declarative paradigm is introduced simultaneously with such derivatives as logic or constraint programming.
-Spotlight on functional...
-Finally a comparison...
+Next, declarative paradigm is introduced simultaneously with such derivatives as logic and constraint programming.
+The section concentrates on FP, by showing how it relates to declarative paradigm and presenting a few basic foundations of FP.
+Finally a connection between programming paradigms and code quality is demonstrated with help of community's impressions as well as an authentic example.
+
+Section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} examines business cases where FP has already been utilized.
+To start with, it goes through the list of most popular FP languages that are included in job offerings around the globe.
+Each of the language is briefly described and examples of companies and projects that incorporate the language are enlisted.
+In the further course of section {{FUNCTIONAL PROGRAMMING IN INDUSTRY}} a few areas are presented that seem most prominent with regards to application of FP.
+Every area comes with a motivation by pointing out the main advantages for using functional approach.
+
+Section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} converts from being theoretic to being very practical by demonstrating multiple code excerpts from a complete web-based application.
+Firstly, choice of Internet applications domain as the infrastructure for example program is justified.
+Secondly, the domain is explored from the point of view of FP, together with emphasizing how concept of asynchrony can be dealt with functional approach.
+Lastly, a significant part of the thesis is devoted to exhibit step-by-step guide with code listings on how to tackle cross-cutting concerns in web development.
 
 Similar study on the topic {{{pastircak2014application}}} describes application of FP to enterprise systems.
