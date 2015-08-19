@@ -148,17 +148,16 @@ Citing the very first sentence of Apt's book {{{apt2003principles}}}:
 
 >> *"Constraint programming is an alternative approach to programming in which the programming process is limited to a generation of requirements (constraints) and a solution of these requirements by means of general or domain specific methods"*
 
-This method can be applied to plenty of specific problems that are representable in terms of abstract areas, such as:
+Standard approach to solving problems using Constraint programming is constructed in following way {{{apt2003principles}}}:
+First, the problem instance has to be defined as a **Constraint Satisfaction Problem** (CSP) with distinction of all variables, their domains and constraints that apply for those variables.
+Next, in a loop, a number of operation is performed including preprocessing the CSP instance to syntactic form, propagating constraints in order to simplify the CSP, and unless terminating condition is not met, the problem is divided into smaller ones, each of which is being processed recursively.
+Finally, the output of the algorithm, built from combination of sub-solutions, determines the result.
+
+Constraint programming can be applied to plenty of specific problems that are representable in terms of abstract areas, such as:
 
 * **Linear and integer programming**, where given a set of constraints, certain variable has to be maximized or minimized;
 * **Linear algebra**, in which the available vector spaces are browsed to find a consistent solution to a problem;
 * **Global optimization**, that examines all inputs to determine global extrema, as opposed to local optimization.
-
-Standard approach to solving problems using Constraint programming is constructed in following way {{{apt2003principles}}}:
-
-* **first**, the problem instance has to be defined as a **Constraint satisfaction problem** (CSP) with distinction of all variables, their domains and constraints that apply for those variables;
-* **next**, in a loop, a number of operation is performed including preprocessing the CSP instance to syntactic form, propagating constraints in order to simplify the CSP, and unless terminating condition is not met, the problem is divided into smaller ones, each of which is being processed recursively;
-* **finally**, the output of the algorithm, built from combination of sub-solutions, determines the result.
 
 ### Domain specific languages
 
@@ -269,17 +268,17 @@ Thanks to the function purity property, a number of benefits are gained, includi
 * **testability** - as long as a function depends only on its arguments, it is straightforward to write automatic tests for that function in isolation.
 
 Listing {{funpurity}} demonstrates two functions, `pureSalary` and `impureSalary`.
-Both functions have the same type signature (`decimal -> decimal -> decimal`), which means that they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.
+Both functions have the same type signature `(decimal * decimal) -> decimal`, which means that they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.
 Despite they have the same type signature, the functions do differ with regards to purity.
 While `pureSalary` does not depend on any value from outside and always returns the same result for given arguments, the `impureSalary` takes an implicit dependency on `DateTime.Now.DayOfWeek` property, which depends on the current (at the time of executing) day of week.
 As F# is not purely functional, it cannot enforce pure nature of functions, and thus the `impureSalary` compiles correctly.
 
 ```xxx
 {FSharp]{Example of pure and impure functions}{funpurity}
-let pureSalary (hours: decimal) (rate: decimal) =
+let pureSalary (hours: decimal, rate: decimal) =
     hours * rate
 
-let impureSalary (hours: decimal) (rate: decimal) =
+let impureSalary (hours: decimal, rate: decimal) =
     if DateTime.Now.DayOfWeek = DayOfWeek.Saturday then
         hours * rate * 1.5M
     else
@@ -292,7 +291,7 @@ This usually means that functions are treated just as any other ordinary value a
 A function is called higher-order when it returns or takes as a parameter another function.
 The concept of function pointers introduced in C and C++ is closely related to higher-order functions, though it does not guarantee type safety like in statically typed functional languages.
 
-Higher-order functions is a powerful feature that enables to abstract away a common piece of logic and make it more reusable.
+Higher-order functions construct a powerful mechanism that enables to abstract away a common piece of logic and make it more reusable.
 It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with lists (for example filtering or mapping) or null-checking.
 In addition to that, higher-order functions can be used as a foundation for concept known in OOP as "Dependency Injection".
 Dependency Injection in OOP paradigm relies on passing abstract interfaces without implementation to consuming classes.
@@ -381,7 +380,7 @@ It takes two arguments: function `f` of type `'a -> 'b` and `list` value of type
 Then it pattern matches on the `list` value to distinguish case when the input list is empty and when there is at least one element.
 If the list is not empty, the `f` function is applied to the first element of list (`h` for head) and `map` function is recursively invoked with the rest of elements (`t` for tail).
 The values are then glued to form a list with `::` operator (the same that was used for pattern matching case).
-It is said that the `map` function is polymorphic, and its parametric type is `'a - 'b` -> `'a list` -> `'b list`.
+It is said that the `map` function is polymorphic, and its parametric type is `('a -> 'b) -> 'a list -> 'b list`.
 (Again, it should be noted that for the sake of simplicity the function is not tail-recursive.)
 
 ```xxx

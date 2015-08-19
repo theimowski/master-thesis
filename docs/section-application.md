@@ -116,7 +116,7 @@ let x: int option = Some 28 (* there is value 28 *)
 let y: int option = None (* there is no value *)```
 
 The simplest possible WebPart can be defined as in line 1 of listing {{fswebparthello}}.
-The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response 200 OK status code, as well as "Hello World!" response body content.
+The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response 200 OK status code, as well as response body content given as the parameter to the WebPart (in this case "Hello World!").
 Such WebPart can be used to start an HTTP server using a default configuration (line 2 of listing {{fswebparthello}}).
 From the listing {{fswebparthello}}, it is evident that Suave allows to build Web applications in a very succinct way and does not require too much ceremony.
 
