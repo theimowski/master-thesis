@@ -54,7 +54,7 @@ This means that they focus on defining reusable procedures which invoke certain 
 Procedures are stateless, and as a result they cannot carry any kind of data with them.
 OOP was introduced in order to combine data with behavior inside an object, in order to relate object to its internal state and applicable operations.
 OOP follows imperative approach with regards to how the behavior inside an object (in form of methods or members) is implemented.
-Following are enlisted a few design principles that the paradigm outlines.
+Following are listed a few design principles that the paradigm outlines.
 
 **Objects** are the basic building blocks of a program in OOP world.
 In some languages, every data structure including primitive types is an object (it is sometimes common to say that "Everything is an object").
@@ -122,7 +122,7 @@ Term declarative refers to the code, which is written by **declaring** how such 
 
 In his work, Padawitz {{{padawitz2006deductive}}} describes the declarative programming term as *"a combination of functional (or applicative) and relational (or logic) programming"*.
 As it turns out, both functional and logic programming can be thought of sub-paradigms of declarative programming paradigm.
-Before functional programming is discussed in details, other examples of specific and based on declarative approach sub-paradigms (including logic programming) are enlisted together with brief description.
+Before functional programming is discussed in details, other examples of specific and based on declarative approach sub-paradigms (including logic programming) are listed together with brief description.
 
 ### Logic programming
 

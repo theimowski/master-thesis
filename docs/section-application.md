@@ -284,7 +284,7 @@ Powerful type-inference mechanism in F# is thus able to determine that the type 
 Thanks to the type-inference, no explicit type annotations are required, and the code is more concise.
 
 While a disadvantage of this approach is that the productivity suffers during development because any change to the view has to be recompiled, 
-two great benefits from using such a DSL for rendering HTML can be enlisted:
+two great benefits from using such a DSL for rendering HTML can be listed:
 
 * Type system can catch common type mismatch issues in compile-time,
 * Every language syntax construct can be used in conjunction with the DSL (as seen with the list comprehension), making it easier to express complex logic.
@@ -306,7 +306,7 @@ Folding comes also from the functional background {{{hughes1989functional}}}.
 In fact, every FP defines `fold` in its core library function suite.
 Type signature for the one in F# is presented in listing {{fsfoldsignature}}.
 `List.fold` calculates result `'State` from the initial `'State` and list of `'T` elements.
-It takes 3 arguments (enlisted in reverse order):
+It takes 3 arguments (listed in reverse order):
 
 * `'T list` - a list of `'T` elements,
 * `'State` - initial state,
@@ -879,7 +879,7 @@ Since Suave is very light-weight, it does not (at the time of writing) come out 
 Engaging part of the research was thus ability to create utility modules for working with forms in Suave.
 Even more inviting experience was that the written modules were accepted as part of the official Suave package (in its "Experimental" distribution), since Suave is an open-source software hosted at GitHub web site {{{suave}}}.
 
-The prepared functionality aimed to target all of the steps enlisted above.
+The prepared functionality aimed to target all of the steps listed above.
 It was designed to do so in a declarative way, by providing strongly typed access to values of form fields, an example of which is shown in listing {{fsformfields}}.
 Form fields were to be enclosed in a record type.
 Supported types for the fields were: 

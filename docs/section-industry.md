@@ -9,7 +9,7 @@ This observation turns out to be specially true at the time of writing, as more 
 This section goes through the most popular functional languages, describing how they got created and what are their main premises.
 Real-world applications that achieved success in the industry are pointed out together with substantiation of why FP proved helpful.
 The success stories presented in this section are largely cited from a number of websites.
-After that, three areas where the paradigm really shines and leaves other approaches behind, are enlisted.
+After that, three areas where the paradigm really shines and leaves other approaches behind, are listed.
 
 Popular languages
 -----------------
@@ -20,7 +20,7 @@ Description for each language sticks to the following structure:
 
 * **short history** is first presented, when a particular language was built and under what circumstances,
 * **most important features** and properties of the language are described next, including static typing and purity,
-* **names of companies** are finally enlisted that use the language in production or for their internal tools.
+* **names of companies** are finally listed that use the language in production or for their internal tools.
 
 The oldest functional languages like Miranda, LISP or Scheme are deliberately not included in the list, as they are not really widely used in business applications.
 It is however important to remember that those languages became inspiration for more modern functional languages that found their way to the list.
@@ -136,7 +136,7 @@ Clojure was created by Rich Hickey in 2007.
 Its major motivation was to design a language that has Lisp-like syntax, embraces existing virtual machine platform (JVM) and allows to write code in functional style with emphasis on immutability and concurrency support.
 Clojure was made a fully open-source software so that it could be easier adopted by the community.
 
-Unlike previously enlisted languages, Clojure is dynamically typed.
+Unlike previously listed languages, Clojure is dynamically typed.
 The code is compiled on-the-fly to corresponding JVM byte-code, but is not type-checked before running, which does not guarantee type safety and can result in this class of run-time errors, which would not be otherwise possible in statically typed language.
 Dynamic typing in Clojure made it easier to incorporate macros feature into the language.
 Macro system in Clojure follows philosophy named "code-as-data", which enables to generate and manipulate arbitrary code dynamically.
