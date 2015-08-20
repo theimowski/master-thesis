@@ -238,8 +238,9 @@ This in turn results in features such as:
 * **nested pattern matching** that allows to dissect a recursive structure.
 
 Listing {{funpatternmatching}} shows a basic pattern matching construct applied to a list.
-Function `printIsEmpty` tries to match the `list` parameter with patterns: `[]` which corresponds to an empty list, and `h :: t` where `::` is a binary operator of type `'a -> 'a list -> 'a list`, that prepends to the list from second argument an element from the first argument.
-In other words, pattern matching construct seen in listing {{funpatternmatching}} recognizes two cases: in first case the list is empty, and in the second case there is at least one element in the list (`h`).
+Function `printIsEmpty` tries to match the `list` parameter with patterns: `[]` which corresponds to an empty list, and `head :: tail` where `::` is a binary operator for operands of type `'a` and `'a list`, which prepends the element from first argument (`head`) to the list (`tail`) from second argument.
+`tail` might be empty, and in that case `head :: tail` denotes a single-element list.
+In other words, pattern matching construct seen in listing {{funpatternmatching}} recognizes two cases: in first case the list is empty, and in the second case there is at least one element in the list (`head`).
 If the second case was omitted, the compiler would issue a warning in compile-time.
 
 ```xxx
@@ -247,7 +248,7 @@ If the second case was omitted, the compiler would issue a warning in compile-ti
 function printIsEmpty list =
     match list with
     | [] -> "list is empty"
-    | h :: t -> "list is not empty"```
+    | head :: tail -> "list is not empty"```
 
 ### Pure functions
 
@@ -268,7 +269,7 @@ Thanks to the function purity property, a number of benefits are gained, includi
 * **testability** - as long as a function depends only on its arguments, it is straightforward to write automatic tests for that function in isolation.
 
 Listing {{funpurity}} demonstrates two functions, `pureSalary` and `impureSalary`.
-Both functions have the same type signature `(decimal * decimal) -> decimal`, which means that they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.
+Both functions have the same type signature, as they take two `decimal` arguments: `hours` and `rate`, and return `decimal` salary computed for a work day.
 Despite they have the same type signature, the functions do differ with regards to purity.
 While `pureSalary` does not depend on any value from outside and always returns the same result for given arguments, the `impureSalary` takes an implicit dependency on `DateTime.Now.DayOfWeek` property, which depends on the current (at the time of executing) day of week.
 As F# is not purely functional, it cannot enforce pure nature of functions, and thus the `impureSalary` compiles correctly.
@@ -319,10 +320,14 @@ Thanks to the currying feature, functional languages gain more re-usability in c
 It is extremely easy to define new, more specific functions that partially match on the multi-argument ones, without compromising any property of the curried function.
 
 In listing {{funcurrying}} a standard `add` function is defined (lines 1-2).
-It takes two parameters (`a` and `b`), adds them together and returns the result of addition (F# compiler infers following type signature: `int -> int -> int`).
+It takes two parameters (`a` and `b`), adds them together and returns the result of addition (F# compiler infers following the arguments to be of type `int`).
 Then in lines 4-5 another function `add5` is defined, which partially applies on `add` function, by applying only the first argument (`x` with value 5).
-In result, `add5` gets inferred by the compiler to be of type `int -> int`, because it applied only the first argument to `add` and now needs yet one more argument to evaluate the sum.
+In result, `add5` is an unary function which takes a single `int` parameter, as only the first argument to `add` was applied and yet one more argument to evaluate the sum is needed.
 Line 7 presents how `add5` can be invoked with a single parameter.
+Functions in F# are **curried by default**, hence following type signature for `add`: `int -> int -> int` means that the function can be invoked both with all arguments (`add 2 2`) and with a single argument (`add 5`).
+While the first case evaluates to an ordinary `int` value, invocation in the latter case returns another function of type `int -> int`.
+F# allows also for defining functions, which take multiple arguments in form of a tuple - such functions are not curried, since creation of a tuple requires all arguments to be given (example of such function is analogous `addNoCurry` in listing {{funcurrying}}).
+The concept is more accurately illustrated in {{{petricek2009real}}}.
 
 ```xxx
 {FSharp]{Currying}{funcurrying}
@@ -332,7 +337,12 @@ let add x y =
 let add5 =
     add 5
 
-add5 8 // evaluates to 13```
+add5 8 // evaluates to 13
+
+addNoCurry (x, y) =
+    x + y
+
+addNoCurry (5, 8) // must specify all arguments```
 
 ### Recursion
 
@@ -340,6 +350,7 @@ Recursion is a computational approach that is known in imperative world, but emp
 It relies on solving a given problem by decomposing it and retrying on a smaller instance (in context of a function or method it is typically achieved by calling itself with arguments that are smaller in some way).
 A recursive function or method must hold the stop property, meaning that there must exist an instance of a problem, for which the function or method is not going to make a recursive call yet again.
 Exception from the above is a recursive function that does not hold the stop property in order to produce an infinite (lazy) chain of values.
+Such logically infinite chain often proves useful in context of lazy evaluation which further depicted and illustrated in listing {{funlazy}}.
 Recursion technique is an alternate approach to iteration.
 Indeed, some programming languages' compilers, for optimization reasons, translate recursive functions into its iterative equivalent.
 According to the Church-Turing thesis:
@@ -349,11 +360,17 @@ According to the Church-Turing thesis:
 This means that for each recursive function there exists a transformation to its corresponding iterative algorithm and the same applies backwards.
 Why bother with recursion at all if in majority of cases an iterative model is more efficient with regards to time complexity and memory consumption?
 Because iteration comes from imperative approach and can harm referential transparency as well as immutability, while recursion fits perfectly into functional world.
-Thanks to complex compilers' code optimizations and techniques such as "tail recursion" (which prevents from stack overflows by avoiding stack frame allocation for recursive calls) a recursive algorithm can be both efficient and easy to comprehend.
+Thanks to complex compilers' code optimizations and techniques such as "tail recursion" a recursive algorithm can be both efficient and easy to comprehend.
+
+In most programming environments, a function invocation is associated with allocating all arguments as well as return address on the stack.
+If a function is invoked recursively, continuous allocations could result in stack overflow.
+Tail recursion prevents from stack overflow when invoking recursive calls by avoiding unnecessary stack frame allocation.
+This is achievable when the recursively-invoked function is the last invoked operation and does not need to return back to the caller {{{petricek2009real}}}.
+F# does support tail recursion mechanism, however the last-operation precaution has to be made for the mechanism to be used by compiler.
 
 Listing {{funrecursion}} presents a recursive `product` function, which computes the product for a given list of numbers.
 Based on the length of `elements` list (with help of pattern matching), the `product` function either returns neutral element for multiplication (`1`) or invokes itself recursively with the tail of the list.
-Pattern matching case in line 4 splits the non-empty list into head (`h`) - first element of the list, and tail (`t`) - the rest of the elements in list (tail might be empty).
+Pattern matching case in line 4 splits the non-empty list into `head` - first element of the list, and `tail` - the rest of the elements in list.
 It is worth noting that the `product` function as defined in listing {{funrecursion}} is not tail-recursive, however with a bit of effort (for example by using technique called accumulator) it could become so.
 
 ```xxx
@@ -361,7 +378,7 @@ It is worth noting that the `product` function as defined in listing {{funrecurs
 let rec product elements =
     match elements with 
     | [] -> 1
-    | (h::t) -> h * product t```
+    | head::tail -> head * product tail```
 
 ### Parametric polymorphism
 

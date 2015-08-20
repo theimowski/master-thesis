@@ -2,15 +2,14 @@ TODO:
 
 Content:
 
-* explain 'a -> 'b -> 'c in currying and mention tuples in functions as well
-* recursive function - better description
-* tail recursion - better description
 * example with F# vs C# - 7000 spare lines
 * example with Reverse()
+
 * type inference to functional features?
 * purely functional data - comment?
 * moar about the tutorial - boost
 
+---
 
 * Summary
 * Introduction
