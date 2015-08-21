@@ -473,8 +473,10 @@ One of the observation concerns modules' dependencies complexity in both languag
 >> *"C# projects tend to be larger, with more classes and dependencies. They also have longer chains of dependencies on average. Real world F# projects are smaller with cleaner modularity."*
 
 Another observation corresponds to size of code, which turns out to be much smaller when using F# in comparison to C#.
-Not only the concise syntax of F#, but also functional properties like composability and abstraction led to interesting outcome.
-Experiment that involved rewriting an existing C# application into its F# equivalent resulted in following conclusion {{{cousins2014difference}}}:
+Conducted experiment involved rewriting an existing C# application, responsible for evaluating revenue from contracts of electricity supply in United Kingdom, with size of 350 KLOC (thousands of lines of code) into its F# equivalent, identical with regards to functionality counterpart.
+Concise syntax of F# allowed to eliminate a lot of "noise" lines of code, such as braces or blank lines that are very common in C# language.
+Not only the syntax of F#, but also functional properties like composability and abstraction led to interesting results.
+One of the conclusions drawn from the experiment highlighted that **total** amount of application code in F# version reached less than 22 KLOC, comparing to the 29 KLOC of only **blank** lines in C# version {{{cousins2014difference}}}:
 
 >> *"I can fit the whole F# solution in the blank lines of the C# solution with 7,000 lines to spare."*
 
