@@ -439,6 +439,32 @@ let numbers =
 
 Seq.toList numbers // evaluation occurs here```
 
+### Type inference
+
+Type systems in some programming languages require manifesting type signatures in order to denote type of variables and methods.
+Type inference mechanism releases the programmer from that duty, by making the compiler / interpreter automatically compute the signatures.
+Often, the most general type is used to sign a symbol under the condition it is applicable, and such technique is called automatic generalization.
+Hindley-Milner algorithm, which bases on the lambda calculus theorem to infer type signatures of symbols in programs, is the foundation for majority of type inference algorithms used in today's programming languages.
+Type inference is specially powerful when combined with language feature of static typing, as it guarantees type safety even without need of type-annotating values or functions.
+
+Listing {{funtypeinfer}} shows example of two identical functions `length` and `lengthAnnotated` of which the first one utilizes type inference.
+The only difference between these two functions are lines 2 and 8 where in the latter example, both `list` argument and return type of the function are annotated.
+It is worth noting that in both cases, type signature for the functions is `'a list -> int`, what emphasizes that automatic generalization was indeed applied by the F# compiler to the `length` function and thus made it generic with type parameter of `'a`.
+
+```xxx
+{FSharp]{Type inference}{funtypeinfer}
+// 'a list -> int
+let rec length list =
+    match list with
+    | [] -> 0
+    | head :: tail -> 1 + length tail
+
+// 'a list -> int
+let rec lengthAnnotated (list: 'a list) : int =
+    match list with
+    | [] -> 0
+    | head :: tail -> 1 + length tail```
+
 Paradigms and code quality
 --------------------------
 

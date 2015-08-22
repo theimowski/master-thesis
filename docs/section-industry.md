@@ -42,7 +42,7 @@ Following are some of the type constructs baked into Haskell type system:
 
 * **Type Classes**, which *"provide a uniform solution to overloading, including providing operations for equality, arithmetic, and string conversion"* {{{hall1996type}}},
 * **Data Types**, which represent discrete set of constructors for a specific type of data,
-* **Type Inference** - a mechanism used by the type system to infer type of a function or expression to make them statically typed, without the need of manual annotations.
+* **Type Inference**.
 
 Strictness in context of static typing means that in order to compile a program, more prerequisites must be met.
 While it makes harder for a software engineer to compile code in strongly statically typed language, a priceless benefit of program correctness is usually gained.

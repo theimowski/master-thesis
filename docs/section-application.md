@@ -285,8 +285,8 @@ Unordered list contains `li` "list items" elements, each of which has a hyper-li
 Line 7 demonstrates "list comprehension" syntax, which binds each element of the `genres` list to `g` value and uses it to yield list items.
 With help of `Path` module, lines 8-9 generate a hyper-link with URL argument, similar to the one presented in {{Routing}} (`/store/browse?genre=Disco`). 
 Because `text` function, which is invoked at the end of line 9 expect a `string` as its argument, `g` value is inferred to be of type `string`.
-Powerful type-inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
-Thanks to the type-inference, no explicit type annotations are required, and the code is more concise.
+Powerful type inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
+Thanks to the type inference, no explicit type annotations are required, and the code is more concise.
 
 While a disadvantage of this approach is that the productivity suffers during development because any change to the view has to be recompiled, 
 two great benefits from using such a DSL for rendering HTML can be listed:
