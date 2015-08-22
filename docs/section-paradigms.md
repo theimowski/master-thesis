@@ -23,7 +23,7 @@ Imperative word looked up in a dictionary means *"giving an authoritative comman
 That definition summarizes what really imperative programming is all about.
 When writing software in imperative manner, the programmer gives commands to a computer and tells it what to do, step by step.
 Imperative relies on explicit modification of state in a program with use of statements, in order to achieve a desired goal.
-The term does also relate to linguistics, where it denotes mood of a verb to express a command or exhortation {{{oxforddic}}}.
+The term does also relate to linguistics, where it denotes *"mood of a verb to express a command or exhortation"* {{{oxforddic}}}.
 
 ### History
 
@@ -78,7 +78,7 @@ It turns out that the same effect that is achieved thanks to inheritance can als
 >> *"Favor object composition over class inheritance."*
 
 **Polymorphism** is a concept that in OOP approach relies mainly on inheritance.
-"Poly" standing for "many" and "morphism", which can be thought of "form" ("morphism" has its formal definition in category theory, however it is not covered by the thesis), describe the ability to treat objects of different classes in unified way.
+"Poly" standing for "many" and "morphism", which can be thought of "form", describe the ability to treat objects of different classes in unified way ("morphism" has also its formal definition in category theory, however it is not covered by the thesis).
 In OOP software this is usually achieved by deriving behavior (and data) from a base class, which enables to refer to an object of specific type with more general, base class type.
 The ability of polymorphism is therefore enforced by specific class hierarchies.
 The polymorphism concept relying on class hierarchies is known as ad hoc polymorphism {{{strachey2000fundamental}}}.
@@ -102,10 +102,10 @@ Tennent in his work explains {{{tennent1976denotational}}}:
 >> *"Main actions performed in imperative paradigm are updating statements, jumps and intermediate input / output, which spoil referential transparency by introducing the possibility of "side effects" or transfers of control during expression evaluations."*
 
 Referential transparency has already been defined a few times {{{sondergaard1990referential, strachey2000fundamental}}}, where it concerns more complex topics such as non-determinism or definiteness.
-In context of this thesis and basic paradigms' characteristics it is enough to say that referential transparency describes a property of programming language, which enables to substitute certain expression with another of the same value, without impact on the program's behavior.
+In context of this thesis and basic paradigms' characteristics it is enough to say that referential transparency describes a property of programming language, which enables to substitute certain expression with another one that evaluates to the same value, without impact on the program's behavior.
 The downsides of imperative program actions mentioned by Tennent {{{tennent1976denotational}}} with regards to referential transparency can be explained as following:
 
-* **side effects** - if an expression evaluates to a certain value, but it has side effects, such as input / output (IO) operations, then it cannot be replaced with another expression without changing behavior of the program, even if the latter expression evaluates to the same value,
+* **side effects** - if an expression evaluates to a certain value, but it has side effects, such as input / output (IO) operations, then it cannot be replaced with another expression without changing behavior of the program, even if the latter expression evaluates to the same value;
 * **transfers of control** - if an expression consists of more than one exit points, and the exit point of expression is determined by condition branching (jump statements), then the value of such expression is ambiguous because control can be transferred from arbitrary point of expression to the outside scope.
 
 In programming practice, these drawbacks lead to difficulties with understanding program's flow and behavior, which in turn imply spending more time on code debugging.
@@ -122,7 +122,7 @@ Term declarative refers to the code, which is written by **declaring** how such 
 
 In his work, Padawitz {{{padawitz2006deductive}}} describes the declarative programming term as *"a combination of functional (or applicative) and relational (or logic) programming"*.
 As it turns out, both functional and logic programming can be thought of sub-paradigms of declarative programming paradigm.
-Before functional programming is discussed in details, other examples of specific and based on declarative approach sub-paradigms (including logic programming) are listed together with brief description.
+Before functional programming is discussed in details, other examples of specific and based on declarative approach sub-paradigms (including mentioned logic programming) are listed together with brief description.
 
 ### Logic programming
 
@@ -204,7 +204,7 @@ All example listings are in F# language.
 
 Immutability is one of the most basic properties of FP.
 In imperative paradigm, assignments are made to variables which, as the name suggests, can vary (be mutated) during run-time.
-In functional world on the other hand, to emphasize that values are immutable, it is said that there is a binding of a value to a symbol. 
+In functional world on the other hand, to emphasize that values are immutable, it is said that there occurs a binding of a value to a symbol. 
 Immutability enforces that all values which are evaluated during program execution, once bound to a symbol, cannot be mutated.
 
 For newcomers the property might initially look restrictive, but it turns out that it does not imply any constraints.
@@ -238,8 +238,8 @@ This in turn results in features such as:
 * **nested pattern matching** that allows to dissect a recursive structure.
 
 Listing {{funpatternmatching}} shows a basic pattern matching construct applied to a list.
-Function `printIsEmpty` tries to match the `list` parameter with patterns: `[]` which corresponds to an empty list, and `head :: tail` where `::` is a binary operator for operands of type `'a` and `'a list`, which prepends the element from first argument (`head`) to the list (`tail`) from second argument.
-`tail` might be empty, and in that case `head :: tail` denotes a single-element list.
+Function `printIsEmpty` tries to match the `list` parameter with patterns: `[]` which corresponds to an empty list, and `head::tail` where `::` is a binary operator for operands of type `'a` and `'a list`, which prepends the element from first argument (`head`) to the list (`tail`) from second argument.
+`tail` might be empty, and in that case `head::tail` denotes a single-element list.
 In other words, pattern matching construct seen in listing {{funpatternmatching}} recognizes two cases: in first case the list is empty, and in the second case there is at least one element in the list (`head`).
 If the second case was omitted, the compiler would issue a warning in compile-time.
 
@@ -293,7 +293,7 @@ A function is called higher-order when it returns or takes as a parameter anothe
 The concept of function pointers introduced in C and C++ is closely related to higher-order functions, though it does not guarantee type safety like in statically typed functional languages.
 
 Higher-order functions construct a powerful mechanism that enables to abstract away a common piece of logic and make it more reusable.
-It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with lists (for example filtering or mapping) or null-checking.
+It addresses the problem, present in many imperative languages, of code repetition for recurrent tasks such as working with lists (for example filtering or mapping).
 In addition to that, higher-order functions can be used as a foundation for concept known in OOP as "Dependency Injection".
 Dependency Injection in OOP paradigm relies on passing abstract interfaces without implementation to consuming classes.
 The interfaces passed to dependent class contain only type signatures of methods to be invoked, hence such interface can be easily represented with traditional functions.
@@ -350,7 +350,7 @@ Recursion is a computational approach that is known in imperative world, but emp
 It relies on solving a given problem by decomposing it and retrying on a smaller instance (in context of a function or method it is typically achieved by calling itself with arguments that are smaller in some way).
 A recursive function or method must hold the stop property, meaning that there must exist an instance of a problem, for which the function or method is not going to make a recursive call yet again.
 Exception from the above is a recursive function that does not hold the stop property in order to produce an infinite (lazy) chain of values.
-Such logically infinite chain often proves useful in context of lazy evaluation which further depicted and illustrated in listing {{funlazy}}.
+Such logically infinite chain often proves useful in context of lazy evaluation which is further depicted and illustrated in listing {{funlazy}}.
 Recursion technique is an alternate approach to iteration.
 Indeed, some programming languages' compilers, for optimization reasons, translate recursive functions into its iterative equivalent.
 According to the Church-Turing thesis:
@@ -367,11 +367,12 @@ If a function is invoked recursively, continuous allocations could result in sta
 Tail recursion prevents from stack overflow when invoking recursive calls by avoiding unnecessary stack frame allocation.
 This is achievable when the recursively-invoked function is the last invoked operation and does not need to return back to the caller {{{petricek2009real}}}.
 F# does support tail recursion mechanism, however the last-operation precaution has to be made for the mechanism to be used by compiler.
+For the sake of simplicity of presented examples of recursive functions, none of them is implemented in tail-recursive manner.
 
 Listing {{funrecursion}} presents a recursive `product` function, which computes the product for a given list of numbers.
 Based on the length of `elements` list (with help of pattern matching), the `product` function either returns neutral element for multiplication (`1`) or invokes itself recursively with the tail of the list.
 Pattern matching case in line 4 splits the non-empty list into `head` - first element of the list, and `tail` - the rest of the elements in list.
-It is worth noting that the `product` function as defined in listing {{funrecursion}} is not tail-recursive, however with a bit of effort (for example by using technique called accumulator) it could become so.
+As stated above, `product` function defined in listing {{funrecursion}} is not tail-recursive, however with a bit of effort (for example by using technique called accumulator) it could become so.
 
 ```xxx
 {FSharp]{Recursion}{funrecursion}
@@ -397,8 +398,7 @@ It takes two arguments: function `f` of type `'a -> 'b` and `list` value of type
 Then it pattern matches on the `list` value to distinguish case when the input list is empty and when there is at least one element.
 If the list is not empty, the `f` function is applied to the first element of list (`h` for head) and `map` function is recursively invoked with the rest of elements (`t` for tail).
 The values are then glued to form a list with `::` operator (the same that was used for pattern matching case).
-It is said that the `map` function is polymorphic, and its parametric type is `('a -> 'b) -> 'a list -> 'b list`.
-(Again, it should be noted that for the sake of simplicity the function is not tail-recursive.)
+It is said that the `map` function is polymorphic, with its type parameters `'a` and `'b` and type signature `('a -> 'b) -> 'a list -> 'b list`.
 
 ```xxx
 {FSharp]{Parametric polymorphism}{funparampoly}
@@ -413,7 +413,7 @@ In a standard, imperative approach, when expression is reached by control, it ge
 Similar behavior applies in case expression is given as a parameter to a function call - it has to be computed before the result value can be pushed to the stack and the function invoked.
 Such strategy is commonly known as eager evaluation.
 On the other hand, evaluation is called to be lazy when the runtime environment postpones evaluating of an expression to the last responsible moment, which is when the value is vital for computations that follow.
-Lazy evaluation therefore treats expressions as first-class citizens and allows to pass them around or assign (bind) to values without actually evaluation (somehow analogous to how higher-order functions allow to operate on functions).
+Lazy evaluation therefore treats expressions as first-class citizens and allows to pass them around or assign (bind) to values without actually performing its evaluation (somehow analogous to how higher-order functions allow to operate on functions).
 While functional-first languages like F# use eager evaluation by default, and with help of additional constructs allow for lazy expressions, pure functional languages such as Haskell incorporate laziness into execution run-time in every single place (unless stated differently).
 
 Lazy evaluation comes with a number of benefits.
@@ -559,7 +559,7 @@ A few concerns are targeted:
     * every matching error entry is appended to that list (line 10).
 
 Example of imperative approach presented in listing {{csparadigmimperative}} shows that different concerns intersect between different lines, which leads to tight coupling of code.
-As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if instead of first 10 lines, one would have to read 10 last lines of file, the whole algorithm would have to be redesigned).
+As result of tight coupling, particular changes in such implementation might have **unwanted impact** on the rest of algorithm (for example, if one would have to skip first 3 error entries and only then read 10 error entries from the file file, the rest of algorithm could get easily spoiled).
 
 On the other hand, listing {{csparadigmfunctional}} demonstrates the same problem solved with C#, but using functional (declarative) techniques (despite it originated as a standard, OOP language, a few functional techniques got introduced into C# to make the language more powerful).
 C# has been chosen for both examples deliberately, to emphasize that programming language is just a tool, and that it is programming style and paradigm used that really matter when considering code quality. 
@@ -574,7 +574,7 @@ var errors =
 
 At first glance, it is obvious that the implementation in listing {{csparadigmfunctional}} is much more concise with only 5 lines compared to 15 in listing {{csparadigmimperative}} (technically these 5 lines build up a single expression which could be written in a single line, but were split to improve readability). The code in listing {{csparadigmfunctional}} follows a functional pattern in respect to that every function invocation is treated as an expression which takes some input and returns some output:
 
-* `File.ReadLines` in line 2 takes path to file (of type `string`) and returns a sequence of lines (`seq<string`). The sequence is evaluated lazily, which prevents loading whole file into memory;
+* `File.ReadLines` in line 2 takes path to file (of type `string`) and returns a sequence of lines (`seq<string>`). The sequence is evaluated lazily, which prevents loading whole file into memory;
 * `Where` (line 3) is a function (speaking strictly C# jargon, it is a LINQ extension method) which takes a predicate function as its argument (`Where` is an example of higher-order function, equivalent to `Seq.filter` in F#) and returns sequence with items that match the predicate;
 * the predicate function in form of anonymous function (lambda expression) passed to the `Where` function is of generic type `'T -> bool`, where `'T` type parameter has been expanded and inferred by C# type system to be of type `string`;
 * `Take` function (line 4) instructs to limit number of items in the sequence to the specified value (all items are returned if the value is larger than number of items);

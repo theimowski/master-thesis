@@ -21,7 +21,7 @@ Section {{PROGRAMING PARADIGMS}} considers programming paradigms.
 It first goes back to beginnings of software engineering history to discuss imperative programming origins and its evolution.
 Then it identifies how OOP was invented, together with premises and design principles that establish the philosophy.
 In passing, a few drawbacks are presented in order to emphasize what issues occur with OOP approach.
-Next, declarative paradigm is introduced in parallel with such derivatives as logic and constraint programming.
+Next, declarative paradigm is introduced in parallel with its derivatives such as logic and constraint programming.
 After that, the section concentrates on FP, by showing how it relates to declarative paradigm and presenting basic foundations and properties of FP.
 Finally, a connection between programming paradigms and code quality is demonstrated with help of the community's studies as well as detailed comparison of solving an authentic problem with imperative and functional ways.
 

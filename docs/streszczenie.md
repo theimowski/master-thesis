@@ -2,7 +2,7 @@ STRESZCZENIE
 ============
 
 Pomimo iż dziedzina informatyki ma swoje korzenie w uczelniach wyższych, w pewnym momencie przemysł oprogramowania widocznie oddzielił się od środowiska akademickiego aby żyć własnym życiem.
-Uczeni badający zagadnienia programowania koncentrują się na aspektach poprawności oraz własności matematycznych, które są blisko powiązane z programowaniem funckyjnym.
+Uczeni badający zagadnienia wokół programowania koncentrują się na aspektach poprawności oraz własności matematycznych, które są blisko powiązane z programowaniem funckyjnym.
 W międzyczasie, to paradygmaty inne niż funkcyjny zdominowały przemysł oprogramowania, co widać na przykładzie przeważającej ilości przedsiębiorstw inwestujących swoje fundusze w projekty informatyczne opierające się o zorientowane obiektowo języki oprogramowania.
 Okazuje się jednak, że te rozpowszechnione metody mają swoje wady, które mogłyby być zaadresowane przez programowanie funkcyjne.
 Ta praca ma na celu zwrócić uwagę na niedawny wzrost zainteresowania programowaniem funkcyjnym, jako sposób poradzenia sobie z problemami wprowadzonymi przez inne podejścia.
