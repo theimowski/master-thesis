@@ -473,7 +473,7 @@ One of the observation concerns modules' dependencies complexity in both languag
 >> *"C# projects tend to be larger, with more classes and dependencies. They also have longer chains of dependencies on average. Real world F# projects are smaller with cleaner modularity."*
 
 Another observation corresponds to size of code, which turns out to be much smaller when using F# in comparison to C#.
-Conducted experiment involved rewriting an existing C# application, responsible for evaluating revenue from contracts of electricity supply in United Kingdom, with size of 350 KLOC (thousands of lines of code) into its F# equivalent, identical with regards to functionality counterpart.
+Conducted experiment involved rewriting an existing C# application, responsible for evaluating revenue from electricity supply contracts in United Kingdom, with size of 350 KLOC (thousands of lines of code) into, identical with regards to functionality, F# counterpart.
 Concise syntax of F# allowed to eliminate a lot of "noise" lines of code, such as braces or blank lines that are very common in C# language.
 Not only the syntax of F#, but also functional properties like composability and abstraction led to interesting results.
 One of the conclusions drawn from the experiment highlighted that **total** amount of application code in F# version reached less than 22 KLOC, comparing to the 29 KLOC of only **blank** lines in C# version {{{cousins2014difference}}}:
@@ -562,15 +562,17 @@ The same concerns apply as in the previous example, however they are separated i
 * **Counting errors** is addressed in line 4.
 * **Collecting error lines** is addressed in line 5.
 
-Thanks to such straightforward separation of concerns, applying changes to existing implementation comes much lower cost.
-Listing {{csparadigmfunctionalreverse}} demonstrates code modification made to collect 10 last instead of 10 first lines from the file.
-In this case, it was enough to add `Reverse` function to the pipeline that reverses the order of lines that are processed (for the sake of simplicity, omitted fact is that all lines have to be loaded into memory for `Reverse` to work).
+Thanks to such straightforward separation of concerns, applying changes to existing implementation comes with much lower cost.
+As an example it can be imagined that for some reason requirement changes and first three "ERROR" entries from the file should be skipped.
+Listing {{csparadigmfunctionalskip}} demonstrates necessary code modification applied to meet that new requirement.
+In this case, it was enough to add `Skip` function with proper argument to the pipeline.
+The same in imperative approach would require another loop with new counter where lines from the file would have to be read, filtered again and then ignored, which sounds more complicated than the functional equivalent.
 
 ```xxx
-{CSharp]{Modifications in functional approach in CSharp}{csparadigmfunctionalreverse}
+{CSharp]{Modifications in functional approach in CSharp}{csparadigmfunctionalskip}
 var errors = 
     File.ReadLines("log")
         .Where(line => line.StartsWith("[ERROR]"))
-        .Reverse() // new logic applied
+        .Skip(3) // new logic applied
         .Take(10)
         .ToList();```
