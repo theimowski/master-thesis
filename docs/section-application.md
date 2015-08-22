@@ -31,8 +31,13 @@ Apart from that, the application would show a plenty of other common aspects of 
 * HTML rendering.
 
 Implementing such application and preparing a tutorial turned out to be a great candidate for research part of this thesis.
-The detailed tutorial has been published and is available on-line {{{suavemusicstoretutorial}}}.
-In addition to that the tutorial is included in the list of tutorials for web development on F# Software Foundation website {{{fsharpwebsite}}}.
+The tutorial consists of 10 chapters, each focused on a specific web development aspect.
+It is quite extensive, with plenty of code listings presenting various features. 
+The detailed tutorial has been published on GitBook website and is available on-line {{{suavemusicstoretutorial}}}. 
+With the help of F# community spreading the word about it, at the of writing it has already more than 12 thousands of views.
+It is also included in the list of tutorials for web development on official F# Software Foundation website {{{fsharpwebsite}}}.
+Section {{Music Store Tutorial}} references excerpts from the tutorial that outline the major concepts and features. 
+
 Credit also goes to the ASP.NET MVC team, which prepared the original tutorial {{{aspnetmvctutorial}}} that largely influenced the variation.
 ASP.NET MVC is a C#-based, heavy-weight framework for creating web applications in .NET ecosystem.
 MVC acronym stands for Model-View-Controller pattern, which aims to separate components for layout rendering, data objects behavior and handling user's interaction.
