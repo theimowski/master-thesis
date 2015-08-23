@@ -72,7 +72,7 @@ With its distinctive syntax, OCaml became an inspiration for a few modern langua
 OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}}}:
 
 * **Jane Street** - a proprietary trading firm that uses OCaml as its primary development platform {{{minsky2008caml}}},
-* **LexiFi** - company that used OCaml to develop the Modeling Language for Finance (MLFi), which is the first formal language that accurately describes the most sophisticated capital market, credit, and investment products,
+* **LexiFi** - company that used OCaml to develop the Modeling Language for Finance (MLFi), which is *"the first formal language that accurately describes the most sophisticated capital market, credit, and investment products"*,
 * **Facebook** - which does not need any introduction, uses OCaml for the following:
     * Hack - a programming language with its compiler written in OCaml, as an extension to PHP with static typing,
     * pfff - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
@@ -92,7 +92,7 @@ F# design was influenced by a set of other languages, most notably:
 * **Erlang**, in respect to the message passing model and asynchrony support.
 
 F# is statically typed and its type system is considered to be very strict (almost as Haskell).
-Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows also for both imperative and OOP constructs.
+Just as OCaml, F# is a functional-first language, meaning that while it encourages to write code in functional style, it is not purely functional and allows for both imperative and OOP constructs.
 Being built on top of .NET, it enables interoperability with all languages from this platform.
 Code written in F# is succinct and readable, making the language an attractive candidate for fast prototyping and reducing time-to-market factor {{{fsharp2014deep}}}.
 
@@ -134,7 +134,7 @@ Partly thanks to the money invested, but also because of the language power itse
 
 Clojure was created by Rich Hickey in 2007.
 Its major motivation was to design a language that has Lisp-like syntax, embraces existing virtual machine platform (JVM) and allows to write code in functional style with emphasis on immutability and concurrency support.
-Clojure was made a fully open-source software so that it could be easier adopted by the community.
+Clojure was made a fully open-source software so that it could be easier adopted by the community {{{clojurewebsite}}}.
 
 Unlike previously listed languages, Clojure is dynamically typed.
 The code is compiled on-the-fly to corresponding JVM byte-code, but is not type-checked before running, which does not guarantee type safety and can result in this class of run-time errors, which would not be otherwise possible in statically typed language.
@@ -169,7 +169,7 @@ At first, the language usage was restricted to Ericsson only, however it became 
 
 The most important aspect of Erlang is concurrency, for which the language has a very sophisticated runtime.
 It enables to span multiple processes with little cost (a process is related to runtime, not operating system).
-As processes do not share memory, the main philosophy of Erlang is based on passing messages between them.
+As processes do not share memory, the main philosophy of Erlang is based on passing messages between processes.
 Message passing technique relies on process isolation and asynchronous communication.
 All processes are autonomic, thus there is no single point of failure in systems built on top of Erlang.
 The message passing approach introduced in Erlang influenced plenty of other languages that appeared afterwards.
