@@ -51,6 +51,7 @@ Because of its nature, Haskell still struggles to be visible in enterprise archi
 
 * **Facebook** internally makes use of HaXL - a tool that simplifies access to remote data, such as databases or web-based services,
 * **Microsoft** uses Haskell for its production serialization system named Bond, which proves useful in high scale services,
+* **Google** utilizes Haskell in a few of its internal projects, as well as Ganeti product for managing virtual server clusters,
 * Haskell was also adopted by a plenty of financial institutions including:
     * Bank of America Merril Lynch,
     * Barclays Capital Quantitative Analytics Group,
@@ -73,7 +74,8 @@ OCaml found its adoption in a few prospering companies, such as {{{ocamlwebsite}
 
 * **Jane Street** - a proprietary trading firm that uses OCaml as its primary development platform {{{minsky2008caml}}},
 * **LexiFi** - company that used OCaml to develop the Modeling Language for Finance (MLFi), which is *"the first formal language that accurately describes the most sophisticated capital market, credit, and investment products"*,
-* **Facebook** - which does not need any introduction, uses OCaml for the following:
+* **Citrix** - group that deals with virtualization, makes use of OCaml for XenServer - a world-class server virtualization system,
+* **Facebook** - which does not need any introduction, uses OCaml for:
     * Hack - a programming language with its compiler written in OCaml, as an extension to PHP with static typing,
     * pfff - a set of tools for static code analysis, which allows Facebook to keep track of its enormous code-bases.
 
