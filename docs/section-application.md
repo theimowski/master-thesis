@@ -14,14 +14,14 @@ FP is already present in a significant amount of areas.
 There are however fields, where it is still not widely adopted, and one of such fields is **web development**. 
 Here, OOP seems to be a strong leader with regards to number of existing frameworks, libraries and tools as well as popularity among software engineers. 
 While some FP languages together with corresponding libraries / frameworks are starting to settle down in the area, like Clojure with Compojure, Scala with Play or Erlang with Webmachine {{{github}}}, F# does not yet go out of line in this regard. 
-At the moment of writing, there are three notable web libraries / frameworks written completely in F# {{{fsharpwebsite}}}: WebSharper, Suave.IO and Freya, but none of them is prominent in respect to popularity.
+At the moment of writing, there are three notable web libraries / frameworks written in and designed for use of F# {{{fsharpwebsite}}}: WebSharper, Suave.IO and Freya, but none of them is prominent in respect to popularity.
 In order to verify whether FP and F# language in particular could potentially be applied to software from arbitrary domain, decision was made to discover how it would fit into this relatively foreign area of web development.
 
 Another reason for which web development domain was chosen, was a will to contribute to the F# community.
 In order to attract more and more attention to F# language, the language community leaded by F# Software Foundation {{{fsharpwebsite}}} is doing its best to encourage developers to give F# a try.
-On one of mailing groups there appeared a suggestion to prepare a tutorial on how to create web applications with F#.
+On one of mailing groups there appeared a suggestion to prepare a tutorial on how to create a web application with F#.
 The tutorial would guide step by step on how to build an E-commerce website called "Music Store".
-In the "Music Store" user could browse music albums by genres, add his favorite to cart and buy.
+In the Music Store user could browse music albums by genres, add his favorite to cart and buy.
 Apart from that, the application would show a plenty of other common aspects of web development, such as:
 
 * Data access,
@@ -31,10 +31,10 @@ Apart from that, the application would show a plenty of other common aspects of 
 * HTML rendering.
 
 Implementing such application and preparing a tutorial turned out to be a great candidate for research part of this thesis.
-The tutorial consists of 10 chapters, each focused on a specific web development aspect.
+The complete tutorial consists of 10 chapters, each focused on a specific web development aspect.
 It is quite extensive, with plenty of code listings presenting various features. 
-The detailed tutorial has been published on GitBook website and is available on-line {{{suavemusicstoretutorial}}}. 
-With the help of F# community spreading the word about it, at the of writing it has already more than 12 thousands of views.
+The tutorial has been published on GitBook website and is available on-line {{{suavemusicstoretutorial}}}. 
+With the help of F# community spreading the word about it, at the time of writing it has already more than 12 thousands of views.
 It is also included in the list of tutorials for web development on official F# Software Foundation website {{{fsharpwebsite}}}.
 Section {{Music Store Tutorial}} references excerpts from the tutorial that outline the major concepts and features. 
 
@@ -50,7 +50,7 @@ Functional Web
 Even though web development is usually associated with using imperative techniques only, it's not completely uncommon to follow functional principles while creating Internet applications.
 Majority of web applications are built on top of the Hypertext Transformation Protocol (HTTP) protocol.
 From a software engineer point of view, the HTTP protocol boils down to requests and responses and accompanied details, such as paths, status codes, headers or content body.
-The HTTP protocol is stateless, meaning that details about requests are not retained by the protocol and thus there is no ad hoc relation between two requests.
+The HTTP protocol is stateless, meaning that requests are not in general retained by the protocol and thus there is no ad-hoc relation between two requests.
 Because of the stateless nature of the underlying protocol, HTTP response should only depend on the issued request, and therefore a functional programmer could even think of a web application as a general function of type `HTTPRequest -> HTTPResponse`.
 
 ### Asynchrony
@@ -73,8 +73,8 @@ As a result, multiple actions can be implemented without the need of callbacks, 
 Asynchronous workflow represents a computation that is supposed to evaluate to a value of the type parameter of `Async`.
 Value inside the `Async` type can happen to be available at once, but usually the deferred execution of `Async` leads to evaluating the inner value.
 From the developer's perspective, extracting the internal state of `Async` object is transparent, as it is always necessary to eventually invoke a blocking call to "unwrap" the value from `Async`.
-The general concept of "wrapping" a value with a cross-cutting structure originates from the functional paradigm.
-Asynchronous workflows or futures and can prove helpful when developing client-server architecture {{{eriksen2013your}}}:
+The general concept of "wrapping" and "unwrapping" a value with a cross-cutting structure originates from the functional paradigm.
+Asynchronous workflows or futures can prove helpful when developing client-server architecture {{{eriksen2013your}}}:
 
 >> *"Futures in conjunction with services and filters present a powerful programming model for building safe, modular, and efficient server software."*
 
@@ -109,7 +109,7 @@ This is the cause of what is known as "The Billion Dollar Mistake" - null refere
 Null references are exceptions thrown at runtime because of referencing a symbol which was not assigned any real value (was `null`).
 In F#, one cannot explicitly bind `null` to any symbol or pass `null` to a function invocation.
 The compiler prevents from doing that by issuing a compile-time error.
-Thanks to this feature, it is hardly possible to get a null reference exception in F# code (unless heavily relying on interoperability or reflection).
+Thanks to this feature, it is hardly possible to get a null reference exception in F# code (unless relying on interoperability with C# or using reflection heavily).
 `Option` type is commonly used in F# to model a property that may or may not have a value.
 If a property has value, then it is `Some`, and otherwise it is `None`, as shown in listing {{fsoption}}.
 In context of WebPart, `Option` determines whether a result should be applied.
@@ -210,7 +210,7 @@ The problem of HTML rendering is complicated, and can be approached in many diff
 This thesis will only touch upon how HTML rendering aspect was solved with Suave framework for the Music Store application.
 It will not however go into much details of HTML rendering topic itself nor try to compare chosen approach with different available possibilities.
 
-For the Music Store rendering engine, a simple to use and built into Suave HTML DSL was chosen.
+For the Music Store rendering engine, a simple to use and built into Suave, HTML DSL was chosen.
 The HTML DSL available in Suave could be categorized as a set of functions focused on building HTML markup. 
 HTML markup can be a valid XML markup, under the condition that all element tags are closed (actually not all valid XML documents are proper HTML documents, due to the self-closing tag concept, which is forbidden in HTML markup).
 Indeed the HTML DSL in Suave relies on creating XML tree and formatting it to plain text.
@@ -284,11 +284,11 @@ The last node returned (lines 6-10) is `ul` which stands for "unordered list".
 Unordered list contains `li` "list items" elements, each of which has a hyper-link to the corresponding genre.
 Line 7 demonstrates "list comprehension" syntax, which binds each element of the `genres` list to `g` value and uses it to yield list items.
 With help of `Path` module, lines 8-9 generate a hyper-link with URL argument, similar to the one presented in {{Routing}} (`/store/browse?genre=Disco`). 
-Because `text` function, which is invoked at the end of line 9 expect a `string` as its argument, `g` value is inferred to be of type `string`.
+Because `text` function, which is invoked at the end of line 9 expects a `string` as its argument, `g` value is inferred to be of type `string`.
 Powerful type inference mechanism in F# is thus able to determine that the type of `genres` argument is `string list`.
 Thanks to the type inference, no explicit type annotations are required, and the code is more concise.
 
-While a disadvantage of this approach is that the productivity suffers during development because any change to the view has to be recompiled, 
+While a disadvantage of this approach is that the productivity suffers during development because any change to the view requires code to be recompiled, 
 two great benefits from using such a DSL for rendering HTML can be listed:
 
 * Type system can catch common type mismatch issues in compile-time,
@@ -308,7 +308,7 @@ It relies on persisting **immutable** events (records) in a store.
 Immutability is one of the major concept of FP itself, that is why Event Sourcing feels like a good fit for functional paradigm.
 In order to obtain certain state in Event Sourcing, **fold** operation is performed on the stored events.
 Folding comes also from the functional background {{{hughes1989functional}}}.
-In fact, every FP defines `fold` in its core library function suite.
+In fact, every FP language defines `fold` in its core library function suite.
 Type signature for the one in F# is presented in listing {{fsfoldsignature}}.
 `List.fold` calculates result `'State` from the initial `'State` and list of `'T` elements.
 It takes 3 arguments (listed in reverse order):
@@ -323,7 +323,7 @@ List.fold : ('State -> 'T -> 'State) -> 'State -> 'T list -> 'State```
 
 While the Event Sourcing could be a good candidate for persistence mechanism in application written in functional language, it was not used for the Music Store.
 That is because despite recent peak in interest in the No-SQL movement, a relational database still seems to be most popular for majority of software engineers.
-In order for the tutorial not to distract attention with different concepts, MS SQL Server was chosen as a persistence mechanism for Music Store application.
+In order for the tutorial not to distract attention with different concepts, MS SQL Server relational database was chosen as a persistence mechanism for Music Store application.
 
 During the computer era, a number of data serialization formats have evolved, some of which became standard in the industry.
 XML, Json, CSV are just the beginning of the long list.
@@ -375,8 +375,8 @@ type CartDetails    = DbContext.``[dbo].[CartDetails]Entity``
 type BestSeller     = DbContext.``[dbo].[BestSellers]Entity```
 
 Database queries can be constructed with SQL Provider like shown in listing {{fssqlproviderqueries}}.
-Function defined in line 1 `firstOrNone` is of type `'t seq -> 't option`.
-It returns `Some` with the value of first element if any in the given sequence.
+Function defined in line 1, `firstOrNone` is of type `'t seq -> 't option`.
+It returns `Some` with the value of first element, if there is any element in the given sequence.
 If the sequence is empty, `firstOrNone` returns `None`.
 `getGenres` (line 3) is a simple query that fetches all `Genre`s from the database and returns them as a `Genre list` type.
 Lines 7-12 and 16-20 show usage of `query` expression.
@@ -417,7 +417,7 @@ let getAlbumDetails id (ctx : DbContext) : AlbumDetails option =
 Data Access Layer implementation is easily achievable in F#.
 As far as the persistence mechanism remains the same, details of the implementation do not differ drastically comparing to the OOP or imperative world.
 Type Providers in F#, together with its type-safe nature allow for convenient data access logic.
-In conjunction with Intellisense feature of Integrated Development Environment (IDE) and Language Integrated Query, writing Data Access code in F# is highly productive and little error-prone.
+In conjunction with Intellisense feature of Integrated Development Environment (IDE) and LINQ, writing Data Access code in F# is highly productive and little error-prone.
 
 ### Create, Update and Delete operations
 
@@ -455,7 +455,7 @@ let createAlbum =
 For the sake of new album feature, code presented in listing {{fsmusiccreatealbum}} was written.
 The `createAlbum`, together with its own route was composed into the main WebPart of the Music Store application.
 Two HTTP methods were defined as acceptable within `createAlbum`: GET and POST (lines 4 and 13).
-The GET method means retrieve whatever information (in the form of an entity) is identified by the Request-URI, while POST method is used to indicate that the server should accept the entity enclosed in the request body {{{fielding1999hypertext}}}.
+The GET method means *"retrieve whatever information (in the form of an entity) is identified by the Request-URI"*, while POST method is used to *"indicate that the server should accept the entity enclosed in the request body"* {{{fielding1999hypertext}}}.
 In context of `createAlbum` WebPart, GET method was used to retrieve HTML form for creating new album.
 POST method was further used to send the album in request body to the origin server for the purpose of saving in the database.
 
@@ -471,7 +471,7 @@ For the POST case, after the `>>=` operator, `bindToForm` function was used.
 If the parsing failed (the request could be malformed), `bindToForm` took care of responding with 400 Bad Request status code, describing why it was unable to parse the entity (`bindToFrom` is described in details in {{Forms}}).
 On the other hand, if the entity could be parsed as `Form.album`, the anonymous function (second argument of `bindToForm`) was applied.
 The anonymous function takes the form model as its parameter, invokes `Db.createAlbum` action with proper arguments, and finally redirects to the main administration management page.
-Redirection was achieved by calling the `Redirection.FOUND` function, which writes 302 Found status code to the response and "Location" header with an URL.
+Redirection was achieved by calling the `Redirection.FOUND` function, which writes 302 Found status code to the response and "Location" header with a target URL.
 Browsers treat 302 status code as a signal to issue another request to the URL defined by the "Location" header of the response.
 
 ```xxx
@@ -508,6 +508,7 @@ The `Db.getAlbum` was designed to return `Album option`, that's why a pattern ma
 In case the `id` was correct and album was found (`Some album`), `choose` WebPart (line 5) applied.
 Otherwise, if `Db.getAlbum` turned out to return `None` (album was not found) then `never` (line 20) WebPart was used.
 WebPart `never` always "fails" (returns `None`), causing the composed typed route to return `None` as well and marking the WebPart as not applicable for the request.
+In practice this would mean, that the control would fall-back to handler for denoting 404 Not Found (album with the id was not found).
 Besides `editAlbum` took an additional `id` parameter of type `int` to identify a proper album, similar logic was followed as in listing {{fsmusiccreatealbum}} (in case the album was found):
 
 * distinction between two allowed HTTP methods GET and POST was made,
@@ -703,7 +704,7 @@ Web applications that use concept of accounts to tie data with users, must know 
 There are also web sites that tend to make profit on persisting in database and selling details about a significant amount of users and their emails.
 Such needs as in above examples led to forming the concepts of authentication and authorization.
 Both of them can be built on top of the state management mechanism by using cookies.
-Since authentication, authorization and session are rather an orthogonal concept to session, they are described separately.
+Since authentication / authorization and session are rather orthogonal to each other, they are described separately.
 
 Authentication is a process, in which a user of a system (be it a human or machine program) presents his credential to the requested authority.
 In web browsing scenario it is often preceded by the web site (playing authority role) blocking access (for user) to a desired resource.
@@ -713,7 +714,7 @@ It is a bit unfortunate that the HTTP standard defines the status code with "Una
 
 In Music Store, form authentication approach was applied.
 Form authentication relies on passing users credentials in request body, with Content-Type header representing either URL or multi-part form data encoding.
-This mechanism should always be accompanied with Secure Socket Layer (SSL) encryption, meaning that HTTPS scheme should be used, because form authentication does not provide ad hoc encryption and the request body is often sent in plain text.
+This mechanism should always be accompanied with Secure Socket Layer (SSL) encryption, meaning that HTTPS scheme should be used, because form authentication does not provide ad-hoc encryption and the request body is often sent in plain text.
 For the sake of simplicity, SSL is not covered in Music Store application.
 Listing {{fsmusiclogon}} shows how basic form authentication was implemented in Music Store.
 
@@ -752,7 +753,7 @@ There is also another invocation of `View.logon` in line 20, which is discussed 
 POST requests to `logon` were treated as an authentication trial.
 As was the case with creating and editing albums, `bindToForm` took care (by returning Bad Request status code) of possible malformed requests that did not originate from the login page.
 When the data sent with POST matched `Form.logon` model, a database query (line 15) was triggered to validate passed credentials.
-Written in-line, `passHash` was defined as a helper function that returned a hash from the password with help of 32-bit-word Secure Hash Algorithm (SHA-256).
+Invoked in-line, `passHash` was defined as a helper function that returned a hash from the password with help of 32-bit-word Secure Hash Algorithm (SHA-256).
 In case, the given credentials did not match (either such user's name did not exist or the password was incorrect), `View.logon` page was displayed again this time with a validation error message in red color to indicate the failure (line 20). 
 If however both user's name and password were correct, authentication process was initiated.
 
@@ -765,7 +766,7 @@ Upon receiving response with `Set-Cookie` header present, a browser saves the co
 
 In line 18, another WebPart composition occurred.
 Having set the cookie, program flow was bound to `returnPathOrHome`.
-WebPart `returnPathOrHome` (line 1) had a look inside the incoming request to find out whether parameter called "returnPath" existed in URL query.
+WebPart `returnPathOrHome` (line 1) had a look inside the incoming request to find out whether parameter named "returnPath" existed in URL query.
 If that was the case (line 5), then value of this parameter would determine to what location redirection should happen.
 Otherwise (line 6), the redirection would be made to the main page, `Path.home`.
 
@@ -776,18 +777,18 @@ let redirectWithReturnPath redirection =
         let path = x.url.AbsolutePath
         Redirection.FOUND (redirection |> Path.withParam ("returnPath", path)))
 
-let loggedOn f_success =
+let loggedOn successFun =
     Auth.authenticate
         Cookie.CookieLife.Session
         false
         (fun () -> Choice2Of2(redirectWithReturnPath "/account/logon"))
         (fun _ -> Choice2Of2 (BAD_REQUEST "Descryption error!"))
-        f_success```
+        successFun```
 
 Functions from listing {{fsmusicisauthenticate}} were necessary to verify if incoming request is authenticated.
 The first one, `redirectWithReturnPath` (line 1) did set the "returnPath" URL query parameter, used by `returnPathOrHome` WebPart which was defined earlier.
 It basically took a `redirection` URL as its argument, appended current absolute path as query parameter to `redirection`, and issued a redirection to the result URL.
-WebPart `loggedOn`, which was defined in line 6 can be thought of a "guard" of the `f_success` WebPart.
+WebPart `loggedOn`, which was defined in line 6 can be thought of a "guard" of the `successFun` WebPart.
 `loggedOn` challenged the request with another built into Suave helper `Auth.authenticate`.
 The `Auth.authenticate` took 5 arguments:
 
@@ -795,7 +796,7 @@ The `Auth.authenticate` took 5 arguments:
 * `false` which reflected that secure protocol was not employed,
 * function which determined what should happen in case authentication cookie was missing,
 * another function which would be invoked if the cookie was present, but decryption of the cookie value failed,
-* finally the `f_success` WebPart that was applied when request came with valid authentication cookie.
+* finally the `successFun` WebPart that was applied when request came with valid authentication cookie.
 
 In line 10, `redirectWithReturnPath` was applied in case of missing cookie.
 This meant that when someone tried to get to a resource without being authenticated, he would be redirected to the login page.
@@ -822,18 +823,18 @@ Function from listing {{fsmusicadminauth}} was implemented to allow only authori
 
 ```xxx
 {FSharp]{Authorize access for administrator in Music Store}{fsmusicadminauth}
-let admin f_success =
+let admin successFun =
     loggedOn (session (function
-        | UserLoggedOn { Role = "admin" } -> f_success
+        | UserLoggedOn { Role = "admin" } -> successFun
         | UserLoggedOn _ -> FORBIDDEN "Only for admin"
         | _ -> UNAUTHORIZED "Not logged in" ))```
 
-As was the case with `loggedOn`, `admin` function played a role of a guard over the `f_success` WebPart and allowed only "admin" roles in.
+As was the case with `loggedOn`, `admin` function played a role of a guard over the `successFun` WebPart and allowed only "admin" roles in.
 In fact, it invoked the `loggedOn` (in line 2) to ensure that request was authenticated, because otherwise there would be no one to authorize.
 `session` function was utilized to determine the state of the user.
 Among three possible values, one of them was `UserLoggedOn` with `Name` and `Role` properties inside.
 The fact that record types can be subject of pattern matching was exploited to match on `Role` property.
-Thanks to that, `f_success` got applied only when `Role` matched "admin" (line 3).
+Thanks to that, `successFun` got applied only when `Role` matched "admin" (line 3).
 If user was authenticated but his role was not "admin" (line 4), a 403 Forbidden status code was written to the HTTP response.
 Line 5 would return 401 Unauthorized status code in case the request was not authenticated.
 The last case served only as a safety net preventing compiler warnings, as the `loggedOn` guard would not allow authenticated requests to pass through.
@@ -849,7 +850,7 @@ pathScan "/admin/edit/%d" (fun id -> admin (editAlbum id))
 pathScan "/admin/delete/%d" (fun id -> admin (deleteAlbum id))```
 
 Composing `admin` function with other WebParts was achieved thanks to code like in listing {{fsmusiccomposingauthorization}}.
-While for parameter-less WebParts like `manage` or `createAlbum`, it was only necessary to wrap them with `admin`, those WebParts that took an argument (`editAlbum` and `deleteAlbum`) had to be contained inside a lambda (anonymous) function.
+While for parameter-less WebParts like `manage` or `createAlbum`, it was only necessary to wrap them with `admin`, those WebParts that took an argument (`editAlbum` and `deleteAlbum`) had to be wrapped inside a lambda (anonymous) function.
 
 Authentication and Authorization in ASP.NET MVC are usually handled with code annotations in form of attributes.
 Those attributes are attached to specific controllers / actions and allow to express the concept in declarative way.
@@ -895,7 +896,7 @@ Supported types for the fields were:
 * `System.Net.Mail.MailAddress` - built-in .NET type for representing email addresses.
 
 In addition to that, the module supported concept of required / optional fields.
-By default field was treated as required.
+By default, field was treated as required.
 If a field was to be marked as optional, it had to be of `option` type.
 Thanks to such solution, all values were type-safe (i.e. no null references would occur while reading a required field).
 `Register` type in listing {{fsformfields}} was declared for the sake of registering a new user.
@@ -955,7 +956,7 @@ Properties enclosed within the `<@ ... @>` operators were interpreted by the com
 For the form module utility, F# quotations allowed to extract name of a field to be used in HTML rendering, as well as parsing the request body on server side.
 Thanks to that, no annotations had to be used for the properties of `Register` record type.
 Second argument of the `TextProp` and `PasswordProp` were lists of duplex (client and server side) validations rules.
-Type definition of duplex rules was similar to server-side-only rules, except they required also a tuple of string (key and value) for to depict proper attribute of HTML `input` element:
+Type definition of duplex rules was similar to server-side-only rules, except they required also a tuple of string (key and value) to depict proper attribute of HTML `input` element:
 
 * `maxLength 30` determined a string for text input, no longer than 30 characters,
 * `passwordRegex pattern` specified a regular expression to be matched on password inputs.
