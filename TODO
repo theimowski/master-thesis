@@ -1,6 +1,15 @@
 TODO:
 
-Content:
+* REFERENCES -> BIBLIOGRAPHY
+* CONTENTS -> TABLE OF CONTENTS
+* ABSTRACT <-> STRESZCZENIE
+* reference for Hindley-Milner algorithm
+* make the hello world sample clearer
+* reference to listing 4.4 for type signature of `choose`
+* correct CRUD acronym
+* "Suave framework ships" -> "is shipped"
+* Summary - FP language -> functional language
+* mention SPA in summary??
 
 * tutorial - attachment?
 * purely functional data - comment?
