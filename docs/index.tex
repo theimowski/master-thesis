@@ -14,7 +14,7 @@
 % For including pdf
 \usepackage{pdfpages}
 % Margins for twosided layout
-\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=3.5cm,asymmetric,twoside=true]{geometry}
+\usepackage[top=2.5cm,bottom=2.5cm,left=3.5cm,right=2.5cm,asymmetric,twoside=true]{geometry}
 \usepackage{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 
@@ -33,10 +33,10 @@
 \usepackage{setspace}
 
 \addto{\captionsenglish}{\renewcommand{\refname}
-    {\normalfont\fontsize{12}{15}\bfseries{REFERENCES}}}
+    {\normalfont\fontsize{12}{15}\bfseries{BIBLIOGRAPHY}}}
 
 \addto{\captionsenglish}{\renewcommand{\contentsname}
-    {\normalfont\fontsize{12}{15}\bfseries{CONTENTS}}}
+    {\normalfont\fontsize{12}{15}\bfseries{TABLE OF CONTENTS}}}
 
 
 \usepackage{indentfirst}
@@ -158,10 +158,10 @@ mutable, if, then, else, cloud, async, static, use, abstract, interface, inherit
 \includepdf[pages={1}]{StronaTytulowa_131517.pdf}
 \includepdf[pages={1}]{Oswiadczenie_131517.pdf}
 
+\include{abstract}
 \selectlanguage{polish}
 \include{streszczenie}
 \selectlanguage{english}
-\include{abstract}
 \begin{spacing}{1.0}
 \tableofcontents
 \end{spacing}

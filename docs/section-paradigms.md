@@ -444,7 +444,7 @@ Seq.toList numbers // evaluation occurs here```
 Type systems in some programming languages require manifesting type signatures in order to denote type of variables and methods.
 Type inference mechanism releases the programmer from that duty, by making the compiler / interpreter automatically compute the signatures.
 Often, the most general type is used to sign a symbol (under condition it is applicable in corresponding case), and such technique is called automatic generalization.
-Hindley-Milner algorithm, which bases on the lambda calculus theorem to infer type signatures of symbols in programs, is the foundation for majority of type inference algorithms used in today's programming languages.
+Hindley-Milner algorithm, which bases on the lambda calculus theorem to infer type signatures of symbols in programs, is the foundation for majority of type inference algorithms used in today's programming languages {{{aiken1993type}}}.
 Type inference is specially powerful when combined with language feature of static typing, as it guarantees type safety even without need of type-annotating values or functions.
 
 Listing {{funtypeinfer}} shows example of two identical functions `length` and `lengthAnnotated` of which the first one utilizes type inference.

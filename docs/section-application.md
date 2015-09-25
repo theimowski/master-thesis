@@ -120,15 +120,15 @@ Usually if a WebPart can return `None`, this WebPart is composed with another wh
 let x: int option = Some 28 (* there is value 28 *)
 let y: int option = None (* there is no value *)```
 
-The simplest possible WebPart can be defined as in line 1 of listing {{fswebparthello}}.
+The simplest possible WebPart, which can work as a server application, can be defined as `app` in line 1 of listing {{fswebparthello}}.
 The `OK` WebPart always "succeeds" (returns `Some`) and writes to the HTTP response 200 OK status code, as well as response body content given as the parameter to the WebPart (in this case "Hello World!").
 Such WebPart can be used to start an HTTP server using a default configuration (line 2 of listing {{fswebparthello}}).
 From the listing {{fswebparthello}}, it is evident that Suave allows to build Web applications in a very succinct way and does not require too much ceremony.
 
 ```xxx
 {FSharp]{WebPart - hello world example}{fswebparthello}
-let webPart = OK "Hello World!"
-startWebServer defaultConfig webPart```
+let app = OK "Hello World!"
+startWebServer defaultConfig app```
 
 To summarize the WebPart type, it can be defined as a function that for a given `HttpContext` may or may not apply a specific, updated `HttpContext`.
 In addition to that, the return value is surrounded with asynchronous computation (`Async`) making the WebPart function asynchrony-friendly.
@@ -155,7 +155,7 @@ let webPart =
         pathScan "/store/details/%d" (fun id -> OK (sprintf "Details: %d" id))
     ]```
 
-Lines 8-13 show how 4 different WebParts are composed together with `choose` function.
+Lines 8-13 of listing {{fssuaverouting}} show how 4 different WebParts are composed together with `choose` function.
 `choose` is of type `WebPart list -> WebPart`.
 It tries to apply each WebPart from the list in order until it finds one that returns `Some`.
 If none element returns `Some`, the `choose` function itself also returns `None`.
@@ -552,7 +552,7 @@ Logic for POST WebPart invoked proper action on `Db` module, and returned redire
 Both POST and GET WebParts had to be surrounded with `warbler`s, because eager evaluation would cause unwanted effects.
 Again, as was the case with editing album, the `deleteAlbum` composed nicely with the typed route (listing {{fssuavetypedroute2}}).
 
-The 3 actions described in this section are sometimes associated with "CRUD" acronym (Create - Update - Delete).
+The 3 actions described in this section are sometimes associated with "CRUD" acronym (create, read, update and delete).
 With their uniform logic, they tend to be used for the purpose of demonstrating a library or tool capabilities.
 Above listings proved that one can cope with this common programming challenge in functional-first language such as F#.
 Typed routes feature from Suave confirmed to be highly composable, and thus the WebParts that were built could be matched together in a transparent manner.
@@ -757,7 +757,7 @@ Invoked in-line, `passHash` was defined as a helper function that returned a has
 In case, the given credentials did not match (either such user's name did not exist or the password was incorrect), `View.logon` page was displayed again this time with a validation error message in red color to indicate the failure (line 20). 
 If however both user's name and password were correct, authentication process was initiated.
 
-Suave framework ships with helper functions such as `Auth.authenticated` (line 17) that made working with authentication more convenient.
+Suave framework is shipped with helper functions such as `Auth.authenticated` (line 17) that made working with authentication more convenient.
 Because it relies on cookies, first argument of `Auth.authenticated` describes lifetime of the cookie.
 Here `CookieLife.Session` was chosen, which means that the cookie is valid until browser session is open.
 Second argument of `boolean` type determines whether the cookie should be marked as secure - as SSL was not employed in the application, `false` value was passed. 

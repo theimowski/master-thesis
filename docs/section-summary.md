@@ -1,7 +1,7 @@
 SUMMARY
 =======
 
-Section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} focused on building a real-world application in FP language.
+Section {{APPLICATION OF FUNCTIONAL PROGRAMMING}} focused on building a real-world application in functional language.
 As the domain of the problem, web development was chosen to prove that functional paradigm does not have to be restricted to a specific set of fields.
 F# language in conjunction with Suave web framework made it possible to implement server concise in size, but with load of features.
 With the help of a number of functional techniques, an e-commerce Music Store website was created.
@@ -20,6 +20,11 @@ Following are some of the main benefits that FP may bring for building and maint
 * **strongly static typing** (applicable for statically typed functional languages) - type systems of F# or Haskell are very strict, therefore can detect more issues in compile time,
 * **composition** - fine-grained functions can be composed into larger building blocks without losing precious properties of pure functions,
 * **no side effects** - FP is all about transforming inputs to outputs {{{leanfunprog}}} which eliminates bizarre order dependencies from code and results in better reasoning about the code.
+
+What is more, recent trends show that Internet applications evolve towards an approach called SPA (single-page applications).
+This approach relies on even less coupling (compared to the standard approach) between the front-end part of application and its back-end.
+It does so through delegating only specific concerns to the back-end side, such as data access, data representation or authorization.
+Thanks to such decoupling, functional approach seem very promising with regards to that only the server-side of an application might be written (or rewritten from scratch as part of a transition process) in a functional language, while the front-end remains based on completely different technologies.
 
 Functional programming is considered the right approach but only when applied to a restricted, related to academic background, set of domains.
 Majority of areas are still seen as being dominated by OOP.
