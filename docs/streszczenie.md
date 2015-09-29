@@ -14,3 +14,7 @@ Punktem kulminacyjnym pracy jest demonstracja biznesowej, internetowej aplikacji
 Słowa kluczowe
 --------------
 Programowanie funkcyjne, F#, Paradygmaty programowania, Oprogramowanie, Aplikacje internetowe
+
+Dziedzina nauki i techniki, zgodnie z wymogami OECD
+----------------
+Nauki przyrodnicze, Nauki o komputerach i informatyka

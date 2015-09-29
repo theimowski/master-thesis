@@ -14,3 +14,7 @@ The thesis culminates with a demonstration of a business web application written
 Keywords
 --------
 Functional programming, F#, Programming paradigms, Software industry, Internet applications
+
+Field of science and technology in accordance with OECD requirements
+---------
+Natural sciences, Computer and information sciences
